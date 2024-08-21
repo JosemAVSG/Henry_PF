@@ -5,21 +5,26 @@ import { UserEntity } from '../../entities/user.entity';
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity> ) {
-    }
+  constructor(
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+  ) {}
 
-    async signIn(email: string, password: string) {
-        
-    const user = this.userRepository.findOne(
-        {where: {email: email}},
-    );
+  async signIn(email: string, password: string) {
+    const user = this.userRepository.findOne({ where: { email: email } });
     console.log(user);
-    
-    if(!user) throw new BadRequestException('Verification Failed');
+
+    if (!user) throw new BadRequestException('Verification Failed');
 
     // const validPassword = await isValidPassword(password, user.password);
     // if(!validPassword) throw new BadRequestException('Verification Failed');
 
     return user;
-    }
+  }
+
+  async signUpService(body: any) {
+    // return body;
+    const user = this.userRepository.create(body);
+    return await this.userRepository.save(user);
+  }
 }
