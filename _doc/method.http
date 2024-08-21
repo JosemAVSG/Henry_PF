@@ -1,0 +1,18 @@
+# ========== Auth ==========
+### signup
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "Names": "John",
+  "LastName": "Doe",
+  "Position": "Developer",
+  "verifiedEmail": true,
+  "mfaEnabled": false,
+  "mfaBackupCodes": "123456,654321",
+  "mfaSecret": "my-secret-key",
+  "mfaVerified": null,
+  "active": true
+}
