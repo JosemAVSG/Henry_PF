@@ -1,41 +1,50 @@
-import {Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn} from 'typeorm';
-import {v4 as uuid} from 'uuid';
-import { ProfileEntity } from './profile.entity';
-@Entity({name: 'users'})
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
+import { v4 as uuid } from 'uuid';
+@Entity({ name: 'users' })
 export class UserEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id: string=uuid();
-    @Column()
-    userName: string;
-    @Column()
-    email: string;
-    @Column()
-    password: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string = uuid();
 
-    @Column()
-    verifiedEmail: boolean;
-    @Column()
-    mfaEnabled: boolean;
+  @Column({ type: 'varchar', unique: true })
+  email: string;
+  @Column({ type: 'varchar' })
+  password: string;
 
-    @Column()
-    mfaBackupCodes: string[];
+  @Column({ type: 'varchar', length: 100 })
+  Names: string;
 
-    @Column()
-    mfaSecret: string;
+  @Column({ type: 'varchar', length: 100 })
+  LastName: string;
 
-    @Column( {type: "timestamp", nullable: true} )
-    mfaVerified: Date;
+  @Column({ type: 'varchar', length: 100 })
+  Position: string;
 
-    @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    createdAt: Date;
+  @Column({ type: 'boolean' })
+  verifiedEmail: boolean;
+  @Column({ type: 'boolean' })
+  mfaEnabled: boolean;
 
-    @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    modifiedAt: Date;
+  @Column()
+  mfaBackupCodes: string[];
 
-    @Column({type:'boolean'})
-    active: boolean
+  @Column({ type: 'varchar' })
+  mfaSecret: string;
 
-    @OneToOne(() => ProfileEntity, (profile) => profile.userID)
-    @JoinColumn()
-    profile: ProfileEntity
+  @Column({ type: 'timestamp', nullable: true })
+  mfaVerified: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  modifiedAt: Date;
+
+  @Column({ type: 'boolean' })
+  active: boolean;
 }
