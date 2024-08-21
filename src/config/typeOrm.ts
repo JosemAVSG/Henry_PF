@@ -2,6 +2,8 @@ import { DataSource, DataSourceOptions } from "typeorm";
 import {config as dotevn} from "dotenv";
 import {registerAs} from '@nestjs/config';
 
+dotevn({path:'.env'});
+
 const typeOrmConfig={
     type:'postgres',
     host: process.env.DB_HOST,
@@ -13,7 +15,8 @@ const typeOrmConfig={
     logging:['error'],
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations:['dist/migrations/*{.ts,.js}'],
-    synchronize:true
+    synchronize:true,
+    dropSchema: true,
 }
 
 export default registerAs('typeorm',()=>typeOrmConfig)

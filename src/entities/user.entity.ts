@@ -30,8 +30,8 @@ export class UserEntity {
   @Column({ type: 'boolean' })
   mfaEnabled: boolean;
 
-  @Column()
-  mfaBackupCodes: string[];
+  @Column({ type: 'varchar'})
+  mfaBackupCodes: string;
 
   @Column({ type: 'varchar' })
   mfaSecret: string;
