@@ -4,6 +4,8 @@ import {registerAs} from '@nestjs/config';
 
 dotevn({path:'.env'});
 
+console.log("dropSchema: ", process.env.DROPSCHEMA)
+
 const typeOrmConfig={
     type:'postgres',
     host: process.env.DB_HOST,
@@ -16,7 +18,7 @@ const typeOrmConfig={
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations:['dist/migrations/*{.ts,.js}'],
     synchronize:true,
-    dropSchema: true,
+    dropSchema: process.env.DROPSCHEMA === 'true', // Convert string to boolean
 }
 
 export default registerAs('typeorm',()=>typeOrmConfig)

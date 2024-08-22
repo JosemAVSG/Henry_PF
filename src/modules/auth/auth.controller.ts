@@ -1,11 +1,11 @@
 
-import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Req, Get, UseGuards } from '@nestjs/common';
 import { SingInDto } from '../../interfaces/dtos/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { SignUpDto } from 'src/interfaces/dtos/signup.dto';
-
-
+import { SignUpDto } from '../../interfaces/dtos/signup.dto';
+import { AuthGuard } from '../../guards/auth.guards';
+import { Request } from 'express';
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -48,4 +48,11 @@ export class AuthController {
       throw new BadRequestException(error);
     }
   }
+
+  @Get('verifyToken')
+  @UseGuards(AuthGuard)
+  async verifyToken(@Req() req: Request){
+        const user = req.user;
+        return user;
+    }
 }
