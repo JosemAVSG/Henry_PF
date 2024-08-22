@@ -1,24 +1,25 @@
-import { IsEmail, IsNotEmpty, IsBoolean, IsString, IsOptional } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsDateString } from 'class-validator';
 
-export class SignUpDto {
-  @IsEmail()
-  email: string;
-
-  @IsNotEmpty()
+export class UpdateUserDto {
+  @IsOptional()
   @IsString()
-  password: string;
-
-  @IsNotEmpty()
-  @IsString()
-  Names: string;
-
-  @IsNotEmpty()
-  @IsString()
-  LastName: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
-  Position: string;
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  Names?: string;
+
+  @IsOptional()
+  @IsString()
+  LastName?: string;
+
+  @IsOptional()
+  @IsString()
+  Position?: string;
 
   @IsOptional()
   @IsBoolean()
@@ -37,6 +38,7 @@ export class SignUpDto {
   mfaSecret?: string;
 
   @IsOptional()
+  @IsDateString()
   mfaVerified?: Date;
 
   @IsOptional()

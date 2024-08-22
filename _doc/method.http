@@ -7,12 +7,42 @@ Content-Type: application/json
   "email": "user@example.com",
   "password": "password123",
   "Names": "John",
-  "LastName": "Doe",
-  "Position": "Developer",
-  "verifiedEmail": true,
+  "LastName": "Doe"
+}
+
+### signin
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+
+# ========== Users ==========
+### get user by ID
+GET http://localhost:3000/users/2806741c-1b3f-46ad-ba2e-d1378e313bb3
+
+
+# ========== Users ==========
+### update user
+PUT http://localhost:3000/users/2806741c-1b3f-46ad-ba2e-d1378e313bb3
+Content-Type: application/json
+
+{
+  "email": "newemail@example.com",
+  "Names": "John Updated",
+  "LastName": "Doe Updated",
+  "Position": "Manager",
   "mfaEnabled": false,
-  "mfaBackupCodes": "123456,654321",
-  "mfaSecret": "my-secret-key",
-  "mfaVerified": null,
   "active": true
 }
+
+### delete user
+DELETE http://localhost:3000/users/2806741c-1b3f-46ad-ba2e-d1378e313bb3
+
+
+
+# ========== Users ==========
+### verify email
+PUT http://localhost:3000/users/verify-email/newemail@example.com

@@ -5,9 +5,11 @@ import {ConfigModule, ConfigService} from '@nestjs/config';
 import typeorm from './config/typeOrm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
+import { UserModule } from './modules/users/users.module';
 
 @Module({
-  imports: [
+  imports: [AuthModule, UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load:[typeorm]
@@ -15,7 +17,12 @@ import { AuthModule } from './modules/auth/auth.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => config.get('typeorm'),
     }),
-    AuthModule],
+    JwtModule.register({
+      secret:  process.env.JWT_SECRET,
+      signOptions: { expiresIn: '1d' },
+      global: true
+    }),
+    ],
   controllers: [AppController],
   providers: [AppService],
 })
