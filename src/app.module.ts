@@ -6,7 +6,7 @@ import typeorm from './config/typeOrm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { UserModule } from './modules/users/users.module';
+import { UserModule } from './interfaces/dtos/users.module';
 
 @Module({
   imports: [AuthModule, UserModule,
