@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../entities/user.entity';
+import { isValidPassword } from '../../utils/hash';
 
 @Injectable()
 export class AuthService {
@@ -10,16 +11,21 @@ export class AuthService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
-  async signIn(email: string, password: string) {
-    const user = this.userRepository.findOne({ where: { email: email } });
-    console.log(user);
 
-    if (!user) throw new BadRequestException('Verification Failed');
+    async signIn(email: string, password: string): Promise<UserEntity | null> {
+ 
+    const user = await this.userRepository.findOne({where: {email: email}});
+    
+    if(!user) throw new BadRequestException('Verification Failed');
 
-    // const validPassword = await isValidPassword(password, user.password);
-    // if(!validPassword) throw new BadRequestException('Verification Failed');
 
+     const validPassword = await isValidPassword(password, user.password);
+    if(!validPassword) throw new BadRequestException('Verification Failed');
+    
     return user;
+
+    }
+
   }
 
   async signUpService(body: any) {
@@ -27,4 +33,5 @@ export class AuthService {
     const user = this.userRepository.create(body);
     return await this.userRepository.save(user);
   }
+
 }
