@@ -8,12 +8,12 @@ export class UserController {
   constructor(private readonly userService: UsersService) {}
 
   @Get()
-  async getUsers(@Query() page: number, @Query() Limit: number) {
-    const pageNumber = Number(page) || 1;
-    const LimitNumber = Number(Limit) || 5;
-
+  async getUsers(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number | null = null
+  ) {
     try {
-      return await this.userService.getUsers(pageNumber, LimitNumber);
+      return await this.userService.getUsers(page, limit);
     } catch (error) {
       throw new NotFoundException(error);
     }
