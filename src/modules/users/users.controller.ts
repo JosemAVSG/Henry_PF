@@ -1,8 +1,11 @@
-import { Controller, Get, NotFoundException, Query, Res } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Query, Param, Body, Delete} from '@nestjs/common';
 import { UsersService } from './users.service';
+import { UpdateUserDto } from './dtos/users.update.dto';
+import { UserEntity } from 'src/entities/user.entity';
+
 @Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Get()
   async getUsers(@Query() page: number, @Query() Limit: number) {
@@ -14,5 +17,30 @@ export class UsersController {
     } catch (error) {
       throw new NotFoundException(error);
     }
+  
+  @Put(':id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserEntity> {
+    return this.userService.updateUser(id, updateUserDto);
+  }
+
+  // Endpoint para obtener un usuario por su ID
+  @Get(':id')
+  async getUserById(@Param('id') id: string): Promise<UserEntity> {
+    return this.userService.getUserById(id);
+  }
+
+  // Endpoint para eliminar un usuario
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string) {
+    return this.userService.deleteUser(id);
+  }
+
+  // Endpoint para verificar el email de un usuario
+  @Put('verify-email/:email')
+  async verifyEmail(@Param('email') email: string) {
+    return this.userService.verifyEmail(email);
   }
 }
