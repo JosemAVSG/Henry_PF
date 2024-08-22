@@ -9,7 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
-  imports: [AuthModule,
+  imports: [AuthModule,UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load:[typeorm]
@@ -22,7 +22,6 @@ import { UsersModule } from './modules/users/users.module';
       signOptions: { expiresIn: '1d' },
       global: true
     }),
-    UsersModule,
     ],
   controllers: [AppController],
   providers: [AppService],

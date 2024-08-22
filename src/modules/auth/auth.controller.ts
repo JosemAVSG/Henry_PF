@@ -1,16 +1,7 @@
-
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  BadRequestException,
-  Res,
-} from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
 import { SingInDto } from '../../interfaces/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { Response } from 'express';
 import { SignUpDto } from 'src/interfaces/signup.dto';
 
 @Controller('auth')
@@ -21,7 +12,7 @@ export class AuthController {
   ) {}
 
   @Post('signin')
-  async signIn(@Body() Crendential: SingInDto, @Res() res: Response) {
+  async signIn(@Body() Crendential: SingInDto) {
     const { email, password } = Crendential;
     try {
       if (!email || !password)
@@ -30,26 +21,29 @@ export class AuthController {
       const result = await this.authService.signIn(email, password);
 
       if (!result) {
-        res.status(400).send({ message: 'Invalid credentials!' });
+        throw new BadRequestException('Invalid credentials!');
       }
 
-        const userPayload = {
-            id: result.id,
-            sub: result.id,
-            email: result.email,
-          //   roles:[result.isAdmin ? Roles.ADMIN : Roles.USER]
-          };
-      const token =  this.jwtService.sign(userPayload);
+      const userPayload = {
+        id: result.id,
+        sub: result.id,
+        email: result.email,
+        //   roles:[result.isAdmin ? Roles.ADMIN : Roles.USER]
+      };
+      const token = this.jwtService.sign(userPayload);
 
-      res.status(200).send({ message: 'You are authenticated!', token });
+      return { message: 'You are authenticated!', token };
     } catch (error) {
-      res.status(401).send(error);
+      throw new BadRequestException(error);
     }
   }
 
   @Post('signup')
   async signUp(@Body() body: SignUpDto) {
-    
-    return await this.authService.signUpService(body);
+    try {
+      return await this.authService.signUpService(body);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 }
