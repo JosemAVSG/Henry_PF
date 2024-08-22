@@ -49,4 +49,5 @@ export class UserEntity {
 
   @Column({ type: 'boolean', nullable: true  })
   active: boolean;
+
 }

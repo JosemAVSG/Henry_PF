@@ -1,5 +1,5 @@
-import { Controller, Put, Param, Body, Delete, Get } from '@nestjs/common';
-import { UserService } from './users.service';
+import { Controller, Get, NotFoundException, Query, Param, Body, Delete} from '@nestjs/common';
+import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/users.update.dto';
 import { UserEntity } from 'src/entities/user.entity';
 
@@ -7,6 +7,17 @@ import { UserEntity } from 'src/entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get()
+  async getUsers(@Query() page: number, @Query() Limit: number) {
+    const pageNumber = Number(page) || 1;
+    const LimitNumber = Number(Limit) || 5;
+
+    try {
+      return await this.usersService.getUsers(pageNumber, LimitNumber);
+    } catch (error) {
+      throw new NotFoundException(error);
+    }
+  
   @Put(':id')
   async updateUser(
     @Param('id') id: string,

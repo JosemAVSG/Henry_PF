@@ -11,6 +11,23 @@ export class UserService {
     private userRepository: Repository<UserEntity>,
   ) {}
 
+  
+   async getUsers(
+    page: number,
+    Limit: number,
+  ): Promise<Omit<UserEntity, 'password'>[]> {
+    const results = await this.userRepository.find({
+      skip: (page - 1) * Limit,
+      take: Limit,
+    });
+    const users = results.map((user) => {
+      const { password, ...usuariosinpassword } = user;
+      return usuariosinpassword;
+    });
+
+    return users;
+    }
+  
   async updateUser(
     id: string,
     updateUserDto: UpdateUserDto,
@@ -59,5 +76,6 @@ export class UserService {
 
     user.verifiedEmail = true;
     return await this.userRepository.save(user);
+
   }
 }

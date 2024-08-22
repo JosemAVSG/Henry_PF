@@ -20,7 +20,8 @@ export class AuthService {
     if (!validPassword) throw new BadRequestException('Verification Failed');
 
     return user;
-  }
+    }
+
 
   async signUpService(body: any) {
     const userExists = await this.userRepository.findOne({
