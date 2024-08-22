@@ -2,7 +2,7 @@ import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
 import { SingInDto } from '../../interfaces/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { SignUpDto } from 'src/entities/signup.dto';
+import { SignUpDto } from 'src/interfaces/signup.dto';
 @Controller('auth')
 export class AuthController {
   constructor(
