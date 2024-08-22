@@ -6,8 +6,11 @@ import { isValidPassword } from '../../utils/hash';
 
 @Injectable()
 export class AuthService {
-    constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity> ) {
-    }
+  constructor(
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+  ) {}
+
 
     async signIn(email: string, password: string): Promise<UserEntity | null> {
  
@@ -15,11 +18,20 @@ export class AuthService {
     
     if(!user) throw new BadRequestException('Verification Failed');
 
+
      const validPassword = await isValidPassword(password, user.password);
     if(!validPassword) throw new BadRequestException('Verification Failed');
     
     return user;
+
     }
 
+  }
+
+  async signUpService(body: any) {
+    // return body;
+    const user = this.userRepository.create(body);
+    return await this.userRepository.save(user);
+  }
 
 }
