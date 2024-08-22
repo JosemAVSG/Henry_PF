@@ -6,6 +6,7 @@ import typeorm from './config/typeOrm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [AuthModule,
@@ -21,6 +22,7 @@ import { JwtModule } from '@nestjs/jwt';
       signOptions: { expiresIn: '1d' },
       global: true
     }),
+    UsersModule,
     ],
   controllers: [AppController],
   providers: [AppService],

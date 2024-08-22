@@ -27,6 +27,7 @@ export class UserEntity {
 
   @Column({ type: 'boolean' })
   verifiedEmail: boolean;
+
   @Column({ type: 'boolean' })
   mfaEnabled: boolean;
 
@@ -46,5 +47,5 @@ export class UserEntity {
   modifiedAt: Date;
 
   @Column({ type: 'boolean' })
-  active: boolean;
+  isAdmin: boolean;
 }

@@ -11,7 +11,7 @@ import { SingInDto } from '../../interfaces/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-import { SignUpDto } from 'src/entities/signup.dto';
+import { SignUpDto } from 'src/interfaces/signup.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -49,6 +49,7 @@ export class AuthController {
 
   @Post('signup')
   async signUp(@Body() body: SignUpDto) {
+    
     return await this.authService.signUpService(body);
   }
 }

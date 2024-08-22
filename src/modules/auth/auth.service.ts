@@ -26,8 +26,6 @@ export class AuthService {
 
     }
 
-  }
-
   async signUpService(body: any) {
     // return body;
     const user = this.userRepository.create(body);
