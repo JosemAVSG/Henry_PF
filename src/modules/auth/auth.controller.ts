@@ -1,40 +1,47 @@
-import { Controller, Post, Body , BadRequestException} from '@nestjs/common';
-import {SingInDto} from '../../interfaces/singIn.dto'
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  BadRequestException,
+  Res,
+} from '@nestjs/common';
+import { SingInDto } from '../../interfaces/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 @Controller('auth')
 export class AuthController {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-    constructor (private readonly authService: AuthService, private jwtService: JwtService) {}
+  @Post('signin')
+  async signIn(@Body() Crendential: SingInDto, @Res() res: Response) {
+    const { email, password } = Crendential;
+    try {
+      if (!email || !password)
+        throw new BadRequestException('No credentials provided!');
 
-    @Post('signin')
-    async signIn(@Body() Crendential: SingInDto) {
-        const {email, password} = Crendential;
-        try {
-            if (!email || !password) {
-              throw new BadRequestException('No credentials provided!');
-            }
-            const result = await this.authService.signIn(email, password);
-            console.log("results: "+ result);
-            
-            if (!result) {
-              throw new BadRequestException('Invalid credentials!');
-            }
-            
-          const userPayload ={
-              id: result.id,
-              sub: result.id,
-              email: result.email,
-              // roles:[result.isAdmin ? Roles.ADMIN : Roles.USER]
-            }
-        
-           const token = this.jwtService.sign(userPayload);
-  
-           return { message: 'You are authenticated!', token };
-          } catch (error) {
-            throw new BadRequestException(error);
-          }
+      const result = await this.authService.signIn(email, password);
+
+      if (!result) {
+        res.status(400).send({ message: 'Invalid credentials!' });
+      }
+
+        const userPayload = {
+            id: result.id,
+            sub: result.id,
+            email: result.email,
+          //   roles:[result.isAdmin ? Roles.ADMIN : Roles.USER]
+          };
+      const token =  this.jwtService.sign(userPayload);
+
+      res.status(200).send({ message: 'You are authenticated!', token });
+    } catch (error) {
+      res.status(401).send(error);
     }
-
+  }
 
 }
