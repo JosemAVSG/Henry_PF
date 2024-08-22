@@ -21,12 +21,12 @@ Content-Type: application/json
 
 # ========== Users ==========
 ### get user by ID
-GET http://localhost:3000/users/2806741c-1b3f-46ad-ba2e-d1378e313bb3
+GET http://localhost:3000/users/7b509208-ac10-494c-a82a-721a6717dc9d
 
 
 # ========== Users ==========
 ### update user
-PUT http://localhost:3000/users/2806741c-1b3f-46ad-ba2e-d1378e313bb3
+PUT http://localhost:3000/users/7b509208-ac10-494c-a82a-721a6717dc9d
 Content-Type: application/json
 
 {
@@ -39,10 +39,19 @@ Content-Type: application/json
 }
 
 ### delete user
-DELETE http://localhost:3000/users/2806741c-1b3f-46ad-ba2e-d1378e313bb3
+DELETE http://localhost:3000/users/7b509208-ac10-494c-a82a-721a6717dc9d
 
 
 
 # ========== Users ==========
 ### verify email
 PUT http://localhost:3000/users/verify-email/newemail@example.com
+
+
+
+# ========== Users ==========
+### get paginated users
+GET http://localhost:3000/users?page=1&limit=5
+
+### get all users
+GET http://localhost:3000/users
