@@ -6,9 +6,10 @@ import typeorm from './config/typeOrm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
+import { UserModule } from './modules/users/users.module';
 
 @Module({
-  imports: [AuthModule,
+  imports: [AuthModule, UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load:[typeorm]
