@@ -33,6 +33,15 @@ export class UserController {
     return this.userService.getUserById(id);
   }
 
+  //Endpoint para actualizar el estado del usuario
+  @Put('status/:userId/:statusId')
+  async updateUserStatus(
+    @Param('userId') userId: string, 
+    @Param('statusId') statusId: number, 
+  ) {
+    return this.userService.updateUserStatus(userId, statusId);
+  }
+
   // Endpoint para eliminar un usuario
   @Delete(':id')
   async deleteUser(@Param('id') id: string) {

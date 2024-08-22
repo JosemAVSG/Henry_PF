@@ -47,7 +47,7 @@ export class UserEntity {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP',   })
   modifiedAt: Date;
 
-  @Column({ type: 'boolean', nullable: true  })
-  active: boolean;
+  @Column({ type: 'int', nullable: true  })
+  statusId: number;
 
 }
