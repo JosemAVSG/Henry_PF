@@ -29,7 +29,7 @@ export class UsersService {
     }
   
   async updateUser(
-    id: string,
+    id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { id } });
@@ -45,7 +45,7 @@ export class UsersService {
   }
 
   // Método para obtener un usuario por su ID
-  async getUserById(id: string): Promise<UserEntity> {
+  async getUserById(id: number): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
@@ -57,7 +57,7 @@ export class UsersService {
 
   
   // Método para actualizar el estado de un usuario
-  async updateUserStatus(userId: string, statusId: number) {
+  async updateUserStatus(userId: number, statusId: number) {
     const result = await this.userRepository.update(userId, {statusId: statusId});
 
     if (result.affected === 0) {
@@ -69,7 +69,7 @@ export class UsersService {
 
 
   // Método para eliminar un usuario
-  async deleteUser(id: string) {
+  async deleteUser(id: number) {
     const result = await this.userRepository.delete(id);
 
     if (result.affected === 0) {
