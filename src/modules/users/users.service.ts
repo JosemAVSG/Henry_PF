@@ -64,7 +64,7 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
-    return result;
+    return {message:"User status updated"};
   }
 
 
