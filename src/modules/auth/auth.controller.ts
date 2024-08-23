@@ -15,7 +15,7 @@ export class AuthController {
 
   @Post('signin')
   async signIn(@Body() Crendential: SingInDto) {
-    const { email, password } = Crendential;
+    const { email, password, mfa } = Crendential;
     try {
       if (!email || !password)
         throw new BadRequestException('No credentials provided!');
@@ -24,6 +24,12 @@ export class AuthController {
 
       if (!result) {
         throw new BadRequestException('Invalid credentials!');
+      }
+
+      if(result.mfaEnabled){
+        if(!mfa) throw new BadRequestException('Two factor code is required!');
+        const isValidate=  this.authService.validateMfa(mfa, result.mfaSecret);
+        if(!isValidate) throw new BadRequestException('Invalid MFA code!');
       }
 
       const userPayload = {
@@ -54,5 +60,25 @@ export class AuthController {
   async verifyToken(@Req() req: Request){
         const user = req.user;
         return user;
-    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('enable-mfa')
+  async enableMfa(@Req() req: Request){
+    console.log(req.user);
+    
+    try{
+      const user = req.user; // suponiendo que el usuario esta logueado
+      if(!user) throw new BadRequestException('No user found!');
+
+      const secret = await this.authService.generateMfaSecret(user.email,user.id);
+
+      const qrCode = await this.authService.generateMfaQrCode(secret);
+
+      return { message: 'MFA enabled!', qrCode,secret:secret.base32};
+    }catch(error){
+      throw new BadRequestException(error);
+    }
+
+  }
 }
