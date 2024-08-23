@@ -14,10 +14,9 @@ export class UserSeeder {
 
   async seed() {
     const users = [];
-
+    
     for (let i = 1; i <= 30; i++) {
       const user = new UserEntity();
-      user.id = uuid();
       user.email = `user${i}@example.com`;
       user.password = await bcrypt.hash('password123', 10);
       user.Names = `User${i}`;

@@ -10,9 +10,9 @@ export class UserController {
   @Get()
   async getUsers(
     @Query('page') page: number = 1,
-    @Query('limit') limit: number | null = null
+    @Query('limit') limit: number = 20,
   ) {
-    try {
+    try {   
       return await this.userService.getUsers(page, limit);
     } catch (error) {
       throw new NotFoundException(error);
@@ -21,7 +21,7 @@ export class UserController {
 
   @Put(':id')
   async updateUser(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserEntity> {
     return this.userService.updateUser(id, updateUserDto);
@@ -29,14 +29,14 @@ export class UserController {
 
   // Endpoint para obtener un usuario por su ID
   @Get(':id')
-  async getUserById(@Param('id') id: string): Promise<UserEntity> {
+  async getUserById(@Param('id') id: number): Promise<UserEntity> {
     return this.userService.getUserById(id);
   }
 
   //Endpoint para actualizar el estado del usuario
   @Put('status/:userId/:statusId')
   async updateUserStatus(
-    @Param('userId') userId: string, 
+    @Param('userId') userId: number, 
     @Param('statusId') statusId: number, 
   ) {
     return this.userService.updateUserStatus(userId, statusId);
@@ -44,7 +44,7 @@ export class UserController {
 
   // Endpoint para eliminar un usuario
   @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
+  async deleteUser(@Param('id') id: number) {
     return this.userService.deleteUser(id);
   }
 

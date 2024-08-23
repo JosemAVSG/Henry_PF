@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../entities/user.entity';
 import { hashPassword, isValidPassword } from '../../utils/hash';
-
+import * as speakeasy from 'speakeasy';
+import * as qrcode from 'qrcode';
 @Injectable()
 export class AuthService {
   constructor(
@@ -33,4 +34,33 @@ export class AuthService {
     const user = this.userRepository.create(body);
     return await this.userRepository.save(user);
   }
+
+   validateMfa(token: string, secret:string):boolean {
+    return speakeasy.totp.verify({
+      secret: secret,
+      encoding: 'base32',
+      token: token,
+    })
+  }
+
+  async generateMfaSecret(email: string, userId: string) {
+    const secret = speakeasy.generateSecret({
+      name: `BP Ventures (${email})`,
+      length: 20,
+    });
+
+    await this.userRepository.update(userId, {
+      mfaSecret: secret.base32,
+      mfaEnabled: true,
+    });
+
+    return secret;
+  }
+
+  async generateMfaQrCode(secret: speakeasy.GeneratedSecret) {
+    const otpAuthUrl = secret.otpauth_url;
+    return await qrcode.toDataURL(otpAuthUrl);
+  }
+
+
 }

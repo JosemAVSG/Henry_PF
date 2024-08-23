@@ -19,6 +19,7 @@ const typeOrmConfig={
     migrations:['dist/migrations/*{.ts,.js}'],
     synchronize:true,
     dropSchema: process.env.DROPSCHEMA === 'true', // Convert string to boolean
+
 }
 
 export default registerAs('typeorm',()=>typeOrmConfig)

@@ -5,11 +5,10 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 @Entity({ name: 'users' })
 export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string = uuid();
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ type: 'varchar', unique: true })
   email: string;
