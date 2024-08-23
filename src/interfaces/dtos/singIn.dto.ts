@@ -15,6 +15,4 @@ export class SingInDto {
     @IsOptional()
     @IsString()
     mfa: string
-
-
 }
