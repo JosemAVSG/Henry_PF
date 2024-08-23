@@ -30,7 +30,6 @@ export class UserSeeder {
       user.mfaVerified = null;
       user.createdAt = new Date();
       user.modifiedAt = new Date();
-      user.active = true;
 
       users.push(user);
     }
