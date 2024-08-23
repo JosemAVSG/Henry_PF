@@ -55,6 +55,19 @@ export class UsersService {
     return user;
   }
 
+  
+  // Método para actualizar el estado de un usuario
+  async updateUserStatus(userId: string, statusId: number) {
+    const result = await this.userRepository.update(userId, {statusId: statusId});
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return {message:"User status updated"};
+  }
+
+
   // Método para eliminar un usuario
   async deleteUser(id: string) {
     const result = await this.userRepository.delete(id);
