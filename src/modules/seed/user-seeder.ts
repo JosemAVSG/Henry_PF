@@ -17,7 +17,7 @@ export class UserSeeder {
 
     for (let i = 1; i <= 30; i++) {
       const user = new UserEntity();
-      user.id = uuid();
+      // user.id = uuid();
       user.email = `user${i}@example.com`;
       user.password = await bcrypt.hash('password123', 10);
       user.Names = `User${i}`;
@@ -30,7 +30,7 @@ export class UserSeeder {
       user.mfaVerified = null;
       user.createdAt = new Date();
       user.modifiedAt = new Date();
-      user.active = true;
+      user.statusId = true;
 
       users.push(user);
     }

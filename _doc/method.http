@@ -4,10 +4,11 @@ POST http://localhost:3000/auth/signup
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "userasdf@example.com",
   "password": "password123",
   "Names": "John",
-  "LastName": "Doe"
+  "LastName": "Doe",
+  "Position": "Manager"
 }
 
 ### signin
@@ -26,7 +27,7 @@ GET http://localhost:3000/users/7b509208-ac10-494c-a82a-721a6717dc9d
 
 # ========== Users ==========
 ### update user
-PUT http://localhost:3000/users/7b509208-ac10-494c-a82a-721a6717dc9d
+PUT http://localhost:3000/users/5007bb61-61b8-444e-92ab-9db36dff62cb
 Content-Type: application/json
 
 {
