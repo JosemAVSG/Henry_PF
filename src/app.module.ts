@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from './modules/users/users.module';
 import { SeedModule } from './modules/seed/seed.module';
+import { DeliverablesModule } from './modules/deliverables/deliverables.module';
 
 @Module({
   imports: [AuthModule, UserModule, SeedModule,
@@ -23,6 +24,7 @@ import { SeedModule } from './modules/seed/seed.module';
       signOptions: { expiresIn: '1d' },
       global: true
     }),
+    DeliverablesModule,
     ],
   controllers: [AppController],
   providers: [AppService],
