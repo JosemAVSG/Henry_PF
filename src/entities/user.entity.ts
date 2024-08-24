@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Permission } from './permission.entity';
+import { Invoice } from './invoice.entity';
 @Entity({ name: 'users' })
 export class UserEntity {
   @PrimaryGeneratedColumn()
@@ -54,4 +55,8 @@ export class UserEntity {
 
   @OneToMany(() => Permission, permission => permission.user)
   permissions: Permission[];
+
+  @OneToMany(() => Invoice, invoice => invoice.user )
+  invoices: Invoice[]
+
 }
