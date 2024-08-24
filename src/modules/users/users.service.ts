@@ -14,9 +14,19 @@ export class UsersService {
 
   
    async getUsers(
-    page: number,
-    Limit: number,
-  ): Promise<PaginatedUsers> {
+    page?: number,
+    Limit?: number,
+  ): Promise<PaginatedUsers | Omit<UserEntity, 'password'>[]> {
+
+    if(page === undefined || Limit === undefined) {
+      const results = await this.userRepository.find()
+      const users = results.map((user) => {
+        const { password, ...usuariosinpassword } = user;
+        return usuariosinpassword;
+      });
+      return users;
+    }
+
     const results = await this.userRepository.find({
       skip: (page - 1) * Limit,
       take: Limit,
@@ -27,7 +37,6 @@ export class UsersService {
     });
 
     const totalPages = Math.ceil((await this.userRepository.count()) / Limit);
-    console.log(totalPages);
     
     const data = { users, totalPages };
     return data;
