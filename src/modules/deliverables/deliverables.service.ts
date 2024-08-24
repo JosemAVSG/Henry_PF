@@ -16,23 +16,32 @@ export class DeliverablesService {
     return 'This action adds a new deliverable';
   }
 
-  async findAll(page:number=1, pageSize: number=10): Promise<Deliverable[]> {
+  async findAll(userId: number = null, page:number=1, pageSize: number=10): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize
     
-    const result = this.deliverableRepository
+    const queryBuilder = this.deliverableRepository
     .createQueryBuilder('deliverable')
     .leftJoinAndSelect('deliverable.deliverableType', 'deliverableType')
+    .leftJoinAndSelect('deliverable.permissions', 'permission')
+    .leftJoinAndSelect('permission.permissionType', 'permissionType')
     .select([
       'deliverable.name AS deliverable_name',
-      'deliverableType.name AS deliverableType_name',
-      'COALESCE(deliverable.updatedAt, deliverable.createdAt) AS "orderDate"',
+      'deliverableType.name AS deliverableType',
+      'permissionType.name AS PermissionType',
+      `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
     ])
-    //.addSelect("COALESCE(deliverable.updatedAt, deliverable.createdAt)", "orderDate")
-    .orderBy('"orderDate"', 'DESC')
+
+//    .addSelect("COALESCE(deliverable.updatedAt, deliverable.createdAt)", "orderDate")
+    .orderBy('"lastDate"', 'DESC')
     .limit(pageSize)
     .offset(offset)
-    .getRawMany() //.getMany()
-
+    
+    if (userId) {
+      queryBuilder.where('permission.userId = :userId', { userId });
+    }
+    const result = await queryBuilder.getRawMany();
+    //.getMany()
+    
     return result; // `This action returns all deliverables`;
   }
 

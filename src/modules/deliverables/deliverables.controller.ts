@@ -13,19 +13,16 @@ export class DeliverablesController {
     return this.deliverablesService.create(createDeliverableDto);
   }
 
-  @Get()
+  @Get(':userId')
   //@UseGuards(AuthGuard)
   findAll(
+    @Param('userId') userId: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    return this.deliverablesService.findAll(page, limit);
+    return this.deliverablesService.findAll(userId, page, limit);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.deliverablesService.findOne(+id);
-  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDeliverableDto: UpdateDeliverableDto) {
