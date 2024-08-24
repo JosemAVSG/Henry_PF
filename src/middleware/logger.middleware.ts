@@ -5,7 +5,7 @@ import { Request, Response, NextFunction } from "express";
 export class LoggerMiddleware implements NestMiddleware {
     use(req: Request, res: Response, next: NextFunction) {
         const timestamp = new Date().toLocaleDateString();
-        console.log(`Request: ${timestamp} ${req.method} ${req.url}`);
+        console.info(`Request: ${timestamp} ${req.method} ${req.url}`);
         next();
     }
 }

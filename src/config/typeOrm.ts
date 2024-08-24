@@ -4,7 +4,7 @@ import {registerAs} from '@nestjs/config';
 
 dotevn({path:'.env'});
 
-console.log("dropSchema: ", process.env.DROPSCHEMA)
+console.info("dropSchema: ", process.env.DROPSCHEMA)
 
 const typeOrmConfig={
     type:'postgres',

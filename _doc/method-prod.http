@@ -7,12 +7,22 @@ GET https://api.1rodemayo.com/users
 ### get user by ID
 GET https://api.1rodemayo.com/users/1
 
+
+### signin
+POST https://api.1rodemayo.com/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+
 ### signup
 POST https://api.1rodemayo.com/auth/signup
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "user234@example.com",
   "password": "password123",
   "Names": "John",
   "LastName": "Doe",
@@ -24,7 +34,7 @@ POST https://api.1rodemayo.com/auth/signin
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "user234@example.com",
   "password": "password123"
 }
 

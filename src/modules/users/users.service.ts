@@ -27,7 +27,6 @@ export class UsersService {
     });
 
     const totalPages = Math.ceil((await this.userRepository.count()) / Limit);
-    console.log(totalPages);
     
     const data = { users, totalPages };
     return data;
