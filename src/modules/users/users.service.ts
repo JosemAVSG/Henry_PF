@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from '../../interfaces/dtos/users.update.dto';
-import { UserEntity } from 'src/entities/user.entity';
+import { UserEntity } from '../../entities/user.entity';
+import {PaginatedUsers} from '../../interfaces/paginatedUser';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +16,7 @@ export class UsersService {
    async getUsers(
     page: number,
     Limit: number,
-  ) {
+  ): Promise<PaginatedUsers> {
     const results = await this.userRepository.find({
       skip: (page - 1) * Limit,
       take: Limit,
@@ -25,15 +26,11 @@ export class UsersService {
       return usuariosinpassword;
     });
 
-    const filteredUsers = users.map(({ id, email, Names, LastName, Position, statusId }) => ({
-      id,
-      email,
-      Names,
-      LastName,
-      Position,
-      statusId
-    }));
-    return filteredUsers;
+    const totalPages = Math.ceil((await this.userRepository.count()) / Limit);
+    console.log(totalPages);
+    
+    const data = { users, totalPages };
+    return data;
     }
   
   async updateUser(
