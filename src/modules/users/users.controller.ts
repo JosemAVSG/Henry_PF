@@ -1,8 +1,8 @@
 import { Controller, Get, NotFoundException, Query, Param, Body, Delete,Put} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../../interfaces/dtos/users.update.dto';
-import { UserEntity } from 'src/entities/user.entity';
-
+import { UserEntity } from '../../entities/user.entity';
+import { PaginatedUsers } from '../../interfaces/paginatedUser';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UsersService) {}
@@ -11,8 +11,9 @@ export class UserController {
   async getUsers(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
-  ) {
+  ):Promise<PaginatedUsers> {
     try {   
+
       return await this.userService.getUsers(page, limit);
     } catch (error) {
       throw new NotFoundException(error);
