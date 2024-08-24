@@ -5,22 +5,21 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 @Entity({ name: 'users' })
 export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string = uuid();
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ type: 'varchar', unique: true })
   email: string;
   
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   password: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, nullable: true  })
   Names: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, nullable: true  })
   LastName: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true  })

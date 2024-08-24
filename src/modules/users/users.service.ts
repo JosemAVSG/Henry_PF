@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from '../../interfaces/dtos/users.update.dto';
-import { UserEntity } from 'src/entities/user.entity';
+import { UserEntity } from '../../entities/user.entity';
+import {PaginatedUsers} from '../../interfaces/paginatedUser';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +16,7 @@ export class UsersService {
    async getUsers(
     page: number,
     Limit: number,
-  ): Promise<Omit<UserEntity, 'password'>[]> {
+  ): Promise<PaginatedUsers> {
     const results = await this.userRepository.find({
       skip: (page - 1) * Limit,
       take: Limit,
@@ -25,13 +26,16 @@ export class UsersService {
       return usuariosinpassword;
     });
 
-    return users;
+    const totalPages = Math.ceil((await this.userRepository.count()) / Limit);
+    
+    const data = { users, totalPages };
+    return data;
     }
   
   async updateUser(
-    id: string,
+    id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<UserEntity> {
+  ) {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
@@ -41,23 +45,40 @@ export class UsersService {
     const updatedUser = Object.assign(user, updateUserDto);
     updatedUser.modifiedAt = new Date(); // Actualizar la fecha de modificación
 
-    return this.userRepository.save(updatedUser);
+    const savedUser = await this.userRepository.save(updatedUser);
+
+    const filteredUser = {
+      id: savedUser.id,
+      email: savedUser.email,
+      Names: savedUser.Names,
+      LastName: savedUser.LastName,
+      Position: savedUser.Position,
+      statusId: savedUser.statusId
+    };
+
+    return filteredUser
   }
 
   // Método para obtener un usuario por su ID
-  async getUserById(id: string): Promise<UserEntity> {
+  async getUserById(id: number) {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return user;
+    // return user;
+    function filterUserData(user: any) {
+      const { id, email, Names, LastName, Position, statusId } = user;
+      return { id, email, Names, LastName, Position, statusId };
+    }
+    const filteredUser = filterUserData(user);
+    return filteredUser
   }
 
   
   // Método para actualizar el estado de un usuario
-  async updateUserStatus(userId: string, statusId: number) {
+  async updateUserStatus(userId: number, statusId: number) {
     const result = await this.userRepository.update(userId, {statusId: statusId});
 
     if (result.affected === 0) {
@@ -69,7 +90,7 @@ export class UsersService {
 
 
   // Método para eliminar un usuario
-  async deleteUser(id: string) {
+  async deleteUser(id: number) {
     const result = await this.userRepository.delete(id);
 
     if (result.affected === 0) {

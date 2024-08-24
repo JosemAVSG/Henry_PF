@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from '../../interfaces/dtos/users.update.dto';
 import { UserEntity } from '../../entities/user.entity';
 import { AuthGuard } from '../../guards/auth.guards';
+import { PaginatedUsers } from '../../interfaces/paginatedUser';
 
 @Controller('users')
 export class UserController {
@@ -11,9 +12,10 @@ export class UserController {
   @Get()
   async getUsers(
     @Query('page') page: number = 1,
-    @Query('limit') limit: number | null = null
-  ) {
-    try {
+    @Query('limit') limit: number = 20,
+  ):Promise<PaginatedUsers> {
+    try {   
+
       return await this.userService.getUsers(page, limit);
     } catch (error) {
       throw new NotFoundException(error);
@@ -22,15 +24,15 @@ export class UserController {
 
   @Put(':id')
   async updateUser(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<UserEntity> {
+  ) {
     return this.userService.updateUser(id, updateUserDto);
   }
 
   // Endpoint para obtener un usuario por su ID
   @Get(':id')
-  async getUserById(@Param('id') id: string): Promise<UserEntity> {
+  async getUserById(@Param('id') id: number) {
     return this.userService.getUserById(id);
   }
 
@@ -38,7 +40,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Put('status/:userId/:statusId')
   async updateUserStatus(
-    @Param('userId') userId: string, 
+    @Param('userId') userId: number, 
     @Param('statusId') statusId: number, 
   ) {
     return this.userService.updateUserStatus(userId, statusId);
@@ -46,7 +48,7 @@ export class UserController {
 
   // Endpoint para eliminar un usuario
   @Delete(':id')
-  async deleteUser(@Param('id') id: string) {
+  async deleteUser(@Param('id') id: number) {
     return this.userService.deleteUser(id);
   }
 

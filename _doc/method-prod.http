@@ -1,14 +1,15 @@
 ### get paginated users
-GET http://localhost:3000/users?page=1&limit=2
+GET https://api.1rodemayo.com/users?page=1&limit=2
 
 ### get all users
-GET http://localhost:3000/users
+GET https://api.1rodemayo.com/users
 
 ### get user by ID
-GET http://localhost:3000/users/1
+GET https://api.1rodemayo.com/users/1
+
 
 ### signin
-POST http://localhost:3000/auth/signin
+POST https://api.1rodemayo.com/auth/signin
 Content-Type: application/json
 
 {
@@ -17,11 +18,11 @@ Content-Type: application/json
 }
 
 ### signup
-POST http://localhost:3000/auth/signup
+POST https://api.1rodemayo.com/auth/signup
 Content-Type: application/json
 
 {
-  "email": "user123@example.com",
+  "email": "user234@example.com",
   "password": "password123",
   "Names": "John",
   "LastName": "Doe",
@@ -29,16 +30,16 @@ Content-Type: application/json
 }
 
 ### signin
-POST http://localhost:3000/auth/signin
+POST https://api.1rodemayo.com/auth/signin
 Content-Type: application/json
 
 {
-  "email": "user123@example.com",
+  "email": "user234@example.com",
   "password": "password123"
 }
 
 ### update user
-PUT http://localhost:3000/users/1
+PUT https://api.1rodemayo.com/users/1
 Content-Type: application/json
 
 {
@@ -51,6 +52,6 @@ Content-Type: application/json
 }
 
 ### delete user
-DELETE http://localhost:3000/users/1
+DELETE https://api.1rodemayo.com/users/1
 
 

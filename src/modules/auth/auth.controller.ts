@@ -1,5 +1,5 @@
 
-import { Controller, Post, Body, BadRequestException, Req, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Req, Get, UseGuards, Query } from '@nestjs/common';
 import { SingInDto } from '../../interfaces/dtos/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
@@ -15,7 +15,7 @@ export class AuthController {
 
   @Post('signin')
   async signIn(@Body() Crendential: SingInDto) {
-    const { email, password } = Crendential;
+    const { email, password, mfa } = Crendential;
     try {
       if (!email || !password)
         throw new BadRequestException('No credentials provided!');
@@ -26,6 +26,12 @@ export class AuthController {
         throw new BadRequestException('Invalid credentials!');
       }
 
+      if(result.mfaEnabled){
+        if(!mfa) throw new BadRequestException('Two factor code is required!');
+        const isValidate=  this.authService.validateMfa(mfa, result.mfaSecret);
+        if(!isValidate) throw new BadRequestException('Invalid MFA code!');
+      }
+
       const userPayload = {
         id: result.id,
         sub: result.id,
@@ -34,7 +40,7 @@ export class AuthController {
       };
       const token = this.jwtService.sign(userPayload);
 
-      return { message: 'You are authenticated!', token };
+      return { message: 'You are authenticated!', token, userPayload };
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -49,10 +55,38 @@ export class AuthController {
     }
   }
 
+  @Post('reset-password')
+  async resetPassword(
+    @Query('token') token: string,
+    @Body('newPassword') newPassword: string
+  ) {
+    // return  atob(token)
+    await this.authService.resetPassword(token, newPassword);
+    return { message: 'Password has been reset successfully' };
+  }
+
   @Get('verifyToken')
   @UseGuards(AuthGuard)
   async verifyToken(@Req() req: Request){
         const user = req.user;
         return user;
-    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('enable-mfa')
+  async enableMfa(@Req() req: Request){
+    try{
+      const user = req.user; // suponiendo que el usuario esta logueado
+      if(!user) throw new BadRequestException('No user found!');
+
+      const secret = await this.authService.generateMfaSecret(user.email,user.id);
+
+      const qrCode = await this.authService.generateMfaQrCode(secret);
+
+      return { message: 'MFA enabled!', qrCode,secret:secret.base32};
+    }catch(error){
+      throw new BadRequestException(error);
+    }
+
+  }
 }
