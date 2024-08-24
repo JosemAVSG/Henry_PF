@@ -40,7 +40,7 @@ export class AuthController {
       };
       const token = this.jwtService.sign(userPayload);
 
-      return { message: 'You are authenticated!', token };
+      return { message: 'You are authenticated!', token, userPayload };
     } catch (error) {
       throw new BadRequestException(error);
     }
