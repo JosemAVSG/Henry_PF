@@ -23,13 +23,13 @@ export class UserController {
   async updateUser(
     @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<UserEntity> {
+  ) {
     return this.userService.updateUser(id, updateUserDto);
   }
 
   // Endpoint para obtener un usuario por su ID
   @Get(':id')
-  async getUserById(@Param('id') id: number): Promise<UserEntity> {
+  async getUserById(@Param('id') id: number) {
     return this.userService.getUserById(id);
   }
 

@@ -15,7 +15,7 @@ export class UsersService {
    async getUsers(
     page: number,
     Limit: number,
-  ): Promise<Omit<UserEntity, 'password'>[]> {
+  ) {
     const results = await this.userRepository.find({
       skip: (page - 1) * Limit,
       take: Limit,
@@ -25,13 +25,21 @@ export class UsersService {
       return usuariosinpassword;
     });
 
-    return users;
+    const filteredUsers = users.map(({ id, email, Names, LastName, Position, statusId }) => ({
+      id,
+      email,
+      Names,
+      LastName,
+      Position,
+      statusId
+    }));
+    return filteredUsers;
     }
   
   async updateUser(
     id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<UserEntity> {
+  ) {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
@@ -41,18 +49,35 @@ export class UsersService {
     const updatedUser = Object.assign(user, updateUserDto);
     updatedUser.modifiedAt = new Date(); // Actualizar la fecha de modificación
 
-    return this.userRepository.save(updatedUser);
+    const savedUser = await this.userRepository.save(updatedUser);
+
+    const filteredUser = {
+      id: savedUser.id,
+      email: savedUser.email,
+      Names: savedUser.Names,
+      LastName: savedUser.LastName,
+      Position: savedUser.Position,
+      statusId: savedUser.statusId
+    };
+
+    return filteredUser
   }
 
   // Método para obtener un usuario por su ID
-  async getUserById(id: number): Promise<UserEntity> {
+  async getUserById(id: number) {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    return user;
+    // return user;
+    function filterUserData(user: any) {
+      const { id, email, Names, LastName, Position, statusId } = user;
+      return { id, email, Names, LastName, Position, statusId };
+    }
+    const filteredUser = filterUserData(user);
+    return filteredUser
   }
 
   

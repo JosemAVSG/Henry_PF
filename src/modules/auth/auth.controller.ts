@@ -1,5 +1,5 @@
 
-import { Controller, Post, Body, BadRequestException, Req, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException, Req, Get, UseGuards, Query } from '@nestjs/common';
 import { SingInDto } from '../../interfaces/dtos/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
@@ -53,6 +53,16 @@ export class AuthController {
     } catch (error) {
       throw new BadRequestException(error);
     }
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Query('token') token: string,
+    @Body('newPassword') newPassword: string
+  ) {
+    // return  atob(token)
+    await this.authService.resetPassword(token, newPassword);
+    return { message: 'Password has been reset successfully' };
   }
 
   @Get('verifyToken')

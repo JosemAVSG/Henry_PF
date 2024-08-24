@@ -4,15 +4,15 @@ export class SignUpDto {
   @IsEmail()
   email: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   password: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   Names: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   LastName: string;
 
