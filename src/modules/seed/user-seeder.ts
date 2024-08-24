@@ -14,7 +14,11 @@ export class UserSeeder {
   async seed() {
     const users = [];
 
+    if(await this.userRepository.count() > 0) {
+      return;
+    }
     // Crear 30 usuarios automáticos
+
     for (let i = 1; i <= 30; i++) {
       const user = new UserEntity();
       user.email = `user${i}@example.com`;
