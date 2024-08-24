@@ -1,0 +1,47 @@
+### get paginated users
+GET https://api.1rodemayo.com/users?page=1&limit=2
+
+### get all users
+GET https://api.1rodemayo.com/users
+
+### get user by ID
+GET https://api.1rodemayo.com/users/1
+
+### signup
+POST https://api.1rodemayo.com/auth/signup
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "Names": "John",
+  "LastName": "Doe",
+  "Position": "Manager"
+}
+
+### signin
+POST https://api.1rodemayo.com/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+
+### update user
+PUT https://api.1rodemayo.com/users/1
+Content-Type: application/json
+
+{
+  "email": "newemail@example.com",
+  "Names": "John Updated",
+  "LastName": "Doe Updated",
+  "Position": "Manager",
+  "mfaEnabled": false,
+  "active": true
+}
+
+### delete user
+DELETE https://api.1rodemayo.com/users/1
+
+

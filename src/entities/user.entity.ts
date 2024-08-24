@@ -13,13 +13,13 @@ export class UserEntity {
   @Column({ type: 'varchar', unique: true })
   email: string;
   
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   password: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, nullable: true  })
   Names: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, nullable: true  })
   LastName: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true  })
