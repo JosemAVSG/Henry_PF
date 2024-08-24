@@ -56,6 +56,6 @@ export class UserSeeder {
 
     // Guardar todos los usuarios en la base de datos
     await this.userRepository.save(users);
-    console.log('Seeded 31 users');
+    console.info('Seeded 31 users');
   }
 }

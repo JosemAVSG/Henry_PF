@@ -1,31 +1,3 @@
-### Send an email
-POST http://localhost:3000/email/send
-Content-Type: application/json
-
-{
-  "to": "fgp555@gmail.com",
-  "subject": "Test Email",
-  "text": "This is a test email sent from NestJS!"
-}
-
-### Password Reset
-POST http://localhost:3000/auth/reset-password?token=ZmdwNTU1QGdtYWlsLmNvbQ==
-Content-Type: application/json
-
-{
-  "newPassword": "newsecurepassword"
-}
-
-### signin
-POST http://localhost:3000/auth/signin
-Content-Type: application/json
-
-{
-  "email": "fgp555@gmail.com",
-  "password": "newsecurepassword"
-}
-
-
 ### get paginated users
 GET http://localhost:3000/users?page=1&limit=2
 
@@ -35,12 +7,21 @@ GET http://localhost:3000/users
 ### get user by ID
 GET http://localhost:3000/users/1
 
+### signin
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+
 ### signup
 POST http://localhost:3000/auth/signup
 Content-Type: application/json
 
 {
-  "email": "fgp555@gmail.com",
+  "email": "user123@example.com",
   "password": "password123",
   "Names": "John",
   "LastName": "Doe",
@@ -52,7 +33,7 @@ POST http://localhost:3000/auth/signin
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "user123@example.com",
   "password": "password123"
 }
 

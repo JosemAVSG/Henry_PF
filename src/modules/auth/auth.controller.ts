@@ -75,8 +75,6 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Post('enable-mfa')
   async enableMfa(@Req() req: Request){
-    console.log(req.user);
-    
     try{
       const user = req.user; // suponiendo que el usuario esta logueado
       if(!user) throw new BadRequestException('No user found!');
