@@ -1,8 +1,10 @@
-import { Controller, Get, NotFoundException, Query, Param, Body, Delete,Put} from '@nestjs/common';
+import { Controller, Get, NotFoundException, Query, Param, Body, Delete,Put, UseGuards} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from '../../interfaces/dtos/users.update.dto';
 import { UserEntity } from '../../entities/user.entity';
+import { AuthGuard } from '../../guards/auth.guards';
 import { PaginatedUsers } from '../../interfaces/paginatedUser';
+
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UsersService) {}
@@ -35,6 +37,7 @@ export class UserController {
   }
 
   //Endpoint para actualizar el estado del usuario
+  @UseGuards(AuthGuard)
   @Put('status/:userId/:statusId')
   async updateUserStatus(
     @Param('userId') userId: number, 

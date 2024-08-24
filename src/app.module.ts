@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from './modules/users/users.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { MailModule } from './modules/mail/mail.module';
+import { DeliverablesModule } from './modules/deliverables/deliverables.module';
 
 @Module({
   imports: [AuthModule, UserModule, SeedModule,MailModule,
@@ -24,6 +25,7 @@ import { MailModule } from './modules/mail/mail.module';
       signOptions: { expiresIn: '1d' },
       global: true
     }),
+    DeliverablesModule,
     ],
   controllers: [AppController],
   providers: [AppService],

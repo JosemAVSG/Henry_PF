@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
+import { Permission } from './permission.entity';
 @Entity({ name: 'users' })
 export class UserEntity {
   @PrimaryGeneratedColumn()
@@ -49,4 +51,7 @@ export class UserEntity {
   @Column({ type: 'int', default: 1 })
   statusId: number;
 
+
+  @OneToMany(() => Permission, permission => permission.user)
+  permissions: Permission[];
 }
