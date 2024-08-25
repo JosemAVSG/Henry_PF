@@ -11,11 +11,15 @@ export class UserController {
 
   @Get()
   async getUsers(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
-  ):Promise<PaginatedUsers> {
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ):Promise<PaginatedUsers | Omit<UserEntity, 'password'>[]> {
     try {   
-
+      
+      if( page===undefined || limit===undefined) {
+        const results = await this.userService.getUsers();
+        return results
+      }
       return await this.userService.getUsers(page, limit);
     } catch (error) {
       throw new NotFoundException(error);
