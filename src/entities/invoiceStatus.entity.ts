@@ -4,7 +4,7 @@ import { Invoice } from "./invoice.entity";
 @Entity()
 export class InvoiceStatus {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
 
     @Column()
     name: string;

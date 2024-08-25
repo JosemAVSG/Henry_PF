@@ -25,13 +25,13 @@ export class DeliverablesService {
     .leftJoinAndSelect('deliverable.permissions', 'permission')
     .leftJoinAndSelect('permission.permissionType', 'permissionType')
     .select([
-      'deliverable.name AS deliverable_name',
-      'deliverableType.name AS deliverableType',
-      'permissionType.name AS PermissionType',
+      'deliverable.id AS "id"',
+      'deliverable.name AS "deliverableName"',
+      'deliverable.path AS "deliverablePath"',
+      'deliverableType.name AS "deliverableType"',
+      'permissionType.name AS "permissionType"',
       `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
     ])
-
-//    .addSelect("COALESCE(deliverable.updatedAt, deliverable.createdAt)", "orderDate")
     .orderBy('"lastDate"', 'DESC')
     .limit(pageSize)
     .offset(offset)
@@ -40,9 +40,8 @@ export class DeliverablesService {
       queryBuilder.where('permission.userId = :userId', { userId });
     }
     const result = await queryBuilder.getRawMany();
-    //.getMany()
     
-    return result; // `This action returns all deliverables`;
+    return result;
   }
 
   findOne(id: number) {
