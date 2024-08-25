@@ -5,10 +5,13 @@ import { UserEntity } from "./user.entity";
 @Entity()
 export class Invoice {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
 
-    @Column()
-    name: string;
+    @Column({nullable:true})
+    number: string;
+
+    @Column({nullable:true})
+    path: string;
 
     @Column({type:'timestamp', nullable:true})
     issueDate: Date; 
