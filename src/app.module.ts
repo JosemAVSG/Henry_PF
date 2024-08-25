@@ -10,6 +10,7 @@ import { UserModule } from './modules/users/users.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { MailModule } from './modules/mail/mail.module';
 import { DeliverablesModule } from './modules/deliverables/deliverables.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
 
 @Module({
   imports: [AuthModule, UserModule, SeedModule,MailModule,
@@ -26,6 +27,7 @@ import { DeliverablesModule } from './modules/deliverables/deliverables.module';
       global: true
     }),
     DeliverablesModule,
+    InvoicesModule,
     ],
   controllers: [AppController],
   providers: [AppService],
