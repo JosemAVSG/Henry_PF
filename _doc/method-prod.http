@@ -13,7 +13,7 @@ POST https://api.1rodemayo.com/auth/signin
 Content-Type: application/json
 
 {
-  "email": "user@example.com",
+  "email": "gio@example.com",
   "password": "password123"
 }
 
@@ -22,7 +22,7 @@ POST https://api.1rodemayo.com/auth/signup
 Content-Type: application/json
 
 {
-  "email": "user234@example.com",
+  "email": "gio@example.com",
   "password": "password123",
   "Names": "John",
   "LastName": "Doe",
@@ -34,7 +34,7 @@ POST https://api.1rodemayo.com/auth/signin
 Content-Type: application/json
 
 {
-  "email": "user234@example.com",
+  "email": "user@example.com",
   "password": "password123"
 }
 
