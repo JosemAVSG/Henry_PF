@@ -23,22 +23,23 @@ export class InvoicesService {
         .leftJoinAndSelect('invoice.invoiceStatus', 'invoiceStatus')
         .leftJoinAndSelect('invoice.user', 'users')
         .select([
-            'invoice.issueDate AS invoice_issueDate',
-            'invoice.dueDate AS invoice_dueDate',
-            'invoice.amount AS invoice_amount',
-            'invoiceStatus.name AS invoiceStatus',
+            `TO_CHAR(invoice.issueDate, 'DD-MM-YYYY') AS "invoice_issueDate"`,
+            `TO_CHAR(invoice.dueDate, 'DD-MM-YYYY') AS "invoice_dueDate"`,
+            'invoice.amount AS "invoice_amount"',
+            'invoiceStatus.name AS "invoiceStatus"',
+            `CASE 
+                WHEN invoice.dueDate < CURRENT_DATE THEN true 
+                ELSE false 
+             END AS "overdueIndicator"`
         ])
-        .orderBy('"invoice.dueDate"', 'DESC') // 3=Payed, 2=Canceled, 1=Pending 
-        .orderBy('"invoiceStatus.id"', 'DESC') // 3=Payed, 2=Canceled, 1=Pending 
+        .orderBy('"invoice_dueDate"', 'DESC')  
         .limit(pageSize)
         .offset(offset)
 
         if(idsInvoiceStatus){
-            queryBuilder.where('invoice_status.id IN (:...statusIds)', { statusIds: idsInvoiceStatus }) // Maneja el array de IDs
+            queryBuilder.where('invoiceStatus.id IN (:...statusIds)', { statusIds: idsInvoiceStatus }) // Maneja el array de IDs
         }
 
-        //.where('invoiceStatus.id = 1') // Only Pending of payment
-        
         if (userId) {
             queryBuilder.where('users.id = :userId', { userId });
         }
