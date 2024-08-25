@@ -23,16 +23,19 @@ export class InvoicesService {
         .leftJoinAndSelect('invoice.invoiceStatus', 'invoiceStatus')
         .leftJoinAndSelect('invoice.user', 'users')
         .select([
-            `TO_CHAR(invoice.issueDate, 'DD-MM-YYYY') AS "invoice_issueDate"`,
-            `TO_CHAR(invoice.dueDate, 'DD-MM-YYYY') AS "invoice_dueDate"`,
-            'invoice.amount AS "invoice_amount"',
+            'invoice.id AS "id"',
+            'invoice.path AS "invoicePath"',
+            'invoice.number AS "invoiceNumber"',
+            `TO_CHAR(invoice.issueDate, 'DD-MM-YYYY') AS "invoiceIssueDate"`,
+            `TO_CHAR(invoice.dueDate, 'DD-MM-YYYY') AS "invoiceDueDate"`,
+            'invoice.amount AS "invoiceAmount"',
             'invoiceStatus.name AS "invoiceStatus"',
             `CASE 
                 WHEN invoice.dueDate < CURRENT_DATE THEN true 
                 ELSE false 
              END AS "overdueIndicator"`
         ])
-        .orderBy('"invoice_dueDate"', 'DESC')  
+        .orderBy('"invoiceDueDate"', 'DESC')  
         .limit(pageSize)
         .offset(offset)
 

@@ -5,11 +5,13 @@ import { Permission } from "./permission.entity";
 @Entity()
 export class Deliverable {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
 
-    @Column()
+    @Column({nullable:true})
     name: string;
 
+    @Column({nullable:true})
+    path: string;
     
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP',   })
     createdAt: Date;
