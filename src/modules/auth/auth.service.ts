@@ -38,16 +38,16 @@ export class AuthService {
     const userSave = await this.userRepository.save(user);
 
 
-    const email = btoa(body.email);
+    // const email = btoa(body.email);
 
-    const resetLink = `http://localhost:3000/auth/reset-password?token=${email}`;
+    // const resetLink = `http://localhost:3000/auth/reset-password?token=${email}`;
 
-     // Send a registration confirmation email
-     await this.mailService.sendMail(
-      body.email,
-      'Welcome to BP Ventures - Password Reset',
-      `Hello ${body.firstName},\n\nThank you for registering with BP Ventures! You can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
-    );
+    //  // Send a registration confirmation email
+    //  await this.mailService.sendMail(
+    //   body.email,
+    //   'Welcome to BP Ventures - Password Reset',
+    //   `Hello ${body.firstName},\n\nThank you for registering with BP Ventures! You can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
+    // );
 
     return userSave
   }

@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from '../../interfaces/dtos/users.update.dto';
 import { UserEntity } from '../../entities/user.entity';
 import {PaginatedUsers} from '../../interfaces/paginatedUser';
+import { hashPassword, isValidPassword } from 'src/utils/hash';
 
 @Injectable()
 export class UsersService {
@@ -42,32 +43,45 @@ export class UsersService {
     return data;
     }
   
-  async updateUser(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ) {
-    const user = await this.userRepository.findOne({ where: { id } });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+    async updateUser(
+      id: number,
+      updateUser: UpdateUserDto,
+    ) {
+      const user = await this.userRepository.findOne({ where: { id } });
+    
+      if (!user) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+    
+      const updatedUser = { ...user, ...updateUser };
+      updatedUser.modifiedAt = new Date(); // Actualizar la fecha de modificación
+    
+      if (updateUser.oldPassword) {
+        const validPassword = await isValidPassword(updateUser.oldPassword, user.password);
+        if (!validPassword) {
+          throw new UnauthorizedException(`Invalid old password`);
+        }
+      }
+    
+      if (updateUser.password) {
+        updatedUser.password = await hashPassword(updateUser.password);
+      }
+    
+      const savedUser = await this.userRepository.save(updatedUser);
+    
+      const filteredUser = {
+        id: savedUser.id,
+        email: savedUser.email,
+        Names: savedUser.Names,
+        LastName: savedUser.LastName,
+        Position: savedUser.Position,
+        statusId: savedUser.statusId,
+        isAdmin: savedUser.isAdmin,
+      };
+    
+      return filteredUser;
     }
-
-    const updatedUser = Object.assign(user, updateUserDto);
-    updatedUser.modifiedAt = new Date(); // Actualizar la fecha de modificación
-
-    const savedUser = await this.userRepository.save(updatedUser);
-
-    const filteredUser = {
-      id: savedUser.id,
-      email: savedUser.email,
-      Names: savedUser.Names,
-      LastName: savedUser.LastName,
-      Position: savedUser.Position,
-      statusId: savedUser.statusId
-    };
-
-    return filteredUser
-  }
+    
 
   // Método para obtener un usuario por su ID
   async getUserById(id: number) {
