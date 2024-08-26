@@ -33,6 +33,7 @@ export class UserSeeder {
       user.mfaVerified = null;
       user.createdAt = new Date();
       user.modifiedAt = new Date();
+      user.isAdmin = false;
 
       users.push(user);
     }
@@ -51,11 +52,30 @@ export class UserSeeder {
     additionalUser.mfaVerified = null;
     additionalUser.createdAt = new Date();
     additionalUser.modifiedAt = new Date();
+    additionalUser.isAdmin = true;
 
     users.push(additionalUser);
 
+    // Agregar el usuario adicional con la información proporcionada
+    const UserAdmin = new UserEntity();
+    UserAdmin.email = 'admin@example.com';
+    UserAdmin.password = await bcrypt.hash('password123', 10);
+    UserAdmin.Names = 'John Admin';
+    UserAdmin.LastName = 'Doe';
+    UserAdmin.Position = 'Admin';
+    UserAdmin.verifiedEmail = true; // O el valor que desees
+    UserAdmin.mfaEnabled = false; // O el valor que desees
+    UserAdmin.mfaBackupCodes = '';
+    UserAdmin.mfaSecret = '';
+    UserAdmin.mfaVerified = null;
+    UserAdmin.createdAt = new Date();
+    UserAdmin.modifiedAt = new Date();
+    UserAdmin.isAdmin = true;
+
+    users.push(UserAdmin);
+
     // Guardar todos los usuarios en la base de datos
     await this.userRepository.save(users);
-    console.info('Seeded 31 users');
+    console.info('Seeded 32 users');
   }
 }

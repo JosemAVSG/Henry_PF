@@ -25,7 +25,8 @@ Content-Type: application/json
   "password": "password123",
   "Names": "John",
   "LastName": "Doe",
-  "Position": "Manager"
+  "Position": "Manager",
+  "isAdmin": true
 }
 
 ### signin
@@ -34,20 +35,23 @@ Content-Type: application/json
 
 {
   "email": "user123@example.com",
-  "password": "password123"
+  "password": "password1234"
 }
 
 ### update user
-PUT http://localhost:3000/users/1
+PUT http://localhost:3000/users/32
 Content-Type: application/json
 
 {
-  "email": "newemail@example.com",
+  "email": "user123@example.com",
   "Names": "John Updated",
   "LastName": "Doe Updated",
   "Position": "Manager",
+  "oldPassword": "password123",
+  "password": "password1234",
   "mfaEnabled": false,
-  "active": true
+  "active": true,
+  "isAdmin": true
 }
 
 ### delete user

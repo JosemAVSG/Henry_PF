@@ -42,4 +42,8 @@ export class SignUpDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isAdmin?: boolean;
 }

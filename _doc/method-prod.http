@@ -7,28 +7,6 @@ GET https://api.1rodemayo.com/users
 ### get user by ID
 GET https://api.1rodemayo.com/users/1
 
-
-### signin
-POST https://api.1rodemayo.com/auth/signin
-Content-Type: application/json
-
-{
-  "email": "gio@example.com",
-  "password": "password123"
-}
-
-### signup
-POST https://api.1rodemayo.com/auth/signup
-Content-Type: application/json
-
-{
-  "email": "gio@example.com",
-  "password": "password123",
-  "Names": "John",
-  "LastName": "Doe",
-  "Position": "Manager"
-}
-
 ### signin
 POST https://api.1rodemayo.com/auth/signin
 Content-Type: application/json
@@ -38,17 +16,42 @@ Content-Type: application/json
   "password": "password123"
 }
 
-### update user
-PUT https://api.1rodemayo.com/users/1
+### signup
+POST https://api.1rodemayo.com/auth/signup
 Content-Type: application/json
 
 {
-  "email": "newemail@example.com",
+  "email": "user123@example.com",
+  "password": "password123",
+  "Names": "John",
+  "LastName": "Doe",
+  "Position": "Manager",
+  "isAdmin": true
+}
+
+### signin
+POST https://api.1rodemayo.com/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user123@example.com",
+  "password": "password1234"
+}
+
+### update user
+PUT https://api.1rodemayo.com/users/32
+Content-Type: application/json
+
+{
+  "email": "user123@example.com",
   "Names": "John Updated",
   "LastName": "Doe Updated",
   "Position": "Manager",
+  "oldPassword": "password123",
+  "password": "password1234",
   "mfaEnabled": false,
-  "active": true
+  "active": true,
+  "isAdmin": true
 }
 
 ### delete user
