@@ -56,12 +56,12 @@ export class UsersService {
       const updatedUser = { ...user, ...updateUser };
       updatedUser.modifiedAt = new Date(); // Actualizar la fecha de modificación
     
-      if (updateUser.oldPassword) {
-        const validPassword = await isValidPassword(updateUser.oldPassword, user.password);
-        if (!validPassword) {
-          throw new UnauthorizedException(`Invalid old password`);
-        }
-      }
+      // if (updateUser.oldPassword) {
+      //   const validPassword = await isValidPassword(updateUser.oldPassword, user.password);
+      //   if (!validPassword) {
+      //     throw new UnauthorizedException(`Invalid old password`);
+      //   }
+      // }
     
       if (updateUser.password) {
         updatedUser.password = await hashPassword(updateUser.password);
