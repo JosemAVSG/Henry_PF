@@ -4,7 +4,7 @@ import { Deliverable } from "./deliverable.entity";
 @Entity()
 export class DeliverableType {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
 
     @Column()
     name: string;
