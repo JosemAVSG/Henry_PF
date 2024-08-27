@@ -17,13 +17,16 @@ export class AuthService {
 
   async signIn(email: string, password: string): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({ where: { email: email } });
-
+    
     if (!user) throw new BadRequestException('Verification Failed');
+    if(user.statusId === 1 ){
+      const validPassword = await isValidPassword(password, user.password);
+      if (!validPassword) throw new BadRequestException('Verification Failed');    
+      return user;
+    }else{
+      throw new BadRequestException('User no Active')
+    }
 
-    const validPassword = await isValidPassword(password, user.password);
-    if (!validPassword) throw new BadRequestException('Verification Failed');
-
-    return user;
     }
 
 
