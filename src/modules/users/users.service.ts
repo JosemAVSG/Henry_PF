@@ -84,20 +84,14 @@ export class UsersService {
     
 
   // Método para obtener un usuario por su ID
-  async getUserById(id: number) {
+  async getUserById(id: number): Promise<Omit<UserEntity, 'password'>> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-
-    // return user;
-    function filterUserData(user: any) {
-      const { id, email, Names, LastName, Position, statusId } = user;
-      return { id, email, Names, LastName, Position, statusId };
-    }
-    const filteredUser = filterUserData(user);
-    return filteredUser
+    const { password, ...usuariosinpassword } = user;
+    return usuariosinpassword;
   }
 
   
