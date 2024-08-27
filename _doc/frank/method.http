@@ -1,5 +1,5 @@
 ### get paginated users
-GET http://localhost:3000/users?page=1&limit=2
+GET http://localhost:3000/users?page=16&limit=2
 
 ### get all users
 GET http://localhost:3000/users
@@ -13,7 +13,7 @@ Content-Type: application/json
 
 {
   "email": "user@example.com",
-  "password": "password123"
+  "password": "user@example.com"
 }
 
 ### signup
@@ -35,23 +35,31 @@ Content-Type: application/json
 
 {
   "email": "user123@example.com",
-  "password": "password1234"
+  "password": "password123"
 }
 
 ### update user
-PUT http://localhost:3000/users/32
+PUT http://localhost:3000/users/1
 Content-Type: application/json
 
 {
-  "email": "user123@example.com",
+  "email": "user1234@example.com",
   "Names": "John Updated",
   "LastName": "Doe Updated",
   "Position": "Manager",
-  "oldPassword": "password123",
   "password": "password1234",
   "mfaEnabled": false,
   "active": true,
   "isAdmin": true
+}
+
+### signin
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+  "email": "user123@example.com",
+  "password": "password1234"
 }
 
 ### delete user
