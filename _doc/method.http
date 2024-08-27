@@ -22,7 +22,7 @@ Content-Type: application/json
 
 {
   "email": "user123@example.com",
-  "password": "user@example.com",
+  "password": "password123",
   "Names": "John",
   "LastName": "Doe",
   "Position": "Manager",
@@ -43,7 +43,7 @@ PUT http://localhost:3000/users/1
 Content-Type: application/json
 
 {
-  "email": "user123@example.com",
+  "email": "user1234@example.com",
   "Names": "John Updated",
   "LastName": "Doe Updated",
   "Position": "Manager",
