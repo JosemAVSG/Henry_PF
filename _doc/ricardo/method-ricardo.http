@@ -2,3 +2,8 @@
 PUT http://localhost:3000/users/status/1/3
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzEsInN1YiI6MzEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTcyNDc5NjUzOCwiZXhwIjoxNzI0ODgyOTM4fQ.riMSELzEZ_foAIAlRZfPeXig59gZVZvA1kIN-MZ2zZA
+
+### status
+PUT http://localhost:3000/users/status/2/2
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzEsInN1YiI6MzEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTcyNDc5NjUzOCwiZXhwIjoxNzI0ODgyOTM4fQ.riMSELzEZ_foAIAlRZfPeXig59gZVZvA1kIN-MZ2zZA

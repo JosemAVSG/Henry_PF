@@ -20,7 +20,10 @@ export class UsersService {
   ) {
 
     if(page === undefined || Limit === undefined) {
-      const results = await this.userRepository.find()
+      // const results = await this.userRepository.find()
+      const results = await this.userRepository.find({ 
+        order: { id: 'ASC' } // Ordenar por nombre ascendente
+      });
       const users = results.map((user) => {
         const { password, ...usuariosinpassword } = user;
         return usuariosinpassword;
@@ -30,10 +33,16 @@ export class UsersService {
       return filteredUsers;
     }
 
+    // const results = await this.userRepository.find({
+    //   skip: (page - 1) * Limit,
+    //   take: Limit,
+    // });
     const results = await this.userRepository.find({
       skip: (page - 1) * Limit,
       take: Limit,
+      order: { id: 'ASC' } // Ordenar por nombre ascendente
     });
+
     const users = results.map((user) => {
       const { password, ...usuariosinpassword } = user;
       return usuariosinpassword;
