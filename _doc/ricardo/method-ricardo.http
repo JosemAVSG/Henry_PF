@@ -7,3 +7,27 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzEsInN1YiI6M
 PUT http://localhost:3000/users/status/2/2
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzEsInN1YiI6MzEsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlhdCI6MTcyNDc5NjUzOCwiZXhwIjoxNzI0ODgyOTM4fQ.riMSELzEZ_foAIAlRZfPeXig59gZVZvA1kIN-MZ2zZA
+
+
+### Carga de Facturas
+POST http://localhost:3000/invoices/
+Content-Type: application/json
+{
+	  "invoiceNumber": "F-324543",
+    "path": "Ruta/path",
+    "issueDate":"2024-08-26",
+    "dueDate":"2024-08-26",
+    "amount":"2345",
+    "userId":1,
+    "invoiceStatusId":1
+}
+
+### Carga de entregables
+POST http://localhost:3000/deliverable/
+Content-Type: application/json
+{
+
+    "name": "Acta de Reunión 2",
+    "path": "ruta/path",
+    "deliverableTypeId": 1
+}
