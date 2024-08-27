@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Permission } from "./permission.entity";
 @Entity()
-export class permissionType {
+export class PermissionType {
     @PrimaryGeneratedColumn()
     id: number;
 

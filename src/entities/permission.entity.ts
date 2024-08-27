@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { UserEntity as User} from "./user.entity";
-import { permissionType } from "./permissionType.entity";
+import { PermissionType } from "./permissionType.entity";
 import { Deliverable } from "./deliverable.entity";
 @Entity()
 export class Permission {
@@ -36,9 +36,9 @@ export class Permission {
 
 
     // Relación Many-to-One con PermissionType
-    @ManyToOne(()=> permissionType, permissionType => permissionType.permissions )
+    @ManyToOne(()=> PermissionType, permissionType => permissionType.permissions )
     @JoinColumn({ name: 'permissionTypeId'}) // Set FK column
-    permissionType: permissionType
+    permissionType: PermissionType
 
     @Column()
     permissionTypeId: number
