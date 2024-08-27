@@ -5,7 +5,7 @@ import { Deliverable } from "./deliverable.entity";
 @Entity()
 export class Permission {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
     
     @Column()
     name: string;

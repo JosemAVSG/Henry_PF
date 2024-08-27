@@ -1,1 +1,8 @@
-export class CreateDeliverableDto {}
+export class CreateDeliverableDto {
+
+    name: string;
+
+    path: string;
+
+    deliverableTypeId: number;
+}

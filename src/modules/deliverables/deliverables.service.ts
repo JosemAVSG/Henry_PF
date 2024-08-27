@@ -4,16 +4,34 @@ import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Deliverable } from 'src/entities/deliverable.entity';
+import { DeliverableType } from 'src/entities/deliverableType.entity';
 
 @Injectable()
 export class DeliverablesService {
   constructor(
     @InjectRepository(Deliverable)
-    private deliverableRepository: Repository<Deliverable>
+    private deliverableRepository: Repository<Deliverable>,
+
+    @InjectRepository(DeliverableType)
+    private deliverableTypeRepository: Repository<DeliverableType>
   ){}
 
-  create(createDeliverableDto: CreateDeliverableDto) {
-    return 'This action adds a new deliverable';
+  async create(createDeliverableDto: CreateDeliverableDto) {
+    const {name, path, deliverableTypeId} = createDeliverableDto
+    const deliverableType = await this.deliverableTypeRepository.findOneBy({id:deliverableTypeId})
+
+    if(!deliverableType){
+      throw new Error('DeliverableType not found')
+    }
+
+    const deliverable = this.deliverableRepository.create({
+      name,
+      path,
+      deliverableType
+    })
+    
+    const result = this.deliverableRepository.save(deliverable);
+    return result;
   }
 
   async findAll(userId: number = null, page:number=1, pageSize: number=10): Promise<Deliverable[]> {
