@@ -1,5 +1,7 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
+import { DefaultDeserializer } from 'v8';
+import { CreateInvoiceDto } from './dto/create-invoices.dto';
 
 @Controller('invoices')
 export class InvoicesController {
@@ -15,6 +17,12 @@ export class InvoicesController {
     ){
         const idsInvoiceStatus = [1,2,3]
         return this.deliverablesService.getInvoicesByUser(userId, idsInvoiceStatus, page, limit)
+    }
+
+    @Post()
+    async createInvoice(
+        @Body() createInvoiceDto:CreateInvoiceDto){
+        return this.deliverablesService.createInvoice(createInvoiceDto)
     }
 
 }
