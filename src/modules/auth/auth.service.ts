@@ -41,16 +41,16 @@ export class AuthService {
     const userSave = await this.userRepository.save(user);
 
 
-    // const email = btoa(body.email);
+    const email = btoa(body.email);
 
-    // const resetLink = `http://localhost:3000/auth/reset-password?token=${email}`;
+    const resetLink = `http://localhost:3001/forgotPassword/${email}`;
 
-    //  // Send a registration confirmation email
-    //  await this.mailService.sendMail(
-    //   body.email,
-    //   'Welcome to BP Ventures - Password Reset',
-    //   `Hello ${body.firstName},\n\nThank you for registering with BP Ventures! You can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
-    // );
+     // Send a registration confirmation email
+     await this.mailService.sendMail(
+      body.email,
+      'Welcome to BP Ventures - Password Reset',
+      `Hello ${body.firstName},\n\nThank you for registering with BP Ventures! You can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
+    );
 
     return userSave
   }
@@ -90,6 +90,32 @@ export class AuthService {
   async generateMfaQrCode(secret: speakeasy.GeneratedSecret) {
     const otpAuthUrl = secret.otpauth_url;
     return await qrcode.toDataURL(otpAuthUrl);
+  }
+
+  async forgotMyPassword(email:string){
+
+    try {
+      const userExists = await this.userRepository.findOne({
+        where: { email: email },
+      });
+      if (!userExists) throw new BadRequestException('User does not exists');
+  
+      const emailEncrypted = btoa(email);
+  
+      const resetLink = `http://localhost:3001/forgotPassword/${emailEncrypted}`;
+  
+       // Send a registration confirmation email
+       await this.mailService.sendMail(
+        email,
+        'BP Ventures - Password Reset',
+        `Hello ${userExists.Names},\n\nYou can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
+      );
+  
+      return { message: 'Password reset link has been sent to your email!'}
+    } catch (error) {
+      throw new BadRequestException(error)
+    }
+
   }
 
 
