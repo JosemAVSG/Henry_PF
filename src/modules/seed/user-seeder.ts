@@ -14,7 +14,7 @@ export class UserSeeder {
   async seed() {
     const users = [];
 
-    if(await this.userRepository.count() > 0) {
+    if (await this.userRepository.count() > 0) {
       return;
     }
     // Crear 30 usuarios automáticos
@@ -22,31 +22,31 @@ export class UserSeeder {
     for (let i = 1; i <= 30; i++) {
       const user = new UserEntity();
       user.email = `user${i}@example.com`;
-      user.password = await bcrypt.hash('password123', 10);
+      user.password = await bcrypt.hash(user.email, 10); // Contraseña = email
       user.Names = `User${i}`;
       user.LastName = `LastName${i}`;
       user.Position = `Position${i}`;
-      user.verifiedEmail = Math.random() > 0.5;
-      user.mfaEnabled = Math.random() > 0.5;
+      user.verifiedEmail = false;
+      user.mfaEnabled = false;
       user.mfaBackupCodes = '';
       user.mfaSecret = '';
       user.mfaVerified = null;
       user.createdAt = new Date();
       user.modifiedAt = new Date();
-      user.isAdmin = false;
+      user.isAdmin = i <= 10; // Hacer que los primeros 10 usuarios sean administradores
 
       users.push(user);
     }
 
-    // Agregar el usuario adicional con la información proporcionada
+    // Agregar usuarios adicionales con la información proporcionada
     const additionalUser = new UserEntity();
     additionalUser.email = 'user@example.com';
-    additionalUser.password = await bcrypt.hash('password123', 10);
+    additionalUser.password = await bcrypt.hash(additionalUser.email, 10); // Contraseña = email
     additionalUser.Names = 'John';
     additionalUser.LastName = 'Doe';
     additionalUser.Position = 'Manager';
-    additionalUser.verifiedEmail = true; // O el valor que desees
-    additionalUser.mfaEnabled = false; // O el valor que desees
+    additionalUser.verifiedEmail = true;
+    additionalUser.mfaEnabled = false;
     additionalUser.mfaBackupCodes = '';
     additionalUser.mfaSecret = '';
     additionalUser.mfaVerified = null;
@@ -56,15 +56,14 @@ export class UserSeeder {
 
     users.push(additionalUser);
 
-    // Agregar el usuario adicional con la información proporcionada
     const UserAdmin = new UserEntity();
     UserAdmin.email = 'admin@example.com';
-    UserAdmin.password = await bcrypt.hash('password123', 10);
+    UserAdmin.password = await bcrypt.hash(UserAdmin.email, 10); // Contraseña = email
     UserAdmin.Names = 'John Admin';
     UserAdmin.LastName = 'Doe';
     UserAdmin.Position = 'Admin';
-    UserAdmin.verifiedEmail = true; // O el valor que desees
-    UserAdmin.mfaEnabled = false; // O el valor que desees
+    UserAdmin.verifiedEmail = true;
+    UserAdmin.mfaEnabled = false;
     UserAdmin.mfaBackupCodes = '';
     UserAdmin.mfaSecret = '';
     UserAdmin.mfaVerified = null;

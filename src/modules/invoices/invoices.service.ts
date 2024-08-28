@@ -10,9 +10,9 @@ export class InvoicesService {
     constructor(
         @InjectRepository(Invoice)
         private invoiceRepository: Repository<Invoice>,
-        @InjectRepository(Invoice)
+        @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
-        @InjectRepository(Invoice)
+        @InjectRepository(InvoiceStatus)
         private invoiceStatusRepository: Repository<InvoiceStatus>,
         
     ){}

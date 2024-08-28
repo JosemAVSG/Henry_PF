@@ -17,29 +17,41 @@ export class UsersService {
    async getUsers(
     page?: number,
     Limit?: number,
-  ): Promise<PaginatedUsers | Omit<UserEntity, 'password'>[]> {
+  ) {
 
     if(page === undefined || Limit === undefined) {
-      const results = await this.userRepository.find()
+      // const results = await this.userRepository.find()
+      const results = await this.userRepository.find({ 
+        order: { id: 'ASC' } // Ordenar por nombre ascendente
+      });
       const users = results.map((user) => {
         const { password, ...usuariosinpassword } = user;
         return usuariosinpassword;
       });
-      return users;
+      const filteredUsers = users.filter(user => user.statusId === 1 || user.statusId === 2);
+
+      return filteredUsers;
     }
 
+    // const results = await this.userRepository.find({
+    //   skip: (page - 1) * Limit,
+    //   take: Limit,
+    // });
     const results = await this.userRepository.find({
       skip: (page - 1) * Limit,
       take: Limit,
+      order: { id: 'ASC' } // Ordenar por nombre ascendente
     });
+
     const users = results.map((user) => {
       const { password, ...usuariosinpassword } = user;
       return usuariosinpassword;
     });
 
     const totalPages = Math.ceil((await this.userRepository.count()) / Limit);
-    
-    const data = { users, totalPages };
+    const filteredUsers = users.filter(user => user.statusId === 1 || user.statusId === 2);
+
+    const data = { users: filteredUsers, totalPages };
     return data;
     }
   
@@ -48,7 +60,7 @@ export class UsersService {
       updateUser: UpdateUserDto,
     ) {
       const user = await this.userRepository.findOne({ where: { id } });
-    
+    console.log(user)
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
@@ -56,12 +68,12 @@ export class UsersService {
       const updatedUser = { ...user, ...updateUser };
       updatedUser.modifiedAt = new Date(); // Actualizar la fecha de modificación
     
-      if (updateUser.oldPassword) {
-        const validPassword = await isValidPassword(updateUser.oldPassword, user.password);
-        if (!validPassword) {
-          throw new UnauthorizedException(`Invalid old password`);
-        }
-      }
+      // if (updateUser.oldPassword) {
+      //   const validPassword = await isValidPassword(updateUser.oldPassword, user.password);
+      //   if (!validPassword) {
+      //     throw new UnauthorizedException(`Invalid old password`);
+      //   }
+      // }
     
       if (updateUser.password) {
         updatedUser.password = await hashPassword(updateUser.password);
