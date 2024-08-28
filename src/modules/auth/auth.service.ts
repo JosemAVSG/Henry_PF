@@ -43,7 +43,7 @@ export class AuthService {
 
     const email = btoa(body.email);
 
-    const resetLink = `http://localhost:3001/forgotPassword/am1nZy45NW5AZ21haWwuY29t`;
+    const resetLink = `http://localhost:3001/forgotPassword/${email}`;
 
      // Send a registration confirmation email
      await this.mailService.sendMail(
@@ -90,6 +90,32 @@ export class AuthService {
   async generateMfaQrCode(secret: speakeasy.GeneratedSecret) {
     const otpAuthUrl = secret.otpauth_url;
     return await qrcode.toDataURL(otpAuthUrl);
+  }
+
+  async forgotMyPassword(email:string){
+
+    try {
+      const userExists = await this.userRepository.findOne({
+        where: { email: email },
+      });
+      if (!userExists) throw new BadRequestException('User does not exists');
+  
+      const emailEncrypted = btoa(email);
+  
+      const resetLink = `http://localhost:3001/forgotPassword/${emailEncrypted}`;
+  
+       // Send a registration confirmation email
+       await this.mailService.sendMail(
+        email,
+        'BP Ventures - Password Reset',
+        `Hello ${userExists.Names},\n\nYou can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
+      );
+  
+      return { message: 'Password reset link has been sent to your email!'}
+    } catch (error) {
+      throw new BadRequestException(error)
+    }
+
   }
 
 

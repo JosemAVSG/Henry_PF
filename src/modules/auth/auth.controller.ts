@@ -61,6 +61,10 @@ export class AuthController {
     @Body('newPassword') newPassword: string
   ) {
     // return  atob(token)
+    console.log('token',token)
+    console.log('password',newPassword);
+    
+    
     await this.authService.resetPassword(token, newPassword);
     return { message: 'Password has been reset successfully' };
   }
@@ -89,4 +93,19 @@ export class AuthController {
     }
 
   }
+
+  @Post('forgotPassword')
+  async forgotPassword (@Body() body:{email:string}) {
+    const {email} = body;
+    try {
+       await this.authService.forgotMyPassword(email);
+      return { message: 'Password reset link has been sent to your email!' };
+    } catch (error) {
+      console.log(error);
+      
+        throw new BadRequestException(error)
+    }
+  }
+
+
 }

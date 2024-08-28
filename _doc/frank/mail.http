@@ -35,7 +35,7 @@ POST http://localhost:3000/auth/reset-password?token=am1nZy45NW5AZ21haWwuY29t
 Content-Type: application/json
 
 {
-  "newPassword": "newsecurepassword"
+  "newPassword": "angeldavid2"
 }
 
 ### signin

@@ -12,8 +12,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzEsInN1YiI6M
 ### Carga de Facturas
 POST http://localhost:3000/invoices/
 Content-Type: application/json
+
 {
-	  "invoiceNumber": "F-324543",
+	"invoiceNumber": "F-324543",
     "path": "Ruta/path",
     "issueDate":"2024-08-26",
     "dueDate":"2024-08-26",
@@ -23,8 +24,9 @@ Content-Type: application/json
 }
 
 ### Carga de entregables
-POST http://localhost:3000/deliverable/
+POST http://localhost:3000/deliverables
 Content-Type: application/json
+
 {
 
     "name": "Acta de Reunión 2",
