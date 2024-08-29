@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsBoolean, IsDateString } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsDateString, IsNumberString } from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -48,4 +48,17 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   active?: boolean;
+
+  @IsOptional()
+  @IsString()
+  empresa: string;
+
+  @IsOptional()
+  @IsNumberString()
+  cuit: number;
+  
+  @IsOptional()
+  @IsString()
+  domicilio: string;
+
 }

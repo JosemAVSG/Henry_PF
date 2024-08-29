@@ -28,6 +28,15 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 100, nullable: true })
   Position: string;
 
+  @Column({type: 'varchar', nullable: true})
+  empresa: string;
+
+  @Column({ type: 'bigint', nullable: true })
+  cuit:number;
+
+  @Column({ type: 'varchar', nullable: true })
+  domicilio:string;
+
   @Column({ type: 'boolean', nullable: true })
   verifiedEmail: boolean;
 

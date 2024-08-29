@@ -20,7 +20,6 @@ export class UsersService {
   ) {
 
     if(page === undefined || Limit === undefined) {
-      // const results = await this.userRepository.find()
       const results = await this.userRepository.find({ 
         order: { id: 'ASC' } // Ordenar por nombre ascendente
       });
@@ -33,10 +32,6 @@ export class UsersService {
       return filteredUsers;
     }
 
-    // const results = await this.userRepository.find({
-    //   skip: (page - 1) * Limit,
-    //   take: Limit,
-    // });
     const results = await this.userRepository.find({
       skip: (page - 1) * Limit,
       take: Limit,
@@ -60,7 +55,7 @@ export class UsersService {
       updateUser: UpdateUserDto,
     ) {
       const user = await this.userRepository.findOne({ where: { id } });
-    console.log(user)
+    console.log('update user',user)
       if (!user) {
         throw new NotFoundException(`User with ID ${id} not found`);
       }
@@ -80,17 +75,12 @@ export class UsersService {
       }
     
       const savedUser = await this.userRepository.save(updatedUser);
-    
-      const filteredUser = {
-        id: savedUser.id,
-        email: savedUser.email,
-        Names: savedUser.Names,
-        LastName: savedUser.LastName,
-        Position: savedUser.Position,
-        statusId: savedUser.statusId,
-        isAdmin: savedUser.isAdmin,
-      };
-    
+      
+      const { password, ...userWithoutPassword } = savedUser;
+      console.log(userWithoutPassword);
+      
+      const filteredUser = userWithoutPassword;
+
       return filteredUser;
     }
     
