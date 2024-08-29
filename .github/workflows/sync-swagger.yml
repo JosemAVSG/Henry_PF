@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main 
-      - dev # O cualquier otra rama que desees usar
+      - dev
 
 jobs:
   sync-swaggerhub:
@@ -16,9 +16,9 @@ jobs:
 
     - name: Verify SwaggerHub CLI Version
       run: npx swaggerhub-cli --version
-      
+
     - name: Sync Swagger spec to SwaggerHub
       env:
         SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
       run: |
-        npx swaggerhub-cli@latest api:update JMGG95N/bp-ventures_api/1.0.0 --file swagger-spec.json --apikey $SWAGGERHUB_API_KEY
+        npx swaggerhub-cli@latest api:update JMGG95N/bp-ventures_api/1.0.0 --file swagger-spec.json
