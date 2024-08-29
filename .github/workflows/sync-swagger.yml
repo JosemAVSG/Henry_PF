@@ -14,12 +14,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install SwaggerHub CLI
-      run: npm install -g swaggerhub-cli
-
     - name: Sync Swagger spec to SwaggerHub
       env:
         SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
       run: |
-        swaggerhub login --apikey $SWAGGERHUB_API_KEY
-        swaggerhub api:update JMGG95N/bp-ventures_api/1.0.0 --file swagger-spec.json
+        npx swaggerhub-cli login --apikey $SWAGGERHUB_API_KEY
+        npx swaggerhub-cli api:update JMGG95N/bp-ventures_api/1.0.0 --file swagger-spec.json
