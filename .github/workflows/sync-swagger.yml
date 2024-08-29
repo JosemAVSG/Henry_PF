@@ -21,4 +21,4 @@ jobs:
       env:
         SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
       run: |
-        npx swaggerhub-cli@latest api:update JMGG95N/bp-ventures_api/1.0.0 --file swagger-spec.json
+        npx swaggerhub-cli@latest api:update JMGG95N/BP-Ventures-API/1.0 --file swagger-spec.json
