@@ -49,7 +49,12 @@ export class DeliverablesService {
     return result;
   }
 
-  async findAll(userId: number = null, page:number=1, pageSize: number=10): Promise<Deliverable[]> {
+  async findAll(
+    userId: number = null, 
+    page:number=1, 
+    pageSize: number=10,
+    parentId: number = null
+  ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize
     
     const queryBuilder = this.deliverableRepository
@@ -59,6 +64,7 @@ export class DeliverablesService {
     .leftJoinAndSelect('permission.permissionType', 'permissionType')
     .select([
       'deliverable.id AS "id"',
+      'deliverable.parentId AS "parentId"',
       'deliverable.name AS "deliverableName"',
       'deliverable.path AS "deliverablePath"',
       'deliverableType.name AS "deliverableType"',
@@ -72,8 +78,17 @@ export class DeliverablesService {
     if (userId) {
       queryBuilder.where('permission.userId = :userId', { userId });
     }
-    const result = await queryBuilder.getRawMany();
-    
+    let result = null
+
+    if(parentId){
+      queryBuilder.where('deliverable.parentId = :parentId', { parentId });
+      result = await queryBuilder.getRawMany();
+
+    }else{
+      result = await queryBuilder.getRawMany();
+      result = this.findTopLevelItems(result)
+    }
+
     return result;
   }
 
@@ -88,4 +103,62 @@ export class DeliverablesService {
   remove(id: number) {
     return `This action removes a #${id} deliverable`;
   }
+
+
+/*
+  const data = [
+    { id: 1, name: "Folder A", parentId: 2 },
+    { id: 2, name: "Folder B", parentId: 3 },
+    { id: 3, name: "Folder C", parentId: 4 },
+    { id: 4, name: "Folder D", parentId: 5 },
+    { id: 6, name: "File 1", parentId: 1 },
+    { id: 7, name: "File 2", parentId: 2 },
+    { id: 8, name: "File 3", parentId: 3 },
+    { id: 9, name: "Folder F", parentId: 4 }
+  ];
+*/
+
+  // Función para construir el árbol
+/*  buildTree(items, parentId = null) {
+    return items
+      .filter(item => item.parentId === parentId)
+      .map(item => {
+        const children = buildTree(items, item.id);
+        if (children.length) {
+          item.children = children;
+        }
+        return item;
+      });
+  }
+*/  
+  // Función para encontrar los elementos de nivel superior
+  findTopLevelItems(items) {
+    const topLevelItems = [];
+    const itemMap = new Map();
+  
+    // Mapa de id -> item
+    items.forEach(item => {
+      itemMap.set(item.id, item);
+    });
+  
+    // Verifica cada elemento; si su padre no está en la lista, es de nivel superior
+    items.forEach(item => {
+      if (!itemMap.has(item.parentId)) {
+        topLevelItems.push(item);
+      }
+    });
+  
+    return topLevelItems;
+  }
+  
+  // Construye el árbol
+  //const tree = buildTree(data);
+  
+  // Encuentra los elementos de nivel superior
+  //const topLevelItems = findTopLevelItems(data);
+  
+  //console.log("Arbol:", JSON.stringify(tree, null, 2));
+  //console.log("Elementos de nivel superior:", JSON.stringify(topLevelItems, null, 2));
+  
+
 }

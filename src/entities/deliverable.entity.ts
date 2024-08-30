@@ -13,6 +13,12 @@ export class Deliverable {
     @Column({nullable:true})
     path: string;
     
+    @Column({nullable:true})
+    parentId: number;
+
+    @Column()
+    isFolder: boolean;
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP',   })
     createdAt: Date;
     

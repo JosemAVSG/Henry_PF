@@ -7,14 +7,17 @@ import { UserEntity } from '../../entities/user.entity';
 import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
 import { DeliverableType } from '../../entities/deliverableType.entity';
 import { PermissionTypeSeeder } from './permissionType.seeder';
-import { PermissionType } from 'src/entities/permissionType.entity';
+import { PermissionType } from '../../entities/permissionType.entity';
+import { Deliverable } from '../../entities/deliverable.entity';
+import { DeliverableSeeder } from './delivery.seeder';
 
 
 @Module({
   imports: [TypeOrmModule.forFeature(
     [
       UserEntity, 
-      InvoiceStatus, 
+      InvoiceStatus,
+      Deliverable, 
       DeliverableType,
       PermissionType
     ]
@@ -22,6 +25,7 @@ import { PermissionType } from 'src/entities/permissionType.entity';
   providers: [
     UserSeeder, 
     InvoiceStatusSeeder, 
+    DeliverableSeeder,
     DeliverableTypeSeeder, 
     PermissionTypeSeeder],
 })
