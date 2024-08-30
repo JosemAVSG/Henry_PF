@@ -33,4 +33,14 @@ export class DeliverablesController {
   remove(@Param('id') id: string) {
     return this.deliverablesService.remove(+id);
   }
+
+  @Get('preview/:fileId')
+  async getPreview(@Param('fileId') fileId: string): Promise<string> {
+    try {
+      return this.deliverablesService.getFilePreview(fileId);
+    } catch (error) {
+      throw new Error(error);
+    }
+  }
+
 }

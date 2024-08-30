@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Deliverable } from 'src/entities/deliverable.entity';
 import { DeliverableType } from 'src/entities/deliverableType.entity';
-
+import { google } from 'googleapis';
 @Injectable()
 export class DeliverablesService {
   constructor(
@@ -15,6 +15,21 @@ export class DeliverablesService {
     @InjectRepository(DeliverableType)
     private deliverableTypeRepository: Repository<DeliverableType>
   ){}
+
+  private drive = google.drive({ version: 'v3', auth: process.env.GOOGLE_DRIVE_TOKEN });
+
+  async getFilePreview(fileId: string) {
+      
+      const response = await this.drive.files.get({
+          fileId,
+          fields: 'webViewLink, webContentLink',
+          supportsTeamDrives: true // TODO: check if this is needed  
+      });
+      console.log(response);
+      
+      return response.data.webViewLink; // esto es una url para ver el archivo
+  }
+
 
   async create(createDeliverableDto: CreateDeliverableDto) {
     const {name, path, deliverableTypeId} = createDeliverableDto
