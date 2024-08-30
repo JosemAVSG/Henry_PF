@@ -32,6 +32,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dotenv": "^16.4.5",
+    "googleapis": "^143.0.0",
     "nodemailer": "^6.9.14",
     "pg": "^8.12.0",
     "qrcode": "^1.5.4",

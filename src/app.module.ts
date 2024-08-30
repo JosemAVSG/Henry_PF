@@ -27,7 +27,7 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
       global: true
     }),
     DeliverablesModule,
-    InvoicesModule,
+    InvoicesModule
     ],
   controllers: [AppController],
   providers: [AppService],
