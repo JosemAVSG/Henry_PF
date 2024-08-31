@@ -19,10 +19,11 @@ export class DeliverablesController {
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('parenId') parenId: number = null,
+    @Query('parentId') parentId: number = null,
     @Query('orderBy') orderBy: number = null,
   ) {
-    return this.deliverablesService.findAll(userId, page, limit, parenId, orderBy);
+    const isAdmin = true;
+    return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin);
   }
 
 

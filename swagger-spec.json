@@ -310,7 +310,7 @@
             }
           },
           {
-            "name": "parenId",
+            "name": "parentId",
             "required": true,
             "in": "query",
             "schema": {
