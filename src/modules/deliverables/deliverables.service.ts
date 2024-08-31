@@ -91,7 +91,7 @@ export class DeliverablesService {
           break;
       }
     }
-    queryBuilder.where('1 = 1');
+    queryBuilder.where('deliverable.statusId = 1');
   
     if (!isAdmin && userId) {
       queryBuilder.andWhere('permission.userId = :userId', { userId });
