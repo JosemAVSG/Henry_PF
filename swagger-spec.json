@@ -365,6 +365,26 @@
         }
       }
     },
+    "/deliverables/preview/{fileId}": {
+      "get": {
+        "operationId": "DeliverablesController_getPreview",
+        "parameters": [
+          {
+            "name": "fileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/invoices/{userId}": {
       "get": {
         "operationId": "InvoicesController_getInvoicesByUser",
@@ -417,26 +437,6 @@
         },
         "responses": {
           "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/files/preview/{fileId}": {
-      "get": {
-        "operationId": "FilesController_getPreview",
-        "parameters": [
-          {
-            "name": "fileId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
             "description": ""
           }
         }
