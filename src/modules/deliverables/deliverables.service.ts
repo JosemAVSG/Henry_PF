@@ -68,13 +68,14 @@ export class DeliverablesService {
         'deliverable.id AS "id"',
         'deliverable.parentId AS "parentId"',
         'deliverable.name AS "deliverableName"',
+        'deliverable.isFolder AS "deliverableIsFolder"',
         'deliverable.path AS "deliverablePath"',
         'deliverableType.name AS "deliverableType"',
         'deliverableCategory.name AS "deliverableCategory"',
         `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
         `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
       ])
-      .groupBy('deliverable.id, deliverable.parentId, deliverable.name, deliverable.path, deliverableType.name, deliverableCategory.name')
+      .groupBy('deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name')
       .orderBy('"lastDate"', 'DESC')
       .limit(pageSize)
       .offset(offset);
