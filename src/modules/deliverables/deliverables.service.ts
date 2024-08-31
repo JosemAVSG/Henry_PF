@@ -3,10 +3,11 @@ import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Deliverable } from 'src/entities/deliverable.entity';
-import { DeliverableType } from 'src/entities/deliverableType.entity';
+import { Deliverable } from '../../entities/deliverable.entity';
+import { DeliverableType } from '../../entities/deliverableType.entity';
 import { google } from 'googleapis';
-import { PermissionType } from 'src/entities/permissionType.entity';
+import { PermissionType } from '../../entities/permissionType.entity';
+import { Permission } from '../../entities/permission.entity';
 @Injectable()
 export class DeliverablesService {
   constructor(
@@ -15,6 +16,12 @@ export class DeliverablesService {
 
     @InjectRepository(DeliverableType)
     private deliverableTypeRepository: Repository<DeliverableType>,
+
+    @InjectRepository(PermissionType)
+    private permissionTypeRepository: Repository<PermissionType>,
+
+    @InjectRepository(Permission)
+    private permissionsRepository: Repository<Permission>,
   ) {}
 
   private drive = google.drive({
@@ -56,36 +63,64 @@ export class DeliverablesService {
   }
 
   async findAll(
-    userId: number = null,
-    page: number = 1,
+    userId: number = null, 
+    page: number = 1, 
     pageSize: number = 10,
+    parentId: number = null,
+    orderBy: number
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
-
+    
     const queryBuilder = this.deliverableRepository
       .createQueryBuilder('deliverable')
-      .leftJoinAndSelect('deliverable.deliverableType', 'deliverableType')
-      .leftJoinAndSelect('deliverable.permissions', 'permission')
-      .leftJoinAndSelect('permission.permissionType', 'permissionType')
+      .leftJoin('deliverable.deliverableType', 'deliverableType')
+      .leftJoin('deliverable.permissions', 'permission')
+      .leftJoin('permission.permissionType', 'permissionType')
+      .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
       .select([
         'deliverable.id AS "id"',
+        'deliverable.parentId AS "parentId"',
         'deliverable.name AS "deliverableName"',
+        'deliverable.isFolder AS "deliverableIsFolder"',
         'deliverable.path AS "deliverablePath"',
         'deliverableType.name AS "deliverableType"',
-        'permissionType.name AS "permissionType"',
+        'deliverableCategory.name AS "deliverableCategory"',
+        `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
         `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
       ])
+      .groupBy('deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name')
       .orderBy('"lastDate"', 'DESC')
       .limit(pageSize)
       .offset(offset);
-
+  
+    if (orderBy) {
+      switch (orderBy) {
+        case 1:
+          queryBuilder.orderBy('"deliverableCategory.name"', 'DESC');
+          break;
+        case 2:
+          queryBuilder.orderBy('"deliverableName"', 'DESC');
+          break;
+      }
+    }
+  
     if (userId) {
       queryBuilder.where('permission.userId = :userId', { userId });
     }
-    const result = await queryBuilder.getRawMany();
-
+  
+    if (parentId) {
+      queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
+    }
+  
+    let result = await queryBuilder.getRawMany();
+  
+    if (!parentId) {
+      result = this.findTopLevelItems(result);
+    }
+  
     return result;
   }
+  
 
   findOne(id: number) {
     return `This action returns a #${id} deliverable`;
@@ -95,8 +130,13 @@ export class DeliverablesService {
     return `This action updates a #${id} deliverable`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} deliverable`;
+  async remove(id: number) {
+    const result = await this.deliverableRepository.update(id, {statusId: 2})
+    if (result.affected === 0) {
+      throw new NotFoundException(`Deliverable with ID ${id} not found`);
+    }
+
+    return {message:"Deliverable status updated"};
   }
 
   async getFilesFolder(parentId: number | null) {
@@ -111,11 +151,32 @@ export class DeliverablesService {
       });
   }
 
-  // async shareDeliverable(deliverableId: number, isPublic: boolean){
+  
+    // Función para encontrar los elementos de nivel superior
+    findTopLevelItems(items) {
+      const topLevelItems = [];
+      const itemMap = new Map();
+    
+      // Mapa de id -> item
+      items.forEach(item => {
+        itemMap.set(item.id, item);
+      });
+    
+      // Verifica cada elemento; si su padre no está en la lista, es de nivel superior
+      items.forEach(item => {
+        if (!itemMap.has(item.parentId)) {
+          topLevelItems.push(item);
+        }
+      });
+    
+      return topLevelItems;
+    }
 
-  //   const deliverable = await this.deliverableRepository.findOneBy({id: deliverableId});
+    async getPermissions(deliverableId: number) {
 
-  //   if(!deliverable) throw new NotFoundException(`Deliverable with ID ${deliverableId} not found`);
-
-  // }
+      return await this.permissionsRepository.find({
+        relations:{user:true,permissionType:true},
+        where:{deliverable:{id:deliverableId}}
+      });
+    }
 }

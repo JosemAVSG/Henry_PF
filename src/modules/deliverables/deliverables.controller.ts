@@ -15,6 +15,7 @@ import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { AuthGuard } from '../../guards/auth.guards';
 import { Deliverable } from 'src/entities/deliverable.entity';
+import { Permission } from 'src/entities/permission.entity';
 
 @Controller('deliverables')
 export class DeliverablesController {
@@ -31,9 +32,11 @@ export class DeliverablesController {
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
+    @Query('parenId') parenId: number = null,
+    @Query('orderBy') orderBy: number = null,
   ) {
     try {
-      return this.deliverablesService.findAll(userId, page, limit);
+      return this.deliverablesService.findAll(userId, page, limit, parenId, orderBy);
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -80,17 +83,19 @@ export class DeliverablesController {
     }
   }
 
-  // @Post('share')
-  // async shareDeliverable(
-  //   @Body('deliverableId') deliverableId: number,
-  //   @Body('isPublic') isPublic: boolean,
-  //   @Body('expirationDate') expirationDate: Date,
-  // ) {
+  @Get('permision/:deliverableId')
+  async getPermision(@Param('deliverableId') deliverableId: number): Promise<Permission[]> {
+    try {
+      return this.deliverablesService.getPermissions(deliverableId);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  // @Post('permision/:userId')
+  // async createPermision(@Param('userId') userId: number, @Body() body: any): Promise<Permission[]> {
   //   try {
-  //     return this.deliverablesService.shareDeliverable(
-  //       deliverableId,
-  //       isPublic
-  //     );
+  //     return this.deliverablesService.createPermision(userId, body);
   //   } catch (error) {
   //     throw new BadRequestException(error);
   //   }

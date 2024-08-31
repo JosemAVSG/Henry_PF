@@ -22,11 +22,15 @@ export class PermissionTypeSeeder {
     permissionTypeData.push(permissionType);
 
     permissionType = new PermissionType();
-    permissionType.name = "editor"
+    permissionType.name = "view"
     permissionTypeData.push(permissionType);
 
     permissionType = new PermissionType();
-    permissionType.name = "viewer"
+    permissionType.name = "edit"
+    permissionTypeData.push(permissionType);
+
+    permissionType = new PermissionType();
+    permissionType.name = "delete"
     permissionTypeData.push(permissionType);
 
     await this.permissionTypeRepository.save(permissionTypeData);

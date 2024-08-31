@@ -308,6 +308,22 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "parenId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "orderBy",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -391,6 +407,26 @@
         "parameters": [
           {
             "name": "parentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/deliverables/permision/{deliverableId}": {
+      "get": {
+        "operationId": "DeliverablesController_getPermision",
+        "parameters": [
+          {
+            "name": "deliverableId",
             "required": true,
             "in": "path",
             "schema": {
