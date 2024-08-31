@@ -54,7 +54,8 @@ export class DeliverablesService {
     page: number = 1, 
     pageSize: number = 10,
     parentId: number = null,
-    orderBy: number
+    orderBy: number,
+    isAdmin: boolean
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
     
@@ -90,9 +91,10 @@ export class DeliverablesService {
           break;
       }
     }
+    queryBuilder.where('1 = 1');
   
-    if (userId) {
-      queryBuilder.where('permission.userId = :userId', { userId });
+    if (!isAdmin && userId) {
+      queryBuilder.andWhere('permission.userId = :userId', { userId });
     }
   
     if (parentId) {
@@ -102,6 +104,7 @@ export class DeliverablesService {
     let result = await queryBuilder.getRawMany();
   
     if (!parentId) {
+      //console.log(result);
       result = this.findTopLevelItems(result);
     }
   
@@ -169,18 +172,13 @@ export class DeliverablesService {
         topLevelItems.push(item);
       }
     });
-  
+    console.log(topLevelItems); 
     return topLevelItems;
   }
   
   // Construye el árbol
   //const tree = buildTree(data);
-  
-  // Encuentra los elementos de nivel superior
-  //const topLevelItems = findTopLevelItems(data);
-  
+    
   //console.log("Arbol:", JSON.stringify(tree, null, 2));
-  //console.log("Elementos de nivel superior:", JSON.stringify(topLevelItems, null, 2));
   
-
 }
