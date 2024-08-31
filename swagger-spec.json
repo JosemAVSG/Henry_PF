@@ -365,6 +365,46 @@
         }
       }
     },
+    "/deliverables/preview/{fileId}": {
+      "get": {
+        "operationId": "DeliverablesController_getPreview",
+        "parameters": [
+          {
+            "name": "fileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/deliverables/files-folder/{parentId}": {
+      "get": {
+        "operationId": "DeliverablesController_getFilesFolder",
+        "parameters": [
+          {
+            "name": "parentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/invoices/{userId}": {
       "get": {
         "operationId": "InvoicesController_getInvoicesByUser",
@@ -422,16 +462,24 @@
         }
       }
     },
-    "/files/preview/{fileId}": {
+    "/invoices/download/{userId}/{invoiceId}": {
       "get": {
-        "operationId": "FilesController_getPreview",
+        "operationId": "InvoicesController_getDonwloadInvoicesCopy",
         "parameters": [
           {
-            "name": "fileId",
+            "name": "userId",
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
+            }
+          },
+          {
+            "name": "invoiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
             }
           }
         ],

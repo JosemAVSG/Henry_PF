@@ -4,6 +4,7 @@ import { Invoice } from '../../entities/invoice.entity';
 import { Repository } from 'typeorm';
 import { InvoiceStatus } from 'src/entities/invoiceStatus.entity';
 import { UserEntity } from 'src/entities/user.entity';
+import { join } from 'path';
 
 @Injectable()
 export class InvoicesService {      
@@ -88,6 +89,21 @@ export class InvoicesService {
         const result = await queryBuilder.getRawMany();
         
         return result;
+
+    }
+
+    async getDonwloadInvoicesCopy(userId: number,invoiceId: number) {
+
+        const user = await this.userRepository.findOneBy({id:userId})
+        if(!user) throw new Error('user not exists');
+
+        const invoiceCopy = await this.invoiceRepository.findOneBy({id:invoiceId})
+
+        if(!invoiceCopy) throw new Error('invoice not exists');
+
+        const filePath = join(__dirname, `../../../${invoiceCopy.path}`);
+
+        return {filePath, fileName: invoiceCopy.number}
 
     }
 }

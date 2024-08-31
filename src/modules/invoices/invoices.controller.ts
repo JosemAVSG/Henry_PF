@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { DefaultDeserializer } from 'v8';
 import { CreateInvoiceDto } from './dto/create-invoices.dto';
-
+import { Response } from 'express';
 @Controller('invoices')
 export class InvoicesController {
     constructor(
@@ -25,4 +25,8 @@ export class InvoicesController {
         return this.deliverablesService.createInvoice(createInvoiceDto)
     }
 
+    @Get('download/:userId/:invoiceId')
+    async getDonwloadInvoicesCopy(@Param('userId') userId:number,@Param('invoiceId') invoiceId:number, @Res() res: Response) {
+        return this.deliverablesService.getDonwloadInvoicesCopy(userId, invoiceId);
+    }
 }

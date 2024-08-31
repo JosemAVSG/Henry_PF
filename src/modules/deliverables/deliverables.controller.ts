@@ -1,8 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import { DeliverablesService } from './deliverables.service';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { AuthGuard } from '../../guards/auth.guards';
+import { Deliverable } from 'src/entities/deliverable.entity';
 
 @Controller('deliverables')
 export class DeliverablesController {
@@ -20,18 +32,32 @@ export class DeliverablesController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    return this.deliverablesService.findAll(userId, page, limit);
+    try {
+      return this.deliverablesService.findAll(userId, page, limit);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
-
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDeliverableDto: UpdateDeliverableDto) {
-    return this.deliverablesService.update(+id, updateDeliverableDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateDeliverableDto: UpdateDeliverableDto,
+  ) {
+    try {
+      return this.deliverablesService.update(+id, updateDeliverableDto);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.deliverablesService.remove(+id);
+    try {
+      return this.deliverablesService.remove(+id);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   @Get('preview/:fileId')
@@ -39,8 +65,34 @@ export class DeliverablesController {
     try {
       return this.deliverablesService.getFilePreview(fileId);
     } catch (error) {
-      throw new Error(error);
+      throw new BadRequestException(error);
     }
   }
 
+  @Get('files-folder/:parentId')
+  async getFilesFolder(
+    @Param('parentId') parentId: number,
+  ): Promise<Deliverable[]> {
+    try {
+      return this.deliverablesService.getFilesFolder(parentId);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  // @Post('share')
+  // async shareDeliverable(
+  //   @Body('deliverableId') deliverableId: number,
+  //   @Body('isPublic') isPublic: boolean,
+  //   @Body('expirationDate') expirationDate: Date,
+  // ) {
+  //   try {
+  //     return this.deliverablesService.shareDeliverable(
+  //       deliverableId,
+  //       isPublic
+  //     );
+  //   } catch (error) {
+  //     throw new BadRequestException(error);
+  //   }
+  // }
 }

@@ -12,6 +12,9 @@ export class Deliverable {
 
     @Column({nullable:true})
     path: string;
+
+    @Column({nullable:true})
+    parentId: number;
     
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP',   })
     createdAt: Date;
@@ -24,4 +27,12 @@ export class Deliverable {
 
     @OneToMany(() => Permission, permission => permission.deliverable)
     permissions: Permission[];
+    
+    // Campos adicionales para compartir
+     @Column({ default: false })
+     isShared: boolean;       
+     @Column({ nullable: true })
+     shareToken: string;       
+     @Column({ default: false })
+     isPublic: boolean;
 }

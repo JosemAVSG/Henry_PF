@@ -16,7 +16,6 @@ export class Permission {
     @Column({type:'timestamp', nullable:true})
     updatedAt: Date;
     
-    
     // Relación Many-to-One con User
     @ManyToOne(() => User, user => user.permissions)
     @JoinColumn({ name: 'userId' }) // Especifica el nombre de la columna FK
@@ -25,7 +24,6 @@ export class Permission {
     @Column()
     userId: string; // FK hacia User
 
-
     // Relación Many-to-One con Deliverable
     @ManyToOne(() => Deliverable, deliverable => deliverable.permissions)
     @JoinColumn({ name: 'deliverableId' }) // Especifica el nombre de la columna FK
@@ -33,7 +31,6 @@ export class Permission {
 
     @Column()
     deliverableId: string; // FK hacia Deliverable
-
 
     // Relación Many-to-One con PermissionType
     @ManyToOne(()=> PermissionType, permissionType => permissionType.permissions )

@@ -5,4 +5,7 @@ export class CreateDeliverableDto {
     path: string;
 
     deliverableTypeId: number;
+
+    parentId: number;
+
 }
