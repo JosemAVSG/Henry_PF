@@ -4,6 +4,7 @@ import { Invoice } from '../../entities/invoice.entity';
 import { Repository } from 'typeorm';
 import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
 import { UserEntity } from '../../entities/user.entity';
+import { CreateInvoiceDto } from './dto/create-invoices.dto';
 
 @Injectable()
 export class InvoicesService {      
@@ -16,8 +17,7 @@ export class InvoicesService {
         private invoiceStatusRepository: Repository<InvoiceStatus>,
         
     ){}
-    async createInvoice(createDeliverableDto
-    ){
+    async createInvoice(createInvoiceDto: CreateInvoiceDto) {
         const {
             invoiceNumber,
             path,
@@ -26,28 +26,29 @@ export class InvoicesService {
             amount,
             userId,
             invoiceStatusId
-        } = createDeliverableDto
-        const invoiceStatus = await this.invoiceStatusRepository.findOneBy({id:invoiceStatusId})
+        } = createInvoiceDto;
 
-        const user = await this.userRepository.findOneBy({id:userId})
+        const invoiceStatus = await this.invoiceStatusRepository.findOneBy({id: invoiceStatusId});
+        const user = await this.userRepository.findOneBy({id: userId});
 
-        if(!invoiceStatus || !user){
-          throw new Error('invoiceStatus or user not found')
+        if (!invoiceStatus || !user) {
+          throw new Error('invoiceStatus or user not found');
         }
     
         const invoice = this.invoiceRepository.create({
-            "number": invoiceNumber,
+            number: invoiceNumber,
             path,
             issueDate,
             dueDate,
             amount,
             user,
             invoiceStatus
-        })
+        });
         
-        const result = this.invoiceRepository.save(invoice);
+        const result = await this.invoiceRepository.save(invoice);
         return result;
     }
+
 
     async getInvoicesByUser(
         userId: number = null, 
