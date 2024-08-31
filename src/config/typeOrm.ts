@@ -1,6 +1,7 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 import {config as dotevn} from "dotenv";
 import {registerAs} from '@nestjs/config';
+import { logging } from "googleapis/build/src/apis/logging";
 
 dotevn({path:'.env'});
 
@@ -14,7 +15,8 @@ const typeOrmConfig={
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
     autoloadEntities:true,
-    logging:['error'],
+    logging: true,
+    //logging:['error'],
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations:['dist/migrations/*{.ts,.js}'],
     synchronize:true,
