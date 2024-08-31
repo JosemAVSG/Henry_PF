@@ -308,6 +308,22 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "parenId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "orderBy",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {

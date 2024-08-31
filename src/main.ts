@@ -1,11 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { UserSeeder } from './modules/seed/user-seeder';
+import { DeliverableSeeder } from './modules/seed/deliverable.seeder';
 import { DeliverableTypeSeeder } from './modules/seed/deliverableType.seeder';
 import { InvoiceStatusSeeder } from './modules/seed/invoiceStatus.seeder';
 import { PermissionTypeSeeder } from './modules/seed/permissionType.seeder';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DeliverableCategorySeeder } from './modules/seed/deliverableCategory.seeder';
 import * as fs from 'fs';
+import { PermissionSeeder } from './modules/seed/permission.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,11 +22,20 @@ async function bootstrap() {
   const deliverableTypeSeeder = app.get(DeliverableTypeSeeder)
   await deliverableTypeSeeder.seedDeliverableType();
 
+  const deliverableCategorySeeder = app.get(DeliverableCategorySeeder)
+  await deliverableCategorySeeder.seedDeliverableCategory();
+
   const invoiceStatusSeeder = app.get(InvoiceStatusSeeder)
   await invoiceStatusSeeder.seedInvoiceStatus();
 
   const permissionTypeSeeder = app.get(PermissionTypeSeeder)
   await permissionTypeSeeder.seedPermissionType();
+
+  const deliverableSeeder = app.get(DeliverableSeeder)
+  await deliverableSeeder.seedDeliverable();
+
+  const permissionSeeder = app.get(PermissionSeeder)
+  await permissionSeeder.seedPermission();
 
   const config = new DocumentBuilder()
   .setTitle('BP Ventures API')

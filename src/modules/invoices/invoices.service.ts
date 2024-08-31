@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from '../../entities/invoice.entity';
 import { Repository } from 'typeorm';
-import { InvoiceStatus } from 'src/entities/invoiceStatus.entity';
-import { UserEntity } from 'src/entities/user.entity';
+import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
+import { UserEntity } from '../../entities/user.entity';
 
 @Injectable()
 export class InvoicesService {      
