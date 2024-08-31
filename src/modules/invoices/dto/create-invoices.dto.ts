@@ -5,5 +5,5 @@ export class CreateInvoiceDto {
     dueDate:Date;
     amount:number;
     userId:number;
-    invoiceStatusId:number;
+    invoiceStatusId:number;//
 }

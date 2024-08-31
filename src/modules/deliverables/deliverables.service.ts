@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -51,46 +51,62 @@ export class DeliverablesService {
 
   async findAll(
     userId: number = null, 
-    page:number=1, 
-    pageSize: number=10,
-    parentId: number = null
+    page: number = 1, 
+    pageSize: number = 10,
+    parentId: number = null,
+    orderBy: number
   ): Promise<Deliverable[]> {
-    const offset = (page - 1) * pageSize
+    const offset = (page - 1) * pageSize;
     
     const queryBuilder = this.deliverableRepository
-    .createQueryBuilder('deliverable')
-    .leftJoinAndSelect('deliverable.deliverableType', 'deliverableType')
-    .leftJoinAndSelect('deliverable.permissions', 'permission')
-    .leftJoinAndSelect('permission.permissionType', 'permissionType')
-    .select([
-      'deliverable.id AS "id"',
-      'deliverable.parentId AS "parentId"',
-      'deliverable.name AS "deliverableName"',
-      'deliverable.path AS "deliverablePath"',
-      'deliverableType.name AS "deliverableType"',
-      'permissionType.name AS "permissionType"',
-      `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
-    ])
-    .orderBy('"lastDate"', 'DESC')
-    .limit(pageSize)
-    .offset(offset)
-    
+      .createQueryBuilder('deliverable')
+      .leftJoin('deliverable.deliverableType', 'deliverableType')
+      .leftJoin('deliverable.permissions', 'permission')
+      .leftJoin('permission.permissionType', 'permissionType')
+      .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
+      .select([
+        'deliverable.id AS "id"',
+        'deliverable.parentId AS "parentId"',
+        'deliverable.name AS "deliverableName"',
+        'deliverable.path AS "deliverablePath"',
+        'deliverableType.name AS "deliverableType"',
+        'deliverableCategory.name AS "deliverableCategory"',
+        `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
+        `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
+      ])
+      .groupBy('deliverable.id, deliverable.parentId, deliverable.name, deliverable.path, deliverableType.name, deliverableCategory.name')
+      .orderBy('"lastDate"', 'DESC')
+      .limit(pageSize)
+      .offset(offset);
+  
+    if (orderBy) {
+      switch (orderBy) {
+        case 1:
+          queryBuilder.orderBy('"deliverableCategory.name"', 'DESC');
+          break;
+        case 2:
+          queryBuilder.orderBy('"deliverableName"', 'DESC');
+          break;
+      }
+    }
+  
     if (userId) {
       queryBuilder.where('permission.userId = :userId', { userId });
     }
-    let result = null
-
-    if(parentId){
-      queryBuilder.where('deliverable.parentId = :parentId', { parentId });
-      result = await queryBuilder.getRawMany();
-
-    }else{
-      result = await queryBuilder.getRawMany();
-      result = this.findTopLevelItems(result)
+  
+    if (parentId) {
+      queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
     }
-
+  
+    let result = await queryBuilder.getRawMany();
+  
+    if (!parentId) {
+      result = this.findTopLevelItems(result);
+    }
+  
     return result;
   }
+  
 
   findOne(id: number) {
     return `This action returns a #${id} deliverable`;
@@ -100,8 +116,13 @@ export class DeliverablesService {
     return `This action updates a #${id} deliverable`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} deliverable`;
+  async remove(id: number) {
+    const result = await this.deliverableRepository.update(id, {statusId: 2})
+    if (result.affected === 0) {
+      throw new NotFoundException(`Deliverable with ID ${id} not found`);
+    }
+
+    return {message:"Deliverable status updated"};
   }
 
 
