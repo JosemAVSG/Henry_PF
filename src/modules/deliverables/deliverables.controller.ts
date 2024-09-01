@@ -32,7 +32,7 @@ export class DeliverablesController {
   }
 
   @Get('user/:userId')
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   findAll(
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
@@ -42,9 +42,7 @@ export class DeliverablesController {
     @Req() req: Request,
   ) {
     try {
-      // console.log(req.user);
-      // const isAdmin =  req.user.isAdmin
-      const isAdmin =  false;
+      const isAdmin =  req.user.isAdmin
       return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin);
     } catch (error) {
       throw new BadRequestException(error);
