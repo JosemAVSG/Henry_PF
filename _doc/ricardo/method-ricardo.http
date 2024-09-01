@@ -31,5 +31,6 @@ Content-Type: application/json
 
     "name": "Acta de Reunión 2",
     "path": "ruta/path",
-    "deliverableTypeId": 1
+    "deliverableTypeId": 2,
+    "parentId": 2
 }

@@ -16,7 +16,7 @@ const typeOrmConfig={
     database: process.env.DB_DATABASE,
     autoloadEntities:true,
     // logging: true,
-    //logging:['error'],
+    logging:['error'],
     entities: ['dist/**/*.entity{.ts,.js}'],
     migrations:['dist/migrations/*{.ts,.js}'],
     synchronize:true,
