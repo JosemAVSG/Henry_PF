@@ -1,11 +1,14 @@
-import { Body, Controller, Get, Param, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UploadedFile, UseInterceptors, Res } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import * as fs from 'fs-extra';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoices.dto';
+import { Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('invoices')
 @Controller('invoices')
 export class InvoicesController {
     constructor(
@@ -47,5 +50,10 @@ export class InvoicesController {
         // Asigna el path del archivo al DTO
         createInvoiceDto.path = file ? file.path : null;
         return this.invoicesService.createInvoice(createInvoiceDto);
+    }
+    
+    @Get('download/:userId/:invoiceId')
+    async getDonwloadInvoicesCopy(@Param('userId') userId:number,@Param('invoiceId') invoiceId:number, @Res() res: Response) {
+        return this.invoicesService.getDonwloadInvoicesCopy(userId, invoiceId);
     }
 }
