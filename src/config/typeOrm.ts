@@ -6,9 +6,10 @@ import { logging } from "googleapis/build/src/apis/logging";
 dotevn({path:'.env'});
 
 console.info("dropSchema: ", process.env.DROPSCHEMA)
+console.info("DB_TYPE: ", process.env.DB_TYPE)
 
 const typeOrmConfig={
-    type:'postgres',
+    type: process.env.DB_TYPE,
     host: process.env.DB_HOST,
     port:  process.env.DB_PORT as unknown as number,
     username: process.env.DB_USERNAME,

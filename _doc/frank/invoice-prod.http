@@ -1,3 +1,6 @@
+### 
+GET https://api.1rodemayo.com/invoices/
+
 ### Obtener facturas por usuario
 GET https://api.1rodemayo.com/invoices/1?page=1&limit=10
 Content-Type: application/json
