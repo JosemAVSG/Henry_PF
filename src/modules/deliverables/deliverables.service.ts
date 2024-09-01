@@ -32,7 +32,7 @@ export class DeliverablesService {
 
 
   async create(createDeliverableDto: CreateDeliverableDto) {
-    const {name, path, deliverableTypeId} = createDeliverableDto
+    const {name, path, deliverableTypeId, isFolder} = createDeliverableDto
     const deliverableType = await this.deliverableTypeRepository.findOneBy({id:deliverableTypeId})
 
     if(!deliverableType){
@@ -42,7 +42,8 @@ export class DeliverablesService {
     const deliverable = this.deliverableRepository.create({
       name,
       path,
-      deliverableType
+      deliverableType,
+      isFolder,
     })
     
     const result = this.deliverableRepository.save(deliverable);
@@ -128,20 +129,6 @@ export class DeliverablesService {
 
     return {message:"Deliverable status updated"};
   }
-
-
-/*
-  const data = [
-    { id: 1, name: "Folder A", parentId: 2 },
-    { id: 2, name: "Folder B", parentId: 3 },
-    { id: 3, name: "Folder C", parentId: 4 },
-    { id: 4, name: "Folder D", parentId: 5 },
-    { id: 6, name: "File 1", parentId: 1 },
-    { id: 7, name: "File 2", parentId: 2 },
-    { id: 8, name: "File 3", parentId: 3 },
-    { id: 9, name: "Folder F", parentId: 4 }
-  ];
-*/
 
   // Función para construir el árbol
 /*  buildTree(items, parentId = null) {

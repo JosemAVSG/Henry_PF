@@ -18,7 +18,7 @@ export class DeliverablesController {
       FileInterceptor('file', {
           storage: diskStorage({
               destination: async (req, file, callback) => {
-                  const uploadPath = './uploads/invoices';
+                  const uploadPath = './uploads/deliverables';
                   await fs.ensureDir(uploadPath); // Crea el directorio si no existe
                   callback(null, uploadPath);
               },
