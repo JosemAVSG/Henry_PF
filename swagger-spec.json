@@ -30,7 +30,10 @@
           "201": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/auth/signup": {
@@ -51,7 +54,10 @@
           "201": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/auth/reset-password": {
@@ -71,7 +77,10 @@
           "201": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/auth/verifyToken": {
@@ -82,7 +91,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/auth/enable-mfa": {
@@ -93,7 +105,10 @@
           "201": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/auth/forgotPassword": {
@@ -104,7 +119,10 @@
           "201": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "auth"
+        ]
       }
     },
     "/users": {
@@ -132,7 +150,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "users"
+        ]
       }
     },
     "/users/{id}": {
@@ -162,7 +183,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "users"
+        ]
       },
       "get": {
         "operationId": "UserController_getUserById",
@@ -180,7 +204,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "users"
+        ]
       },
       "delete": {
         "operationId": "UserController_deleteUser",
@@ -198,7 +225,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "users"
+        ]
       }
     },
     "/users/status/{userId}/{statusId}": {
@@ -226,7 +256,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "users"
+        ]
       }
     },
     "/users/verify-email/{email}": {
@@ -246,7 +279,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "users"
+        ]
       }
     },
     "/email/send": {
@@ -278,10 +314,13 @@
           "201": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "deliverables"
+        ]
       }
     },
-    "/deliverables/{userId}": {
+    "/deliverables/user/{userId}": {
       "get": {
         "operationId": "DeliverablesController_findAll",
         "parameters": [
@@ -310,7 +349,7 @@
             }
           },
           {
-            "name": "parenId",
+            "name": "parentId",
             "required": true,
             "in": "query",
             "schema": {
@@ -330,7 +369,33 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "deliverables"
+        ]
+      }
+    },
+    "/deliverables/{deliverableId}": {
+      "get": {
+        "operationId": "DeliverablesController_getByDeliverableId",
+        "parameters": [
+          {
+            "name": "deliverableId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "deliverables"
+        ]
       }
     },
     "/deliverables/{id}": {
@@ -360,7 +425,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "deliverables"
+        ]
       },
       "delete": {
         "operationId": "DeliverablesController_remove",
@@ -378,7 +446,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "deliverables"
+        ]
       }
     },
     "/deliverables/preview/{fileId}": {
@@ -398,7 +469,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "deliverables"
+        ]
       }
     },
     "/deliverables/files-folder/{parentId}": {
@@ -418,7 +492,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "deliverables"
+        ]
       }
     },
     "/deliverables/permision/{deliverableId}": {
@@ -438,7 +515,31 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "deliverables"
+        ]
+      },
+      "put": {
+        "operationId": "DeliverablesController_createPermision",
+        "parameters": [
+          {
+            "name": "deliverableId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "deliverables"
+        ]
       }
     },
     "/invoices/{userId}": {
@@ -474,7 +575,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "invoices"
+        ]
       }
     },
     "/invoices": {
@@ -495,7 +599,10 @@
           "201": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "invoices"
+        ]
       }
     },
     "/invoices/download/{userId}/{invoiceId}": {
@@ -523,7 +630,10 @@
           "200": {
             "description": ""
           }
-        }
+        },
+        "tags": [
+          "invoices"
+        ]
       }
     }
   },

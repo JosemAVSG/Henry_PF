@@ -7,7 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  Put,
   UseGuards,
+  Req,
   BadRequestException,
 } from '@nestjs/common';
 import { DeliverablesService } from './deliverables.service';
@@ -16,7 +18,10 @@ import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { AuthGuard } from '../../guards/auth.guards';
 import { Deliverable } from 'src/entities/deliverable.entity';
 import { Permission } from 'src/entities/permission.entity';
+import { Request } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('deliverables')
 @Controller('deliverables')
 export class DeliverablesController {
   constructor(private readonly deliverablesService: DeliverablesService) {}
@@ -26,17 +31,30 @@ export class DeliverablesController {
     return this.deliverablesService.create(createDeliverableDto);
   }
 
-  @Get(':userId')
-  //@UseGuards(AuthGuard)
+  @Get('user/:userId')
+  // @UseGuards(AuthGuard)
   findAll(
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
-    @Query('parenId') parenId: number = null,
+    @Query('parentId') parentId: number = null,
     @Query('orderBy') orderBy: number = null,
+    @Req() req: Request,
   ) {
     try {
-      return this.deliverablesService.findAll(userId, page, limit, parenId, orderBy);
+      // console.log(req.user);
+      // const isAdmin =  req.user.isAdmin
+      const isAdmin =  false;
+      return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Get(':deliverableId')
+  getByDeliverableId(@Param('deliverableId') deliverableId: number) {
+    try {
+      return this.deliverablesService.getByDeliverableID(deliverableId);
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -84,7 +102,7 @@ export class DeliverablesController {
   }
 
   @Get('permision/:deliverableId')
-  async getPermision(@Param('deliverableId') deliverableId: number): Promise<Permission[]> {
+  async getPermision(@Param('deliverableId') deliverableId: number): Promise<Partial<Permission>[]> {
     try {
       return this.deliverablesService.getPermissions(deliverableId);
     } catch (error) {
@@ -92,12 +110,14 @@ export class DeliverablesController {
     }
   }
 
-  // @Post('permision/:userId')
-  // async createPermision(@Param('userId') userId: number, @Body() body: any): Promise<Permission[]> {
-  //   try {
-  //     return this.deliverablesService.createPermision(userId, body);
-  //   } catch (error) {
-  //     throw new BadRequestException(error);
-  //   }
-  // }
+  @Put('permision/:deliverableId')
+  async createPermision(@Param('deliverableId') deliverableId: number, @Body() permission: any): Promise<Permission[]> {
+    try {
+      console.log(permission, deliverableId);
+      
+      return this.deliverablesService.updatePermissions(deliverableId, permission);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
 }

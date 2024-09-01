@@ -18,15 +18,31 @@ export class DeliverableTypeSeeder {
     }
 
     let deliverableType = new DeliverableType();
+    deliverableType.name = "Folder"
+    deliverableTypeData.push(deliverableType);
+
+    deliverableType = new DeliverableType();
+    deliverableType.name = "Link"
+    deliverableTypeData.push(deliverableType);
+
+    deliverableType = new DeliverableType();
     deliverableType.name = "pdf"
     deliverableTypeData.push(deliverableType);
 
     deliverableType = new DeliverableType();
-    deliverableType.name = "docx"
+    deliverableType.name = "doc"
+    deliverableTypeData.push(deliverableType);
+
+    deliverableType = new DeliverableType();
+    deliverableType.name = "xls"
     deliverableTypeData.push(deliverableType);
 
     deliverableType = new DeliverableType();
     deliverableType.name = "jpg"
+    deliverableTypeData.push(deliverableType);
+
+    deliverableType = new DeliverableType();
+    deliverableType.name = "png"
     deliverableTypeData.push(deliverableType);
 
     await this.deliverableTypeRepository.save(deliverableTypeData);

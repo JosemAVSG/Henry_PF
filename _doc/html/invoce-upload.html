@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+        }
+        label, input {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload Invoice</h2>
+    <form id="invoiceForm" enctype="multipart/form-data">
+        <label for="invoiceNumber">Invoice Number:</label>
+        <input type="text" id="invoiceNumber" name="invoiceNumber" value="INV-123456" required>
+        
+        <label for="issueDate">Issue Date:</label>
+        <input type="date" id="issueDate" name="issueDate" value="2024-08-31" required>
+
+        <label for="dueDate">Due Date:</label>
+        <input type="date" id="dueDate" name="dueDate" value="2024-09-15" required>
+
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" value="1500" required>
+
+        <label for="userId">User ID:</label>
+        <input type="number" id="userId" name="userId" value="1" required>
+
+        <label for="invoiceStatusId">Invoice Status ID:</label>
+        <input type="number" id="invoiceStatusId" name="invoiceStatusId" value="1" required>
+
+        <label for="file">Upload File:</label>
+        <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('invoiceForm');
+        const fileInput = document.getElementById('file');
+        
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const file = fileInput.files[0];
+            if (file) {
+                const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid file type. Please upload an image (JPG, PNG) or a PDF.');
+                    return;
+                }
+            }
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('http://localhost:3000/invoices', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Invoice uploaded successfully!');
+                    console.log(result);
+                } else {
+                    alert('Error uploading invoice');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while uploading the invoice.');
+            }
+        });
+    </script>
+</body>
+</html>

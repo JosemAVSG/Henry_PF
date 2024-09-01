@@ -8,6 +8,7 @@ import { DeliverableType } from '../../entities/deliverableType.entity';
 import { google } from 'googleapis';
 import { PermissionType } from '../../entities/permissionType.entity';
 import { Permission } from '../../entities/permission.entity';
+import { UserEntity } from 'src/entities/user.entity';
 @Injectable()
 export class DeliverablesService {
   constructor(
@@ -22,6 +23,9 @@ export class DeliverablesService {
 
     @InjectRepository(Permission)
     private permissionsRepository: Repository<Permission>,
+
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   private drive = google.drive({
@@ -63,14 +67,15 @@ export class DeliverablesService {
   }
 
   async findAll(
-    userId: number = null, 
-    page: number = 1, 
+    userId: number = null,
+    page: number = 1,
     pageSize: number = 10,
     parentId: number = null,
-    orderBy: number
+    orderBy: number,
+    isAdmin: boolean,
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
-    
+
     const queryBuilder = this.deliverableRepository
       .createQueryBuilder('deliverable')
       .leftJoin('deliverable.deliverableType', 'deliverableType')
@@ -88,11 +93,13 @@ export class DeliverablesService {
         `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
         `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
       ])
-      .groupBy('deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name')
+      .groupBy(
+        'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
+      )
       .orderBy('"lastDate"', 'DESC')
       .limit(pageSize)
       .offset(offset);
-  
+
     if (orderBy) {
       switch (orderBy) {
         case 1:
@@ -103,24 +110,25 @@ export class DeliverablesService {
           break;
       }
     }
-  
-    if (userId) {
-      queryBuilder.where('permission.userId = :userId', { userId });
+    queryBuilder.where('deliverable.statusId = 1');
+
+    if (!isAdmin && userId) {
+      queryBuilder.andWhere('permission.userId = :userId', { userId });
     }
-  
+
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
     }
-  
+
     let result = await queryBuilder.getRawMany();
-  
+
     if (!parentId) {
+      //console.log(result);
       result = this.findTopLevelItems(result);
     }
-  
+
     return result;
   }
-  
 
   findOne(id: number) {
     return `This action returns a #${id} deliverable`;
@@ -131,12 +139,12 @@ export class DeliverablesService {
   }
 
   async remove(id: number) {
-    const result = await this.deliverableRepository.update(id, {statusId: 2})
+    const result = await this.deliverableRepository.update(id, { statusId: 2 });
     if (result.affected === 0) {
       throw new NotFoundException(`Deliverable with ID ${id} not found`);
     }
 
-    return {message:"Deliverable status updated"};
+    return { message: 'Deliverable status updated' };
   }
 
   async getFilesFolder(parentId: number | null) {
@@ -151,32 +159,84 @@ export class DeliverablesService {
       });
   }
 
+  // Función para encontrar los elementos de nivel superior
+  findTopLevelItems(items) {
+    const topLevelItems = [];
+    const itemMap = new Map();
+
+    // Mapa de id -> item
+    items.forEach((item) => {
+      itemMap.set(item.id, item);
+    });
+
+    // Verifica cada elemento; si su padre no está en la lista, es de nivel superior
+    items.forEach((item) => {
+      if (!itemMap.has(item.parentId)) {
+        topLevelItems.push(item);
+      }
+    });
+
+    return topLevelItems;
+  }
+
+  async getPermissions(deliverableId: number) {
+    const data = await this.permissionsRepository.find({
+      relations: { user: true, permissionType: true },
+      where: { deliverable: { id: deliverableId }, },
+      select: { permissionType:{name: true, id: true} },
+    });
+    
+    const permissions = data.map((item) => {
+    
+      return {
+        userId: item.userId,
+        permissionType: item.permissionType,
+      };
+    });
+
+    return permissions;
+  }
+
+  async updatePermissions(
+    deliverableId: number,
+    newPermission: Permission[],
+  ): Promise<Permission[]> {
+    const permissions = await this.permissionsRepository.find({
+      relations: { user: true, permissionType: true },
+      where: { deliverable: { id: deliverableId } },
+    });
+    if (!permissions) {
+      return await this.permissionsRepository.save(newPermission);
+    }
+
+    await this.permissionsRepository.remove(permissions)
+
+    const result = newPermission.map(async (item) => {
+
+      const permissionObject =  this.permissionsRepository.create({
+        userId: item.userId,
+        permissionTypeId: item.permissionTypeId,
+        user: await this.userRepository.findOneBy({id: Number(item.userId)}),
+        permissionType: await this.permissionTypeRepository.findOneBy({id: Number(item.permissionTypeId)}),
+        deliverable: await this.deliverableRepository.findOneBy({id: deliverableId}),
+        deliverableId: deliverableId.toString(),
+      })
+       return await this.permissionsRepository.save(permissionObject)
+
+    })
+
+    return await Promise.all(result)
+
+    }
   
-    // Función para encontrar los elementos de nivel superior
-    findTopLevelItems(items) {
-      const topLevelItems = [];
-      const itemMap = new Map();
-    
-      // Mapa de id -> item
-      items.forEach(item => {
-        itemMap.set(item.id, item);
-      });
-    
-      // Verifica cada elemento; si su padre no está en la lista, es de nivel superior
-      items.forEach(item => {
-        if (!itemMap.has(item.parentId)) {
-          topLevelItems.push(item);
-        }
-      });
-    
-      return topLevelItems;
-    }
+  async getByDeliverableID(deliverableId){
+    return await this.deliverableRepository.find({
+      relations: { permissions: true,
+        deliverableType: true, deliverableCategory: true },
+      where: { id: deliverableId },
+    })
 
-    async getPermissions(deliverableId: number) {
+  }
 
-      return await this.permissionsRepository.find({
-        relations:{user:true,permissionType:true},
-        where:{deliverable:{id:deliverableId}}
-      });
-    }
+  
 }
