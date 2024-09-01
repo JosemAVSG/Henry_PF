@@ -1,0 +1,42 @@
+### Create a new Voucher
+POST http://localhost:3000/vouchers
+Content-Type: application/json
+
+{
+    "number": "string",
+    "path": "string",
+    "issueDate": "2024-09-01",
+    "amount": 1,
+    "invoiceId": 1
+}
+
+###
+
+### Get all Vouchers
+GET http://localhost:3000/vouchers
+
+###
+
+### Get Voucher by ID
+GET http://localhost:3000/vouchers/1
+
+###
+GET http://localhost:3000/vouchers/invoice/1
+
+
+### Update a Voucher
+PATCH  http://localhost:3000/vouchers/1
+Content-Type: application/json
+
+{
+  "number": "54321",
+  "issueDate": "2024-09-01",
+  "amount": 200.00,
+  "invoiceId": 1
+}
+
+###
+
+### Delete a Voucher
+DELETE http://localhost:3000/vouchers/1
+

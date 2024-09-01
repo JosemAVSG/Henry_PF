@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        form, table {
+            margin-bottom: 30px;
+        }
+        label {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, select {
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voucher Management</h1>
+
+        <!-- Create Voucher Form -->
+        <h2>Create Voucher</h2>
+        <form id="voucherForm">
+            <label for="number">Voucher Number:</label>
+            <input type="text" id="number" name="number" value="V12345" required>
+            
+            <label for="issueDate">Issue Date:</label>
+            <input type="date" id="issueDate" name="issueDate" value="2023-01-01" required>
+            
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" value="100.00" step="0.01" required>
+            
+            <label for="invoiceId">Invoice ID:</label>
+            <input type="number" id="invoiceId" name="invoiceId" value="1" required>
+            
+            <label for="file">Upload File:</label>
+            <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.pdf" required>
+
+            <button type="button" id="submitVoucher">Submit</button>
+        </form>
+        <p id="responseMessage"></p>
+
+        <!-- Read Vouchers Form -->
+        <h2>View Vouchers</h2>
+        <button id="loadVouchers">Load All Vouchers</button>
+        <button id="loadVouchersByInvoiceId">Load Vouchers by Invoice ID</button>
+        <input type="number" id="searchInvoiceId" placeholder="Enter Invoice ID" value="1">
+        <table id="vouchersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Number</th>
+                    <th>Path</th>
+                    <th>Issue Date</th>
+                    <th>Amount</th>
+                    <th>Invoice ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Vouchers will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.getElementById('submitVoucher').addEventListener('click', async function() {
+            const form = document.getElementById('voucherForm');
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('http://localhost:3000/vouchers', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('responseMessage').textContent = 'Voucher created successfully: ID ' + data.id;
+                    loadVouchers(); // Reload vouchers after creation
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('responseMessage').textContent = 'Error: ' + errorData.message;
+                }
+            } catch (error) {
+                document.getElementById('responseMessage').textContent = 'Error: ' + error.message;
+            }
+        });
+
+        document.getElementById('loadVouchers').addEventListener('click', async function() {
+            try {
+                const response = await fetch('http://localhost:3000/vouchers');
+                if (response.ok) {
+                    const vouchers = await response.json();
+                    const tableBody = document.querySelector('#vouchersTable tbody');
+                    tableBody.innerHTML = ''; // Clear existing rows
+
+                    vouchers.forEach(voucher => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${voucher.id}</td>
+                            <td>${voucher.number}</td>
+                            <td><a href="${voucher.path}" target="_blank">View File</a></td>
+                            <td>${voucher.issueDate}</td>
+                            <td>${voucher.amount}</td>
+                            <td>${voucher.invoiceId}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('responseMessage').textContent = 'Error: ' + errorData.message;
+                }
+            } catch (error) {
+                document.getElementById('responseMessage').textContent = 'Error: ' + error.message;
+            }
+        });
+
+        document.getElementById('loadVouchersByInvoiceId').addEventListener('click', async function() {
+            const invoiceId = document.getElementById('searchInvoiceId').value;
+            try {
+                const response = await fetch(`http://localhost:3000/vouchers/invoice/${invoiceId}`);
+                if (response.ok) {
+                    const vouchers = await response.json();
+                    const tableBody = document.querySelector('#vouchersTable tbody');
+                    tableBody.innerHTML = ''; // Clear existing rows
+
+                    vouchers.forEach(voucher => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${voucher.id}</td>
+                            <td>${voucher.number}</td>
+                            <td><a href="${voucher.path}" target="_blank">View File</a></td>
+                            <td>${voucher.issueDate}</td>
+                            <td>${voucher.amount}</td>
+                            <td>${voucher.invoiceId}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    const errorData = await response.json();
+                    document.getElementById('responseMessage').textContent = 'Error: ' + errorData.message;
+                }
+            } catch (error) {
+                document.getElementById('responseMessage').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

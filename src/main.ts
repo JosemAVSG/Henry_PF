@@ -9,9 +9,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { DeliverableCategorySeeder } from './modules/seed/deliverableCategory.seeder';
 import * as fs from 'fs';
 import { PermissionSeeder } from './modules/seed/permission.seeder';
+import * as morgan from 'morgan';  // Importa morgan
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Configura morgan para registrar las solicitudes HTTP
+  app.use(morgan('dev'));  // 'combined' es un formato predefinido de morgan
+
   app.enableCors({
     origin:'*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
