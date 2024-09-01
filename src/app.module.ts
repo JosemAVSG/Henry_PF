@@ -29,7 +29,7 @@ import { VouchersModule } from './modules/vouchers/vouchers.module';
     }),
     DeliverablesModule,
     InvoicesModule,
-    // VouchersModule
+    VouchersModule
     ],
   controllers: [AppController],
   providers: [AppService],
