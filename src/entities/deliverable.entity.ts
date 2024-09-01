@@ -13,7 +13,7 @@ export class Deliverable {
 
     @Column({nullable:true})
     path: string;
-    
+
     @Column({nullable:true})
     parentId: number;
 
@@ -37,4 +37,5 @@ export class Deliverable {
     
     @OneToMany(() => Permission, permission => permission.deliverable)
     permissions: Permission[];
+
 }

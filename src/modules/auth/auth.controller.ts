@@ -6,6 +6,9 @@ import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from '../../interfaces/dtos/signup.dto';
 import { AuthGuard } from '../../guards/auth.guards';
 import { Request } from 'express';
+import { ApiTags } from '@nestjs/swagger';
+
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -36,7 +39,7 @@ export class AuthController {
         id: result.id,
         sub: result.id,
         email: result.email,
-        //   roles:[result.isAdmin ? Roles.ADMIN : Roles.USER]
+        isAdmin: result.isAdmin
       };
       const token = this.jwtService.sign(userPayload);
 

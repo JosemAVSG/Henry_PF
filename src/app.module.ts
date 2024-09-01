@@ -11,6 +11,7 @@ import { SeedModule } from './modules/seed/seed.module';
 import { MailModule } from './modules/mail/mail.module';
 import { DeliverablesModule } from './modules/deliverables/deliverables.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
+import { VouchersModule } from './modules/vouchers/vouchers.module';
 
 @Module({
   imports: [AuthModule, UserModule, SeedModule,MailModule,
@@ -27,7 +28,8 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
       global: true
     }),
     DeliverablesModule,
-    InvoicesModule
+    InvoicesModule,
+    VouchersModule
     ],
   controllers: [AppController],
   providers: [AppService],

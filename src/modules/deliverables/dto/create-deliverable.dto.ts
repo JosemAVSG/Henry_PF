@@ -5,5 +5,5 @@ export class CreateDeliverableDto {
     deliverableTypeId: number;
     deliverableCategoryId: number;
     isFolder: boolean;
-
+    parentId: number;
 }
