@@ -45,7 +45,8 @@ export class DeliverablesService {
   }
 
   async create(createDeliverableDto: CreateDeliverableDto) {
-    const { name, path, deliverableTypeId, parentId } = createDeliverableDto;
+    const {name, path, deliverableTypeId, isFolder, parentId} = createDeliverableDto
+
 
     const deliverableType = await this.deliverableTypeRepository.findOneBy({
       id: deliverableTypeId,
@@ -59,9 +60,10 @@ export class DeliverablesService {
       name,
       path,
       deliverableType,
+      isFolder,
       parentId,
-    });
-
+    })
+    
     const result = this.deliverableRepository.save(deliverable);
     return result;
   }
@@ -146,6 +148,18 @@ export class DeliverablesService {
 
     return { message: 'Deliverable status updated' };
   }
+
+  // Función para construir el árbol
+/*  buildTree(items, parentId = null) {
+    return items
+      .filter(item => item.parentId === parentId)
+      .map(item => {
+        const children = buildTree(items, item.id);
+        if (children.length) {
+          item.children = children;
+        }
+        return item;
+*/
 
   async getFilesFolder(parentId: number | null) {
     if (parentId === 1)
