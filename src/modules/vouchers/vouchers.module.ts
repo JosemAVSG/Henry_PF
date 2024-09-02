@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { VouchersService } from './vouchers.service';
 import { VouchersController } from './vouchers.controller';
 import { Invoice } from '../../entities/invoice.entity';
-import { Voucher } from 'src/entities/vouchers.entity';
+import { Voucher } from '../../entities/vouchers.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Voucher, Invoice])],

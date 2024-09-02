@@ -1,0 +1,42 @@
+### Create a new Voucher
+POST https://api.bpventures.com.ar/vouchers
+Content-Type: application/json
+
+{
+    "number": "string",
+    "path": "string",
+    "issueDate": "2024-09-01",
+    "amount": 1,
+    "invoiceId": 1
+}
+
+###
+
+### Get all Vouchers
+GET https://api.bpventures.com.ar/vouchers
+
+###
+
+### Get Voucher by ID
+GET https://api.bpventures.com.ar/vouchers/1
+
+###
+GET https://api.bpventures.com.ar/vouchers/invoice/1
+
+
+### Update a Voucher
+PATCH  https://api.bpventures.com.ar/vouchers/1
+Content-Type: application/json
+
+{
+  "number": "54321",
+  "issueDate": "2024-09-01",
+  "amount": 200.00,
+  "invoiceId": 1
+}
+
+###
+
+### Delete a Voucher
+DELETE https://api.bpventures.com.ar/vouchers/1
+
