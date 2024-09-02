@@ -56,7 +56,7 @@ export class DeliverablesController {
     try {
       // console.log(req.user);
       // const isAdmin =  req.user.isAdmin
-      const isAdmin =  false;
+      const isAdmin =  true;
       return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin);
     } catch (error) {
       throw new BadRequestException(error);
