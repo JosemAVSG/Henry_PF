@@ -10,9 +10,17 @@ import { DeliverableCategorySeeder } from './modules/seed/deliverableCategory.se
 import * as fs from 'fs';
 import { PermissionSeeder } from './modules/seed/permission.seeder';
 import * as morgan from 'morgan';  // Importa morgan
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Configura la carpeta 'uploads' como pública
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
+  
   // Configura morgan para registrar las solicitudes HTTP
   app.use(morgan('dev'));  // 'combined' es un formato predefinido de morgan
 
