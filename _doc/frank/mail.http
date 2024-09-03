@@ -13,11 +13,13 @@ POST http://localhost:3000/auth/signup
 Content-Type: application/json
 
 {
-  "email": "jmgg.95n@gmail.com",
+  "email": "fgp555@gmail.com",
   "password": "password123",
   "Names": "John",
   "LastName": "Doe",
-  "Position": "Manager"
+  "Position": "Manager",
+  "isAdmin": true,
+  "domain": "example.com"
 }
 
 ### signin
@@ -31,7 +33,7 @@ Content-Type: application/json
 
 
 ### Password Reset
-POST http://localhost:3000/auth/reset-password?token=am1nZy45NW5AZ21haWwuY29t
+POST http://localhost:3000/auth/reset-password?token=1502134750415a544833020e130c184506161e
 Content-Type: application/json
 
 {
@@ -44,5 +46,15 @@ Content-Type: application/json
 
 {
   "email": "fgp555@gmail.com",
-  "password": "newsecurepassword"
+  "password": "angeldavid2"
+}
+
+
+### Forgot Password Request
+POST http://localhost:3000/auth/forgotPassword
+Content-Type: application/json
+
+{
+  "email": "fgp555@gmail.com",
+  "domain": "example.com"
 }

@@ -21,12 +21,13 @@ POST http://localhost:3000/auth/signup
 Content-Type: application/json
 
 {
-  "email": "user123@example.com",
+  "email": "fgp555@gmail.com",
   "password": "password123",
   "Names": "John",
   "LastName": "Doe",
   "Position": "Manager",
-  "isAdmin": true
+  "isAdmin": true,
+  "domain": "example.com"
 }
 
 ### signin

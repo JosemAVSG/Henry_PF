@@ -6,31 +6,30 @@ import { hashPassword, isValidPassword } from '../../utils/hash';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { MailService } from '../mail/mail.service';
+import { SignUpDto } from 'src/interfaces/dtos/signup.dto';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
     private mailService: MailService, // Inject MailService
-
   ) {}
 
   async signIn(email: string, password: string): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({ where: { email: email } });
-    
+
     if (!user) throw new BadRequestException('Verification Failed');
-    if(user.statusId === 1 ){
+    if (user.statusId === 1) {
       const validPassword = await isValidPassword(password, user.password);
-      if (!validPassword) throw new BadRequestException('Verification Failed');    
+      if (!validPassword) throw new BadRequestException('Verification Failed');
       return user;
-    }else{
-      throw new BadRequestException('User no Active')
+    } else {
+      throw new BadRequestException('User no Active');
     }
+  }
 
-    }
-
-
-  async signUpService(body: any) {
+  async signUpService(body: SignUpDto) {
+    console.log('body', body);
     const userExists = await this.userRepository.findOne({
       where: { email: body.email },
     });
@@ -39,38 +38,86 @@ export class AuthService {
     body.password = password;
     const user = this.userRepository.create(body);
     const userSave = await this.userRepository.save(user);
-
-
-    const email = btoa(body.email);
-
-    const resetLink = `http://localhost:3001/forgotPassword/${email}`;
-
-     // Send a registration confirmation email
-     await this.mailService.sendMail(
+    // Función para cifrar un mensaje usando XOR y convertirlo a hexadecimal
+    function encryptToHex(text, key) {
+      let encryptedHex = '';
+      for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        encryptedHex += charCode.toString(16).padStart(2, '0'); // Convierte a hexadecimal y rellena con ceros si es necesario
+      }
+      return encryptedHex;
+    }
+    // Cifrar el mensaje
+    const encryptedHexMessage = encryptToHex(body.email, 'secretkey');
+    // Utiliza el dominio recibido desde el frontend
+    const resetLink = `${body.domain}/forgotPassword/${encryptedHexMessage}`;
+    await this.mailService.sendMail(
       body.email,
       'Welcome to BP Ventures - Password Reset',
-      `Hello ${body.firstName},\n\nThank you for registering with BP Ventures! You can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
+      `Hello ${body.Names},\n\nThank you for registering with BP Ventures! You can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`,
     );
+    return { userSave, encryptedHexMessage };
+  }
 
-    return userSave
+  async forgotMyPassword(email: string, domain: string) {
+    try {
+      const userExists = await this.userRepository.findOne({
+        where: { email: email },
+      });
+      if (!userExists) throw new BadRequestException('User does not exists');
+      // Función para cifrar un mensaje usando XOR y convertirlo a hexadecimal
+      function encryptToHex(text, key) {
+        let encryptedHex = '';
+        for (let i = 0; i < text.length; i++) {
+          const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+          encryptedHex += charCode.toString(16).padStart(2, '0'); // Convierte a hexadecimal y rellena con ceros si es necesario
+        }
+        return encryptedHex;
+      }
+
+      // Cifrar el mensaje
+      const encryptedHexMessage = encryptToHex(email, 'secretkey');
+      const resetLink = `${domain}/forgotPassword/${encryptedHexMessage}`; // Usar el dominio del frontend
+      await this.mailService.sendMail(
+        email,
+        'BP Ventures - Password Reset',
+        `Hello ${userExists.Names},\n\nYou can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`,
+      );
+      return { message: 'Password reset link has been sent to your email!' };
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    const email = atob(token);
+    function decryptFromHex(encryptedHex: string, key: string) {
+      let decryptedText = '';
+      for (let i = 0; i < encryptedHex.length; i += 2) {
+        const hexPair = encryptedHex.slice(i, i + 2);
+        const charCode =
+          parseInt(hexPair, 16) ^ key.charCodeAt((i / 2) % key.length);
+        decryptedText += String.fromCharCode(charCode);
+      }
+      return decryptedText;
+    }
+
+    const decryptedMessage = decryptFromHex(token.toString(), 'secretkey');
+
     const user = await this.userRepository.findOne({
-      where: { email: email },
+      where: { email: decryptedMessage },
     });
+
     if (!user) throw new BadRequestException('Invalid token');
     user.password = await hashPassword(newPassword);
     await this.userRepository.save(user);
   }
-  
-   validateMfa(token: string, secret:string):boolean {
+
+  validateMfa(token: string, secret: string): boolean {
     return speakeasy.totp.verify({
       secret: secret,
       encoding: 'base32',
       token: token,
-    })
+    });
   }
 
   async generateMfaSecret(email: string, userId: string) {
@@ -91,32 +138,4 @@ export class AuthService {
     const otpAuthUrl = secret.otpauth_url;
     return await qrcode.toDataURL(otpAuthUrl);
   }
-
-  async forgotMyPassword(email:string){
-
-    try {
-      const userExists = await this.userRepository.findOne({
-        where: { email: email },
-      });
-      if (!userExists) throw new BadRequestException('User does not exists');
-  
-      const emailEncrypted = btoa(email);
-  
-      const resetLink = `http://localhost:3001/forgotPassword/${emailEncrypted}`;
-  
-       // Send a registration confirmation email
-       await this.mailService.sendMail(
-        email,
-        'BP Ventures - Password Reset',
-        `Hello ${userExists.Names},\n\nYou can reset your password using the following link:\n\n${resetLink}\n\nBest regards,\nBP Ventures Team`
-      );
-  
-      return { message: 'Password reset link has been sent to your email!'}
-    } catch (error) {
-      throw new BadRequestException(error)
-    }
-
-  }
-
-
 }
