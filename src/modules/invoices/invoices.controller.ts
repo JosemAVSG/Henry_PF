@@ -95,7 +95,8 @@ export class InvoicesController {
   @Delete(':invoiceId')
   async deleteInvoice(@Param('invoiceId') invoiceId: number) {
     try {
-      return this.invoicesService.deleteInvoice(invoiceId);
+      await this.invoicesService.deleteInvoice(invoiceId);
+      return {message: 'deleted'}
     } catch (error) {
       throw new BadRequestException(error);
     }
