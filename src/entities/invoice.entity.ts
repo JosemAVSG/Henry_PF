@@ -7,7 +7,7 @@ export class Invoice {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({nullable:true})
+    @Column({nullable:true, unique:true})
     number: string;
 
     @Column({nullable:true})

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from '../../entities/invoice.entity';
 import { Repository } from 'typeorm';
@@ -30,14 +30,22 @@ export class InvoicesService {
             userId,
             invoiceStatusId
         } = createInvoiceDto;
-
-        const invoiceStatus = await this.invoiceStatusRepository.findOneBy({id: invoiceStatusId});
-        const user = await this.userRepository.findOneBy({id: userId});
-
-        if (!invoiceStatus || !user) {
-          throw new Error('invoiceStatus or user not found');
+    
+        // Check if an invoice with the same number already exists
+        const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
+        if (existingInvoice) {
+            throw new BadRequestException('Ya existe una factura con este número');
         }
     
+        // Ensure invoiceStatus and user exist
+        const invoiceStatus = await this.invoiceStatusRepository.findOneBy({ id: invoiceStatusId });
+        const user = await this.userRepository.findOneBy({ id: userId });
+    
+        if (!invoiceStatus || !user) {
+            throw new Error('invoiceStatus or user not found');
+        }
+    
+        // Create and save the new invoice
         const invoice = this.invoiceRepository.create({
             number: invoiceNumber,
             path,
@@ -51,6 +59,7 @@ export class InvoicesService {
         const result = await this.invoiceRepository.save(invoice);
         return result;
     }
+    
 
 
     async getInvoicesByUser(

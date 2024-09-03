@@ -53,9 +53,9 @@ async function bootstrap() {
   .setTitle('BP Ventures API')
   .setDescription('Endpoints de BP Ventures')
   .setVersion('1.0')
-  .addServer('https://api.1rodemayo.com')  // Reemplaza con tu dominio
+  .addServer('https://api.bpventures.com.ar')  // Reemplaza con tu dominio
   .build();
-
+  
   const document = SwaggerModule.createDocument(app, config);
 
    // Configura la ruta para acceder a Swagger

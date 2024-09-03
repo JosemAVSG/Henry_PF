@@ -46,4 +46,8 @@ export class SignUpDto {
   @IsOptional()
   @IsBoolean()
   isAdmin?: boolean;
+
+  @IsOptional()
+  @IsString()
+  domain: string;
 }
