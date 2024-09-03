@@ -85,7 +85,8 @@ export class InvoicesController {
     try {
       return this.invoicesService.getDonwloadInvoicesCopy(
         userId,
-        invoiceId
+        invoiceId,
+        res
       );
     } catch (error) {
       throw new BadRequestException(error);
