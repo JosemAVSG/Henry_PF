@@ -13,7 +13,7 @@ export class Voucher {
   path: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  issueDate: Date; // Fecha de Emisión
+  paymentDate: Date; // Fecha de Emisión
 
   @Column('decimal', { precision: 10, scale: 2 })
   amount: number;

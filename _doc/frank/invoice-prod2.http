@@ -1,12 +1,12 @@
 ### 
-GET https://api.1rodemayo.com/invoices/
+GET https://api.bpventures.com.ar/invoices/
 
 ### Obtener facturas por usuario
-GET https://api.1rodemayo.com/invoices/1?page=1&limit=10
+GET https://api.bpventures.com.ar/invoices/1?page=1&limit=10
 Content-Type: application/json
 
 ### Crear una nueva factura
-POST https://api.1rodemayo.com/invoices
+POST https://api.bpventures.com.ar/invoices
 Content-Type: application/json
 
 {

@@ -12,7 +12,7 @@ export class CreateVoucherDto {
 
   @IsNotEmpty()
   @IsDate()
-  issueDate: Date;
+  paymentDate: Date;
 
   @IsNotEmpty()
   @IsNumber()

@@ -18,6 +18,7 @@ export class InvoicesService {
         private invoiceStatusRepository: Repository<InvoiceStatus>,
         
     ){}
+   
     async createInvoice(createInvoiceDto: CreateInvoiceDto) {
         const {
             invoiceNumber,
@@ -107,4 +108,10 @@ export class InvoicesService {
         return {filePath, fileName: invoiceCopy.number}
 
     }
+
+    async deleteInvoice(id: number): Promise<void> {
+        const invoice = await this.invoiceRepository.findOneBy({id: id});
+        await this.invoiceRepository.remove(invoice);
+    }
+
 }

@@ -27,7 +27,7 @@ export class VouchersController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: './uploads/vouchers',
         filename: (req, file, cb) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -47,7 +47,7 @@ export class VouchersController {
   async createVoucher(
     @Body() createVoucherDto: CreateVoucherDto,
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<Voucher> {
+  ) {
     if (file) {
       createVoucherDto.path = file.path;
     }

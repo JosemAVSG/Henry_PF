@@ -28,8 +28,8 @@ import { VouchersModule } from './modules/vouchers/vouchers.module';
       global: true
     }),
     DeliverablesModule,
+    VouchersModule,
     InvoicesModule,
-    VouchersModule
     ],
   controllers: [AppController],
   providers: [AppService],
