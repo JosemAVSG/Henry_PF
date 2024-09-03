@@ -44,9 +44,11 @@ export class DeliverablesService {
     return response.data.webViewLink; // esto es una url para ver el archivo
   }
 
-  async create(createDeliverableDto: CreateDeliverableDto) {
+  async create(
+    createDeliverableDto: CreateDeliverableDto, 
+    userId: number
+  ) {
     const {name, path, deliverableTypeId, isFolder, parentId} = createDeliverableDto
-
 
     const deliverableType = await this.deliverableTypeRepository.findOneBy({
       id: deliverableTypeId,
@@ -64,8 +66,29 @@ export class DeliverablesService {
       parentId,
     })
     
-    const result = this.deliverableRepository.save(deliverable);
-    return result;
+    const deliveryResult = await this.deliverableRepository.save(deliverable);
+
+    let ownerPermissionTypeId = 1;
+    let deliverableId = deliveryResult.id;
+
+    const permissionObject =  this.permissionsRepository.create({
+      userId: userId.toString(),
+      user: await this.userRepository.findOneBy({id: Number(userId)}),
+
+      permissionTypeId: ownerPermissionTypeId,
+      permissionType: await this.permissionTypeRepository.findOneBy(
+          {id: Number(ownerPermissionTypeId)}
+      ),
+      
+      deliverable: await this.deliverableRepository.findOneBy(
+        {id: deliverableId}
+      ),
+      deliverableId: deliverableId.toString(),
+    })
+
+    const permissionResult = await this.permissionsRepository.save(permissionObject)
+
+    return permissionResult;
   }
 
   async findAll(
