@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors,  Req, BadRequestException, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors,  Req, BadRequestException, Put, Res, HttpException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -21,6 +21,7 @@ export class DeliverablesController {
   ) {}
 
   @Post('file')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
       FileInterceptor('file', {
           storage: diskStorage({
@@ -46,10 +47,11 @@ export class DeliverablesController {
   ) {
     try {
       let userId = req?.user?.id || 1;
+      let isFolder = false;
 
       createDeliverableDto.path = file ? file.path : null;
             
-      return this.deliverablesService.create(createDeliverableDto, userId);
+      return this.deliverablesService.create(createDeliverableDto, userId, isFolder);
 
     } catch (error) {
       throw new BadRequestException(error);
@@ -101,11 +103,16 @@ export class DeliverablesController {
       const userId =  req.user.id;
       const folderName = createDeliverableDto.name;
       const relativePath = createDeliverableDto.path;
+      const isFolder = true;
       const folderPath = path.join(__dirname, '..', 'uploads/deliverables',relativePath,  folderName);
       
       if (!fs.existsSync(folderPath)) {
         fs.mkdirSync(folderPath, { recursive: true });
-        await this.deliverablesService.create(createDeliverableDto, userId);
+        await this.deliverablesService.create(
+          createDeliverableDto, 
+          userId, 
+          isFolder
+        );
         return `Folder ${folderName} created successfully`;
       } else {
         return `Folder ${folderName} already exists`;
@@ -122,13 +129,13 @@ export class DeliverablesController {
       @Req() req: Request,
   ) {
     const userId =  req.user.id;
-    
-    return this.deliverablesService.create(createDeliverableDto, userId);
+    const isFolder = false;
+    return this.deliverablesService.create(createDeliverableDto, userId, isFolder);
   }
 
 
   @Get('user/:userId')
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   findAll(
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
@@ -154,6 +161,28 @@ export class DeliverablesController {
       throw new BadRequestException(error);
     }
   }
+
+  @Get('download/:id')
+  async downloadFile(@Param('id') id: string, @Res() res: Response) {
+    // try {
+    //   // Obtener la información del archivo desde el servicio
+    //   const { filePath, fileName, fileType } = await this.deliverablesService.getFileDetails(id);
+
+    //   // Crear un stream para el archivo
+    //   const fileStream = createReadStream(join(process.cwd(), filePath));
+      
+    //   res.set({
+    //     'Content-Type': 'application/octet-stream',
+    //     'Content-Disposition': `attachment; filename="${fileName}.${fileType}"`,
+    //   });
+
+    //   // Enviar el archivo como respuesta
+    //   fileStream.pipe(res);
+    // } catch (error) {
+    //   throw new HttpException('Error al descargar el archivo', HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
+  }
+
 
   @Patch(':id')
   update(

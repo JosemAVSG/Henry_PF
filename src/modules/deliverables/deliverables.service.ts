@@ -46,9 +46,10 @@ export class DeliverablesService {
 
   async create(
     createDeliverableDto: CreateDeliverableDto, 
-    userId: number
+    userId: number,
+    isFolder: boolean 
   ) {
-    const {name, path, deliverableTypeId, isFolder, parentId} = createDeliverableDto
+    const {name, path, deliverableTypeId, parentId} = createDeliverableDto
 
     const deliverableType = await this.deliverableTypeRepository.findOneBy({
       id: deliverableTypeId,
