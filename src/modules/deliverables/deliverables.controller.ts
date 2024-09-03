@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors,  Req, BadRequestException, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, UseInterceptors,  Req, BadRequestException, Put, Res, HttpException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import * as fs from 'fs-extra';
+import * as path from 'path';
 import { DeliverablesService } from './deliverables.service';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
@@ -15,9 +16,12 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('deliverables')
 @Controller('deliverables')
 export class DeliverablesController {
-  constructor(private readonly deliverablesService: DeliverablesService) {}
+  constructor(
+    private readonly deliverablesService: DeliverablesService
+  ) {}
 
-  @Post()
+  @Post('file')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
       FileInterceptor('file', {
           storage: diskStorage({
@@ -33,18 +37,105 @@ export class DeliverablesController {
                   callback(null, filename);
               },
           }),
+          limits: { fileSize: 10 * 1024 * 1024 }, // Límite de tamaño del archivo: 10 MB
       }),
   )
-  async createInvoice(
-      @UploadedFile() file: Express.Multer.File,
-      @Body() createDeliverableDto: CreateDeliverableDto
+  async createDeliverableFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createDeliverableDto: CreateDeliverableDto,
+    @Req() req: Request,
   ) {
+    try {
+      let userId = req?.user?.id || 1;
+      let isFolder = false;
+
       createDeliverableDto.path = file ? file.path : null;
-      return this.deliverablesService.create(createDeliverableDto);
+            
+      return this.deliverablesService.create(createDeliverableDto, userId, isFolder);
+
+    } catch (error) {
+      throw new BadRequestException(error);
+    } 
   }
 
+  
+  @Put('file')
+  @UseInterceptors(
+      FileInterceptor('file', {
+          storage: diskStorage({
+              destination: async (req, file, callback) => {
+                  const uploadPath = './uploads/deliverables';
+                  await fs.ensureDir(uploadPath); // Crea el directorio si no existe
+                  callback(null, uploadPath);
+              },
+              filename: (req, file, callback) => {
+                  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+                  const ext = extname(file.originalname);
+                  const filename = `${uniqueSuffix}${ext}`;
+                  callback(null, filename);
+              },
+          }),
+          limits: { fileSize: 10 * 1024 * 1024 }, // Límite de tamaño del archivo: 10 MB
+      }),
+  )
+  async updateDeliverableFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createDeliverableDto: CreateDeliverableDto,
+    @Req() req: Request,
+  ) {
+    try {
+      let userId = req?.user?.id || 1;
+      createDeliverableDto.path = file ? file.path : null;
+            
+      //return this.deliverablesService.update(createDeliverableDto, userId);
+
+    } catch (error) {
+      throw new BadRequestException(error);
+    } 
+  }
+
+  @Post('folder')
+  async createFolderDeliverable(
+      @Body() createDeliverableDto: CreateDeliverableDto,
+      @Req() req: Request,
+  ) {
+    try {
+      const userId =  req.user.id;
+      const folderName = createDeliverableDto.name;
+      const relativePath = createDeliverableDto.path;
+      const isFolder = true;
+      const folderPath = path.join(__dirname, '..', 'uploads/deliverables',relativePath,  folderName);
+      
+      if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+        await this.deliverablesService.create(
+          createDeliverableDto, 
+          userId, 
+          isFolder
+        );
+        return `Folder ${folderName} created successfully`;
+      } else {
+        return `Folder ${folderName} already exists`;
+      }
+      
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Post('link')
+  async createLinkDeliverable(
+      @Body() createDeliverableDto: CreateDeliverableDto,
+      @Req() req: Request,
+  ) {
+    const userId =  req.user.id;
+    const isFolder = false;
+    return this.deliverablesService.create(createDeliverableDto, userId, isFolder);
+  }
+
+
   @Get('user/:userId')
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   findAll(
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
@@ -54,9 +145,8 @@ export class DeliverablesController {
     @Req() req: Request,
   ) {
     try {
-      // console.log(req.user);
-      // const isAdmin =  req.user.isAdmin
-      const isAdmin =  true;
+      const isAdmin =  req.user.isAdmin
+      //const isAdmin =  true;
       return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin);
     } catch (error) {
       throw new BadRequestException(error);
@@ -71,6 +161,28 @@ export class DeliverablesController {
       throw new BadRequestException(error);
     }
   }
+
+  @Get('download/:id')
+  async downloadFile(@Param('id') id: string, @Res() res: Response) {
+    // try {
+    //   // Obtener la información del archivo desde el servicio
+    //   const { filePath, fileName, fileType } = await this.deliverablesService.getFileDetails(id);
+
+    //   // Crear un stream para el archivo
+    //   const fileStream = createReadStream(join(process.cwd(), filePath));
+      
+    //   res.set({
+    //     'Content-Type': 'application/octet-stream',
+    //     'Content-Disposition': `attachment; filename="${fileName}.${fileType}"`,
+    //   });
+
+    //   // Enviar el archivo como respuesta
+    //   fileStream.pipe(res);
+    // } catch (error) {
+    //   throw new HttpException('Error al descargar el archivo', HttpStatus.INTERNAL_SERVER_ERROR);
+    // }
+  }
+
 
   @Patch(':id')
   update(
