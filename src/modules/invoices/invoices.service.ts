@@ -6,7 +6,8 @@ import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
 import { UserEntity } from '../../entities/user.entity';
 import { join } from 'path';
 import { CreateInvoiceDto } from './dto/create-invoices.dto';
-
+import { existsSync } from 'fs';
+import { Response } from 'express';
 @Injectable()
 export class InvoicesService {      
     constructor(
@@ -94,18 +95,28 @@ export class InvoicesService {
 
     }
 
-    async getDonwloadInvoicesCopy(userId: number,invoiceId: number) {
+    async getDonwloadInvoicesCopy(userId: number,invoiceId: number, res: Response) {
 
-        const user = await this.userRepository.findOneBy({id:userId})
-        if(!user) throw new Error('user not exists');
-
-        const invoiceCopy = await this.invoiceRepository.findOneBy({id:invoiceId})
-
-        if(!invoiceCopy) throw new Error('invoice not exists');
-
-        const filePath = join(__dirname, `../../../${invoiceCopy.path}`);
-
-        return {filePath, fileName: invoiceCopy.number}
+        const user = await this.userRepository.findOneBy({ id: userId });
+        if (!user) throw new Error('User does not exist');
+    
+        const invoiceCopy = await this.invoiceRepository.findOneBy({ id: invoiceId });
+        if (!invoiceCopy) throw new Error('Invoice does not exist');
+    
+        const filePath = join(__dirname, '../../upload/invoices', invoiceCopy.path);
+    
+        if (!existsSync(filePath)) {
+            throw new Error('Invoice file not found');
+        }
+    
+        // Enviar el archivo directamente como respuesta
+        return res.download(filePath, invoiceCopy.number);
 
     }
+
+    async deleteInvoice(id: number): Promise<void> {
+        const invoice = await this.invoiceRepository.findOneBy({id: id});
+        await this.invoiceRepository.remove(invoice);
+    }
+
 }
