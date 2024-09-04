@@ -25,6 +25,18 @@ import { ApiTags } from '@nestjs/swagger';
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
+  @Get('check-invoice-number')
+  async checkInvoiceNumber(
+    @Query('invoiceNumber') invoiceNumber: string,
+  ): Promise<{ exists: boolean }> {
+    try {
+      const exists = await this.invoicesService.checkInvoiceNumberExists(invoiceNumber);
+      return { exists };
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  
   @Get(':userId')
   async getInvoicesByUser(
     @Param('userId') userId: number,

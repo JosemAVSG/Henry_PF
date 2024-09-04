@@ -23,7 +23,7 @@ export class MailService {
   async sendMail(to: string, subject: string, text: string, html?: string): Promise<void> {
     try {
       await this.transporter.sendMail({
-        from: `"Tu Nombre" <${process.env.EMAIL_USER}>`, // Dirección del remitente
+        from: `"Equipo de BP Ventures" <${process.env.EMAIL_USER}>`, // Dirección del remitente
         to, // Dirección del destinatario
         subject, // Asunto del correo
         text, // Texto plano del correo

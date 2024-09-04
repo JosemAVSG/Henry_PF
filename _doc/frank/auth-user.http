@@ -1,3 +1,8 @@
+### Verificar si un correo electrónico ya existe
+
+GET http://localhost:3000/auth/check-email?email=fgp555@gmail.com
+Accept: application/json
+
 ### get paginated users
 GET http://localhost:3000/users?page=16&limit=2
 

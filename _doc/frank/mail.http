@@ -19,7 +19,7 @@ Content-Type: application/json
   "LastName": "Doe",
   "Position": "Manager",
   "isAdmin": true,
-  "domain": "example.com"
+  "domain": "https://example.com"
 }
 
 ### signin
@@ -56,5 +56,5 @@ Content-Type: application/json
 
 {
   "email": "fgp555@gmail.com",
-  "domain": "example.com"
+  "domain": "https://example.com"
 }

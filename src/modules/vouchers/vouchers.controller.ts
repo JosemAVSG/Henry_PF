@@ -82,7 +82,7 @@ export class VouchersController {
   }
 
   @Delete(':id')
-  async deleteVoucher(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  async deleteVoucher(@Param('id', ParseIntPipe) id: number) {
     return this.vouchersService.deleteVoucher(id);
   }
 }

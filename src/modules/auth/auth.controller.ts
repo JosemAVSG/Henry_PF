@@ -24,6 +24,16 @@ export class AuthController {
     private readonly jwtService: JwtService,
   ) {}
 
+  @Get('check-email')
+  async checkEmailExists(@Query('email') email: string) {
+    try {
+      const exists = await this.authService.checkEmailExists(email);
+      return { exists };
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
   @Post('signin')
   async signIn(@Body() Crendential: SingInDto) {
     const { email, password, mfa } = Crendential;

@@ -67,8 +67,8 @@ export class VouchersService {
     return this.voucherRepository.save(voucher);
   }
 
-  async deleteVoucher(id: number): Promise<void> {
+  async deleteVoucher(id: number) {
     const voucher = await this.getVoucherById(id);
-    await this.voucherRepository.remove(voucher);
+    return await this.voucherRepository.remove(voucher);
   }
 }
