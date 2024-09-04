@@ -19,6 +19,10 @@ export class InvoicesService {
         private invoiceStatusRepository: Repository<InvoiceStatus>,
         
     ){}
+    async checkInvoiceNumberExists(invoiceNumber: string): Promise<boolean> {
+        const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
+        return !!existingInvoice;
+    }
    
     async createInvoice(createInvoiceDto: CreateInvoiceDto) {
         const {

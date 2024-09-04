@@ -15,3 +15,6 @@ Content-Type: application/json
   "userId": 1,
   "invoiceStatusId": 2
 }
+
+###
+GET http://localhost:3000/invoices/check-invoice-number?invoiceNumber=INV-001
