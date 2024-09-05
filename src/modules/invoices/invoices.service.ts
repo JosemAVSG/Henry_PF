@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from '../../entities/invoice.entity';
 import { Repository } from 'typeorm';
@@ -64,6 +64,63 @@ export class InvoicesService {
         return result;
     }
     
+    async updateInvoice(id: number, updateInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
+        const {
+            invoiceNumber,
+            path,
+            issueDate,
+            dueDate,
+            amount,
+            userId,
+            invoiceStatusId
+        } = updateInvoiceDto;
+
+        // Find the invoice to update
+        const invoice = await this.invoiceRepository.findOneBy({ id });
+        if (!invoice) {
+            throw new BadRequestException('Invoice not found');
+        }
+
+        // Check if another invoice with the same number exists
+        if (invoiceNumber && invoiceNumber !== invoice.number) {
+            const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
+            if (existingInvoice) {
+                throw new BadRequestException('Ya existe una factura con este número');
+            }
+        }
+
+        // Ensure invoiceStatus and user exist
+        const invoiceStatus = await this.invoiceStatusRepository.findOneBy({ id: invoiceStatusId });
+        const user = await this.userRepository.findOneBy({ id: userId });
+
+        if (!invoiceStatus || !user) {
+            throw new BadRequestException('invoiceStatus or user not found');
+        }
+
+        // Update invoice properties
+        invoice.number = invoiceNumber || invoice.number;
+        invoice.path = path || invoice.path;
+        invoice.issueDate = issueDate || invoice.issueDate;
+        invoice.dueDate = dueDate || invoice.dueDate;
+        invoice.amount = amount || invoice.amount;
+        invoice.user = user;
+        invoice.invoiceStatus = invoiceStatus;
+
+        return this.invoiceRepository.save(invoice);
+    }
+
+    async getInvoiceById(id: number): Promise<Invoice> {
+        const invoice = await this.invoiceRepository.findOne({
+            where: { id },
+            relations: ['user', 'invoiceStatus'], // Adjust if needed
+        });
+        
+        if (!invoice) {
+            throw new NotFoundException(`Invoice with ID ${id} not found`);
+        }
+
+        return invoice;
+    }
 
 
     async getInvoicesByUser(

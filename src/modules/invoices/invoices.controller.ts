@@ -10,6 +10,7 @@ import {
   Res,
   BadRequestException,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -83,6 +84,48 @@ export class InvoicesController {
       // Asigna el path del archivo al DTO
       createInvoiceDto.path = file ? file.path : null;
       return this.invoicesService.createInvoice(createInvoiceDto);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Patch(':invoiceId')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: async (req, file, callback) => {
+          const uploadPath = './uploads/invoices';
+          await fs.ensureDir(uploadPath); // Crea el directorio si no existe
+          callback(null, uploadPath);
+        },
+        filename: (req, file, callback) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          const filename = `${uniqueSuffix}${ext}`;
+          callback(null, filename);
+        },
+      }),
+    }),
+  )  
+  async updateInvoice(
+    @Param('invoiceId') invoiceId: number,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() updateInvoiceDto: CreateInvoiceDto,
+  ) {
+    try {
+      // Asigna el path del archivo al DTO solo si el archivo es nuevo
+      updateInvoiceDto.path = file ? file.path : undefined;
+      return this.invoicesService.updateInvoice(invoiceId, updateInvoiceDto);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Get('getbyid/:id')
+  async getInvoiceById(@Param('id') id: number) {
+    try {
+      return await this.invoicesService.getInvoiceById(id);
     } catch (error) {
       throw new BadRequestException(error);
     }
