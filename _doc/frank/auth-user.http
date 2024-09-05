@@ -32,7 +32,7 @@ Content-Type: application/json
   "LastName": "Doe",
   "Position": "Manager",
   "isAdmin": true,
-  "domain": "example.com"
+  "domain": "http://localhost:3001"
 }
 
 ### signin
