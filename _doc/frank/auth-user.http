@@ -72,3 +72,11 @@ Content-Type: application/json
 DELETE http://localhost:3000/users/1
 
 
+###
+POST http://localhost:3000/auth/forgotPassword
+Content-Type: application/json
+
+{
+  "email": "fgp555@gmail.com",
+  "domain": "http://localhost:3001"
+}
