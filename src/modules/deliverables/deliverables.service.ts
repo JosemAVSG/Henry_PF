@@ -97,11 +97,12 @@ export class DeliverablesService {
     page: number = 1,
     pageSize: number = 10,
     parentId: number = null,
-    orderBy: number,
+    orderBy:  'name' | 'date' | 'category',
     isAdmin: boolean,
+    orderOrientation: 'ASC' | 'DESC' = 'DESC',
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
-
+    
     const queryBuilder = this.deliverableRepository
       .createQueryBuilder('deliverable')
       .leftJoin('deliverable.deliverableType', 'deliverableType')
@@ -128,11 +129,17 @@ export class DeliverablesService {
 
     if (orderBy) {
       switch (orderBy) {
-        case 1:
-          queryBuilder.orderBy('"deliverableCategory.name"', 'DESC');
+        case null:
+          queryBuilder.orderBy('"lastDate"', orderOrientation);
           break;
-        case 2:
-          queryBuilder.orderBy('"deliverableName"', 'DESC');
+        case 'date':
+          queryBuilder.orderBy('"lastDate"', orderOrientation);
+          break;
+        case 'name':
+          queryBuilder.orderBy('"deliverableName"', orderOrientation);
+          break;
+        case 'category':
+          queryBuilder.orderBy('"deliverableCategory"', orderOrientation);
           break;
       }
     }

@@ -141,13 +141,14 @@ export class DeliverablesController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('parentId') parentId: number = null,
-    @Query('orderBy') orderBy: number = null,
+    @Query('orderBy') orderBy: 'name' | 'date' | 'category' = 'date',
+    @Query('orderOrientation') orderOrientation: 'ASC' | 'DESC' = 'DESC',
     @Req() req: Request,
   ) {
     try {
       const isAdmin =  req.user.isAdmin
       //const isAdmin =  true;
-      return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin);
+      return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation);
     } catch (error) {
       throw new BadRequestException(error);
     }
