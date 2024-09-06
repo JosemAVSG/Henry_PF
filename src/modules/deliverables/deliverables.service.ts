@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Deliverable } from '../../entities/deliverable.entity';
 import { DeliverableType } from '../../entities/deliverableType.entity';
 import { google } from 'googleapis';
@@ -97,11 +97,13 @@ export class DeliverablesService {
     page: number = 1,
     pageSize: number = 10,
     parentId: number = null,
-    orderBy: number,
+    orderBy:  'name' | 'date' | 'category',
     isAdmin: boolean,
+    orderOrientation: 'ASC' | 'DESC' = 'DESC',
+    deliverableIds: number[] = null,
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
-
+    
     const queryBuilder = this.deliverableRepository
       .createQueryBuilder('deliverable')
       .leftJoin('deliverable.deliverableType', 'deliverableType')
@@ -122,17 +124,22 @@ export class DeliverablesService {
       .groupBy(
         'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
       )
-      .orderBy('"lastDate"', 'DESC')
-      .limit(pageSize)
-      .offset(offset);
+      
+      
 
     if (orderBy) {
       switch (orderBy) {
-        case 1:
-          queryBuilder.orderBy('"deliverableCategory.name"', 'DESC');
+        case null:
+          queryBuilder.orderBy('"lastDate"', orderOrientation);
           break;
-        case 2:
-          queryBuilder.orderBy('"deliverableName"', 'DESC');
+        case 'date':
+          queryBuilder.orderBy('"lastDate"', orderOrientation);
+          break;
+        case 'name':
+          queryBuilder.orderBy('"deliverableName"', orderOrientation);
+          break;
+        case 'category':
+          queryBuilder.orderBy('"deliverableCategory"', orderOrientation);
           break;
       }
     }
@@ -144,14 +151,18 @@ export class DeliverablesService {
 
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
+      queryBuilder.limit(pageSize)
+      queryBuilder.offset(offset);
+    }else{
+      // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
+      if(deliverableIds){
+        queryBuilder.andWhere('deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)', { deliverableIds })
+        queryBuilder.limit(pageSize)
+        queryBuilder.offset(offset);
+      }
     }
 
     let result = await queryBuilder.getRawMany();
-
-    if (!parentId) {
-      //console.log(result);
-      result = this.findTopLevelItems(result);
-    }
 
     return result;
   }
@@ -173,29 +184,7 @@ export class DeliverablesService {
     return { message: 'Deliverable status updated' };
   }
 
-  // Función para construir el árbol
-/*  buildTree(items, parentId = null) {
-    return items
-      .filter(item => item.parentId === parentId)
-      .map(item => {
-        const children = buildTree(items, item.id);
-        if (children.length) {
-          item.children = children;
-        }
-        return item;
-*/
 
-  async getFilesFolder(parentId: number | null) {
-    if (parentId === 1)
-      return await this.deliverableRepository.find({
-        where: { parentId: null },
-      });
-
-    if (parentId > 1)
-      return await this.deliverableRepository.find({
-        where: { parentId: parentId - 1 },
-      });
-  }
 
   // Función para encontrar los elementos de nivel superior
   findTopLevelItems(items) {
@@ -259,6 +248,7 @@ export class DeliverablesService {
         deliverable: await this.deliverableRepository.findOneBy({id: deliverableId}),
         deliverableId: deliverableId.toString(),
       })
+
        return await this.permissionsRepository.save(permissionObject)
 
     })
@@ -276,5 +266,18 @@ export class DeliverablesService {
 
   }
 
-  
+  async getByName(name: string, userId:string) {
+    console.log(name);
+    
+    const data = await this.deliverableRepository.find({
+      where: { name: ILike(`%${name}%`),
+      permissions:{user: {id: Number(userId)}}
+    },
+      relations: { permissions:true },
+    });
+    console.log(data);
+    
+    if(!data) throw new NotFoundException(`Deliverable with name ${name} not found`)
+    return data;
+  }
 }
