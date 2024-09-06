@@ -135,7 +135,7 @@ export class DeliverablesController {
 
 
   @Get('user/:userId')
-  //@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   async findAll(
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
@@ -146,9 +146,8 @@ export class DeliverablesController {
     @Req() req: Request,
   ) {
     try {
-      //const isAdmin =  req.user.isAdmin
-      const isAdmin =  true;
-      parentId = 4;
+      const isAdmin =  req.user.isAdmin
+      //const isAdmin =  true;
       let result = null;
       const deliverableResult = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation);
       
