@@ -135,8 +135,8 @@ export class DeliverablesController {
 
 
   @Get('user/:userId')
-  @UseGuards(AuthGuard)
-  findAll(
+  //@UseGuards(AuthGuard)
+  async findAll(
     @Param('userId') userId: number,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
@@ -146,9 +146,23 @@ export class DeliverablesController {
     @Req() req: Request,
   ) {
     try {
-      const isAdmin =  req.user.isAdmin
-      //const isAdmin =  true;
-      return this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation);
+      //const isAdmin =  req.user.isAdmin
+      const isAdmin =  true;
+      parentId = 4;
+      let result = null;
+      const deliverableResult = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation);
+      
+      if(parentId){
+        return deliverableResult;
+      }else{
+        const deliverableIds = deliverableResult.map(item => item.id);
+        console.log('los ids son deliverableIds'); 
+        console.log(deliverableIds); 
+        result = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation, deliverableIds);
+        return result
+      }
+
+
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -165,23 +179,20 @@ export class DeliverablesController {
 
   @Get('download/:id')
   async downloadFile(@Param('id') id: string, @Res() res: Response) {
-    // try {
-    //   // Obtener la información del archivo desde el servicio
-    //   const { filePath, fileName, fileType } = await this.deliverablesService.getFileDetails(id);
+    // const user = await this.userRepository.findOneBy({ id: userId });
+    // if (!user) throw new Error('User does not exist');
 
-    //   // Crear un stream para el archivo
-    //   const fileStream = createReadStream(join(process.cwd(), filePath));
-      
-    //   res.set({
-    //     'Content-Type': 'application/octet-stream',
-    //     'Content-Disposition': `attachment; filename="${fileName}.${fileType}"`,
-    //   });
+    // const invoiceCopy = await this.invoiceRepository.findOneBy({ id: invoiceId });
+    // if (!invoiceCopy) throw new Error('Invoice does not exist');
 
-    //   // Enviar el archivo como respuesta
-    //   fileStream.pipe(res);
-    // } catch (error) {
-    //   throw new HttpException('Error al descargar el archivo', HttpStatus.INTERNAL_SERVER_ERROR);
+    // const filePath = join(__dirname, '../../upload/invoices', invoiceCopy.path);
+
+    // if (!existsSync(filePath)) {
+    //     throw new Error('Invoice file not found');
     // }
+
+    // // Enviar el archivo directamente como respuesta
+    // return res.download(filePath, invoiceCopy.number);
   }
 
 
@@ -215,16 +226,6 @@ export class DeliverablesController {
     }
   }
 
-  @Get('files-folder/:parentId')
-  async getFilesFolder(
-    @Param('parentId') parentId: number,
-  ): Promise<Deliverable[]> {
-    try {
-      return this.deliverablesService.getFilesFolder(parentId);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
 
   @Get('permision/:deliverableId')
   async getPermision(@Param('deliverableId') deliverableId: number): Promise<Partial<Permission>[]> {
