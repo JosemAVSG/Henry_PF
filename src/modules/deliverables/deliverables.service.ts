@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Deliverable } from '../../entities/deliverable.entity';
 import { DeliverableType } from '../../entities/deliverableType.entity';
 import { google } from 'googleapis';
@@ -248,6 +248,7 @@ export class DeliverablesService {
         deliverable: await this.deliverableRepository.findOneBy({id: deliverableId}),
         deliverableId: deliverableId.toString(),
       })
+
        return await this.permissionsRepository.save(permissionObject)
 
     })
@@ -265,5 +266,18 @@ export class DeliverablesService {
 
   }
 
-  
+  async getByName(name: string, userId:string) {
+    console.log(name);
+    
+    const data = await this.deliverableRepository.find({
+      where: { name: ILike(`%${name}%`),
+      permissions:{user: {id: Number(userId)}}
+    },
+      relations: { permissions:true },
+    });
+    console.log(data);
+    
+    if(!data) throw new NotFoundException(`Deliverable with name ${name} not found`)
+    return data;
+  }
 }
