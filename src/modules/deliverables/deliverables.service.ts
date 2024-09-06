@@ -100,6 +100,7 @@ export class DeliverablesService {
     orderBy:  'name' | 'date' | 'category',
     isAdmin: boolean,
     orderOrientation: 'ASC' | 'DESC' = 'DESC',
+    deliverableIds: number[] = null,
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
     
@@ -123,9 +124,8 @@ export class DeliverablesService {
       .groupBy(
         'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
       )
-      .orderBy('"lastDate"', 'DESC')
-      .limit(pageSize)
-      .offset(offset);
+      
+      
 
     if (orderBy) {
       switch (orderBy) {
@@ -151,14 +151,18 @@ export class DeliverablesService {
 
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
+      queryBuilder.limit(pageSize)
+      queryBuilder.offset(offset);
+    }else{
+      // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
+      if(deliverableIds){
+        queryBuilder.andWhere('deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)', { deliverableIds })
+        queryBuilder.limit(pageSize)
+        queryBuilder.offset(offset);
+      }
     }
 
     let result = await queryBuilder.getRawMany();
-
-    if (!parentId) {
-      //console.log(result);
-      result = this.findTopLevelItems(result);
-    }
 
     return result;
   }
@@ -180,29 +184,7 @@ export class DeliverablesService {
     return { message: 'Deliverable status updated' };
   }
 
-  // Función para construir el árbol
-/*  buildTree(items, parentId = null) {
-    return items
-      .filter(item => item.parentId === parentId)
-      .map(item => {
-        const children = buildTree(items, item.id);
-        if (children.length) {
-          item.children = children;
-        }
-        return item;
-*/
 
-  async getFilesFolder(parentId: number | null) {
-    if (parentId === 1)
-      return await this.deliverableRepository.find({
-        where: { parentId: null },
-      });
-
-    if (parentId > 1)
-      return await this.deliverableRepository.find({
-        where: { parentId: parentId - 1 },
-      });
-  }
 
   // Función para encontrar los elementos de nivel superior
   findTopLevelItems(items) {
