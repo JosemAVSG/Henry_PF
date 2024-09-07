@@ -8,19 +8,30 @@ import { join } from 'path';
 import { CreateInvoiceDto } from './dto/create-invoices.dto';
 import { existsSync } from 'fs';
 import { Response } from 'express';
+import { Permission } from 'src/entities/permission.entity';
+import { PermissionType } from 'src/entities/permissionType.entity';
 import { Company } from 'src/entities/company.entity';
 @Injectable()
 export class InvoicesService {      
     constructor(
         @InjectRepository(Invoice)
         private invoiceRepository: Repository<Invoice>,
+
         @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
+        
         @InjectRepository(Company)
         private companyRepository: Repository<Company>,
+
         @InjectRepository(InvoiceStatus)
         private invoiceStatusRepository: Repository<InvoiceStatus>,
-        
+
+        @InjectRepository(Permissions)
+        private permissionsRepository: Repository<Permission>,
+
+        @InjectRepository(PermissionType)
+        private permissionTypeRepository: Repository<PermissionType>,
+    
     ){}
     // =====================================
     async checkInvoiceNumberExists(invoiceNumber: string): Promise<boolean> {
@@ -189,10 +200,59 @@ export class InvoicesService {
 
     }
 
-    async deleteInvoice(id: number): Promise<void> {
-        
+    async deleteInvoice(id: number): Promise<void> {    
         const invoice = await this.invoiceRepository.findOneBy({id: id});
         await this.invoiceRepository.remove(invoice);
     }
 
+    async getPermissions(invoiceId: number) {
+        const data = await this.permissionsRepository.find({
+            where: {invoice: {id: invoiceId}},
+            relations: { user: true, permissionType: true },
+            select: { permissionType: { name: true, id: true } },
+        });
+
+        const permissions = data.map((item) => {
+          return {
+            userId: item.userId,
+            permissionType: item.permissionType,
+          };
+        });
+    
+        return permissions;
+      }
+    
+
+      async updatePermissions(
+        invoiceId: number,
+        newPermission: Permission[],
+      ): Promise<Permission[]> {
+        const permissions = await this.permissionsRepository.find({
+          relations: { user: true, permissionType: true },
+          where: { invoice: { id: invoiceId } },
+        });
+        if (!permissions) {
+          return await this.permissionsRepository.save(newPermission);
+        }
+    
+        await this.permissionsRepository.remove(permissions);
+    
+        const result = newPermission.map(async (item) => {
+          const permissionObject = this.permissionsRepository.create({
+            userId: item.userId,
+            permissionTypeId: item.permissionTypeId,
+            user: await this.userRepository.findOneBy({ id: Number(item.userId) }),
+            permissionType: await this.permissionTypeRepository.findOneBy({
+              id: Number(item.permissionTypeId),
+            }),
+            invoice: await this.invoiceRepository.findOneBy({
+              id: invoiceId,
+            }),
+          });
+    
+          return await this.permissionsRepository.save(permissionObject);
+        });
+    
+        return await Promise.all(result);
+      }
 }
