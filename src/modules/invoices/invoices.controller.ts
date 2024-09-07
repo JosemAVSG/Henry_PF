@@ -11,6 +11,9 @@ import {
   BadRequestException,
   Delete,
   Patch,
+  UseGuards,
+  Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -20,7 +23,8 @@ import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoices.dto';
 import { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-
+import { AuthGuard } from '../../guards/auth.guards';
+import { Request } from 'express';
 @ApiTags('invoices')
 @Controller('invoices')
 export class InvoicesController {
@@ -148,8 +152,15 @@ export class InvoicesController {
     }
   }
   @Delete(':invoiceId')
-  async deleteInvoice(@Param('invoiceId') invoiceId: number) {
+  @UseGuards(AuthGuard)
+
+  async deleteInvoice(@Param('invoiceId') invoiceId: number,@Req() req: Request) {
     try {
+      const isAdmin = req.user.isAdmin;
+
+      if(!isAdmin){
+        throw new ForbiddenException('No tiene permisos para realizar esta acción');
+      }
       await this.invoicesService.deleteInvoice(invoiceId);
       return {message: 'deleted'}
     } catch (error) {
