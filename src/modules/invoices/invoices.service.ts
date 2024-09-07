@@ -185,6 +185,7 @@ export class InvoicesService {
     }
 
     async deleteInvoice(id: number): Promise<void> {
+        
         const invoice = await this.invoiceRepository.findOneBy({id: id});
         await this.invoiceRepository.remove(invoice);
     }
