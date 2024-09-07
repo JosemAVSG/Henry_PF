@@ -18,7 +18,12 @@ export class CompaniesService {
   }
 
   async findAll(): Promise<Company[]> {
-    return this.companyRepository.find({ relations: ['users', 'invoices'] });
+    return this.companyRepository.find({
+      relations: ['users', 'invoices'],
+      order: {
+        id: 'ASC', // Ordenar por ID en orden ascendente. Puedes usar 'DESC' si prefieres descendente.
+      },
+    });
   }
 
   async findOne(id: number): Promise<Company> {
@@ -39,6 +44,7 @@ export class CompaniesService {
   }
 
   async remove(id: number): Promise<void> {
+    console.log("id",id)
     const company = await this.findOne(id);
     await this.companyRepository.remove(company);
   }

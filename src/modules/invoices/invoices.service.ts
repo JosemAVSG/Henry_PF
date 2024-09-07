@@ -26,8 +26,8 @@ export class InvoicesService {
         @InjectRepository(InvoiceStatus)
         private invoiceStatusRepository: Repository<InvoiceStatus>,
 
-        @InjectRepository(Permissions)
-        private permissionsRepository: Repository<Permission>,
+        // @InjectRepository(Permissions)
+        // private permissionsRepository: Repository<Permission>,
 
         @InjectRepository(PermissionType)
         private permissionTypeRepository: Repository<PermissionType>,
@@ -205,54 +205,54 @@ export class InvoicesService {
         await this.invoiceRepository.remove(invoice);
     }
 
-    async getPermissions(invoiceId: number) {
-        const data = await this.permissionsRepository.find({
-            where: {invoice: {id: invoiceId}},
-            relations: { user: true, permissionType: true },
-            select: { permissionType: { name: true, id: true } },
-        });
+    // async getPermissions(invoiceId: number) {
+    //     const data = await this.permissionsRepository.find({
+    //         where: {invoice: {id: invoiceId}},
+    //         relations: { user: true, permissionType: true },
+    //         select: { permissionType: { name: true, id: true } },
+    //     });
 
-        const permissions = data.map((item) => {
-          return {
-            userId: item.userId,
-            permissionType: item.permissionType,
-          };
-        });
+    //     const permissions = data.map((item) => {
+    //       return {
+    //         userId: item.userId,
+    //         permissionType: item.permissionType,
+    //       };
+    //     });
     
-        return permissions;
-      }
+    //     return permissions;
+    //   }
     
 
-      async updatePermissions(
-        invoiceId: number,
-        newPermission: Permission[],
-      ): Promise<Permission[]> {
-        const permissions = await this.permissionsRepository.find({
-          relations: { user: true, permissionType: true },
-          where: { invoice: { id: invoiceId } },
-        });
-        if (!permissions) {
-          return await this.permissionsRepository.save(newPermission);
-        }
+    //   async updatePermissions(
+    //     invoiceId: number,
+    //     newPermission: Permission[],
+    //   ): Promise<Permission[]> {
+    //     const permissions = await this.permissionsRepository.find({
+    //       relations: { user: true, permissionType: true },
+    //       where: { invoice: { id: invoiceId } },
+    //     });
+    //     if (!permissions) {
+    //       return await this.permissionsRepository.save(newPermission);
+    //     }
     
-        await this.permissionsRepository.remove(permissions);
+    //     await this.permissionsRepository.remove(permissions);
     
-        const result = newPermission.map(async (item) => {
-          const permissionObject = this.permissionsRepository.create({
-            userId: item.userId,
-            permissionTypeId: item.permissionTypeId,
-            user: await this.userRepository.findOneBy({ id: Number(item.userId) }),
-            permissionType: await this.permissionTypeRepository.findOneBy({
-              id: Number(item.permissionTypeId),
-            }),
-            invoice: await this.invoiceRepository.findOneBy({
-              id: invoiceId,
-            }),
-          });
+    //     const result = newPermission.map(async (item) => {
+    //       const permissionObject = this.permissionsRepository.create({
+    //         userId: item.userId,
+    //         permissionTypeId: item.permissionTypeId,
+    //         user: await this.userRepository.findOneBy({ id: Number(item.userId) }),
+    //         permissionType: await this.permissionTypeRepository.findOneBy({
+    //           id: Number(item.permissionTypeId),
+    //         }),
+    //         invoice: await this.invoiceRepository.findOneBy({
+    //           id: invoiceId,
+    //         }),
+    //       });
     
-          return await this.permissionsRepository.save(permissionObject);
-        });
+    //       return await this.permissionsRepository.save(permissionObject);
+    //     });
     
-        return await Promise.all(result);
-      }
+    //     return await Promise.all(result);
+    //   }
 }

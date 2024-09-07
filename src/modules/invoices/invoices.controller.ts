@@ -169,29 +169,29 @@ export class InvoicesController {
     }
   }
 
-  @Get('permision/:invoiceId')
-  async getPermision(
-    @Param('invoiceId') invoiceId: number,
-  ) {
-    try {
-      return this.invoicesService.getPermissions(invoiceId);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
+  // @Get('permision/:invoiceId')
+  // async getPermision(
+  //   @Param('invoiceId') invoiceId: number,
+  // ) {
+  //   try {
+  //     return this.invoicesService.getPermissions(invoiceId);
+  //   } catch (error) {
+  //     throw new BadRequestException(error);
+  //   }
+  // }
 
-  @Put('permision/:invoiceId')
-  async createPermision(
-    @Param('invoiceId') invoiceId: number,
-    @Body() permission: any,
-  ): Promise<Permission[]> {
-    try {
-      return this.invoicesService.updatePermissions(
-        invoiceId,
-        permission,
-      );
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
+  // @Put('permision/:invoiceId')
+  // async createPermision(
+  //   @Param('invoiceId') invoiceId: number,
+  //   @Body() permission: any,
+  // ): Promise<Permission[]> {
+  //   try {
+  //     return this.invoicesService.updatePermissions(
+  //       invoiceId,
+  //       permission,
+  //     );
+  //   } catch (error) {
+  //     throw new BadRequestException(error);
+  //   }
+  // }
 }
