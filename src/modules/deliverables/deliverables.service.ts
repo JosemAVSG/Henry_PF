@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { ILike, Repository } from 'typeorm';
 import { Deliverable } from '../../entities/deliverable.entity';
 import { DeliverableType } from '../../entities/deliverableType.entity';
@@ -12,6 +13,8 @@ import { UserEntity } from 'src/entities/user.entity';
 @Injectable()
 export class DeliverablesService {
   constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    
     @InjectRepository(Deliverable)
     private deliverableRepository: Repository<Deliverable>,
 
@@ -105,43 +108,28 @@ export class DeliverablesService {
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
 
+    // Crear la subconsulta
     const queryBuilder = this.deliverableRepository
-      .createQueryBuilder('deliverable')
-      .leftJoin('deliverable.deliverableType', 'deliverableType')
-      .leftJoin('deliverable.permissions', 'permission')
-      .leftJoin('permission.permissionType', 'permissionType')
-      .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
-      .select([
-        'deliverable.id AS "id"',
-        'deliverable.parentId AS "parentId"',
-        'deliverable.name AS "deliverableName"',
-        'deliverable.isFolder AS "deliverableIsFolder"',
-        'deliverable.path AS "deliverablePath"',
-        'deliverableType.name AS "deliverableType"',
-        'deliverableCategory.name AS "deliverableCategory"',
-        `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
-        `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
-      ])
-      .groupBy(
-        'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
-      );
+    .createQueryBuilder('deliverable')
+    .leftJoin('deliverable.deliverableType', 'deliverableType')
+    .leftJoin('deliverable.permissions', 'permission')
+    .leftJoin('permission.permissionType', 'permissionType')
+    .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
+    .select([
+      'deliverable.id AS "id"',
+      'deliverable.parentId AS "parentId"',
+      'deliverable.name AS "deliverableName"',
+      'deliverable.isFolder AS "deliverableIsFolder"',
+      'deliverable.path AS "deliverablePath"',
+      'deliverableType.name AS "deliverableType"',
+      'deliverableCategory.name AS "deliverableCategory"',
+      `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
+      `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
+    ])
+    .groupBy(
+      'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
+    );
 
-    if (orderBy) {
-      switch (orderBy) {
-        case null:
-          queryBuilder.orderBy('"lastDate"', orderOrientation);
-          break;
-        case 'date':
-          queryBuilder.orderBy('"lastDate"', orderOrientation);
-          break;
-        case 'name':
-          queryBuilder.orderBy('"deliverableName"', orderOrientation);
-          break;
-        case 'category':
-          queryBuilder.orderBy('"deliverableCategory"', orderOrientation);
-          break;
-      }
-    }
     queryBuilder.where('deliverable.statusId = 1');
 
     if (!isAdmin && userId) {
@@ -150,23 +138,52 @@ export class DeliverablesService {
 
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
-      queryBuilder.limit(pageSize);
-      queryBuilder.offset(offset);
-    } else {
+    }else{
       // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
-      if (deliverableIds) {
-        queryBuilder.andWhere(
-          'deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)',
-          { deliverableIds },
-        );
-        queryBuilder.limit(pageSize);
-        queryBuilder.offset(offset);
+      if(deliverableIds){
+        queryBuilder.andWhere('deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)', { deliverableIds })
       }
     }
 
-    let result = await queryBuilder.getRawMany();
+    const queryBuilder2 =  this.dataSource
+      .createQueryBuilder()
+      .select('*')
+      .from("(" + queryBuilder.getQuery() + ")", "subquery")
+      .setParameters(queryBuilder.getParameters()); // Pasar parámetros de la subconsulta
+
+    // Aplicar filtros y ordenamientos adicionales
+    if (orderBy) {
+      switch (orderBy) {
+        case 'date':
+          queryBuilder2.orderBy('"lastDate"', orderOrientation);
+          break;
+        case 'name':
+          queryBuilder2.orderBy('"deliverableName"', orderOrientation);
+          break;
+        case 'category':
+          queryBuilder2.orderBy('"deliverableCategory"', orderOrientation);
+          break;
+        default:
+          queryBuilder2.orderBy('"lastDate"', orderOrientation);
+          break;
+      }
+    }
+
+    if (parentId) {
+      queryBuilder2.limit(pageSize)
+      queryBuilder2.offset(offset);
+    }else{
+      // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
+      if(deliverableIds){
+        queryBuilder2.limit(pageSize)
+        queryBuilder2.offset(offset);
+      }
+    }
+
+    const result = await queryBuilder2.getRawMany();
 
     return result;
+
   }
 
   findOne(id: number) {

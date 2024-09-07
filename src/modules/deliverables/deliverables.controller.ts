@@ -181,8 +181,8 @@ export class DeliverablesController {
         return deliverableResult;
       }else{
         const deliverableIds = deliverableResult.map(item => item.id);
-        console.log('los ids son deliverableIds'); 
-        console.log(deliverableIds); 
+        //console.log('los ids son deliverableIds'); 
+        //console.log(deliverableIds); 
         result = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation, deliverableIds);
         return result
       }
