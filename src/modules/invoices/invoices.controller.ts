@@ -14,6 +14,7 @@ import {
   UseGuards,
   Req,
   ForbiddenException,
+  Put,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -25,6 +26,7 @@ import { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../../guards/auth.guards';
 import { Request } from 'express';
+import { Permission } from 'src/entities/permission.entity';
 @ApiTags('invoices')
 @Controller('invoices')
 export class InvoicesController {
@@ -153,7 +155,6 @@ export class InvoicesController {
   }
   @Delete(':invoiceId')
   @UseGuards(AuthGuard)
-
   async deleteInvoice(@Param('invoiceId') invoiceId: number,@Req() req: Request) {
     try {
       const isAdmin = req.user.isAdmin;
@@ -163,6 +164,32 @@ export class InvoicesController {
       }
       await this.invoicesService.deleteInvoice(invoiceId);
       return {message: 'deleted'}
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Get('permision/:invoiceId')
+  async getPermision(
+    @Param('invoiceId') invoiceId: number,
+  ) {
+    try {
+      return this.invoicesService.getPermissions(invoiceId);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Put('permision/:invoiceId')
+  async createPermision(
+    @Param('invoiceId') invoiceId: number,
+    @Body() permission: any,
+  ): Promise<Permission[]> {
+    try {
+      return this.invoicesService.updatePermissions(
+        invoiceId,
+        permission,
+      );
     } catch (error) {
       throw new BadRequestException(error);
     }

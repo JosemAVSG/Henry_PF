@@ -5,9 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Invoice } from '../../entities/invoice.entity';
 import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
 import { UserEntity } from '../../entities/user.entity';
+import { Permission } from 'src/entities/permission.entity';
+import { PermissionType } from 'src/entities/permissionType.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invoice,InvoiceStatus, UserEntity])],
+  imports: [TypeOrmModule.forFeature([Invoice,InvoiceStatus, UserEntity,Permission,PermissionType])],
   providers: [InvoicesService],
   controllers: [InvoicesController]
 })

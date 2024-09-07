@@ -209,8 +209,9 @@ export class DeliverablesService {
   async getPermissions(deliverableId: number) {
     const data = await this.permissionsRepository.find({
       relations: { user: true, permissionType: true },
-      where: { deliverable: { id: deliverableId } },
+      where: { deliverable: { id: deliverableId }},
       select: { permissionType: { name: true, id: true } },
+      
     });
 
     const permissions = data.map((item) => {

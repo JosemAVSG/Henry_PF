@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { InvoiceStatus } from "./invoiceStatus.entity";
 import { UserEntity } from "./user.entity";
+import { Permission } from "./permission.entity";
 
 @Entity()
 export class Invoice {
@@ -22,7 +23,6 @@ export class Invoice {
     @Column('decimal', { precision: 10, scale: 2 })
     amount: number;
 
-
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP',   })
     createdAt: Date;
 
@@ -34,5 +34,8 @@ export class Invoice {
 
     @ManyToOne(()=> InvoiceStatus, invoiceStatus => invoiceStatus.invoices)
     invoiceStatus: InvoiceStatus
+
+    @OneToMany(() => Permission, permission => permission.invoice)
+    permissions: Permission[];
 
 }
