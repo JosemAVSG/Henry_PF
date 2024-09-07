@@ -26,7 +26,7 @@ export class InvoicesService {
         @InjectRepository(InvoiceStatus)
         private invoiceStatusRepository: Repository<InvoiceStatus>,
 
-        @InjectRepository(Permissions)
+        @InjectRepository(Permission)
         private permissionsRepository: Repository<Permission>,
 
         @InjectRepository(PermissionType)
