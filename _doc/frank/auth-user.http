@@ -32,7 +32,8 @@ Content-Type: application/json
   "LastName": "Doe",
   "Position": "Manager",
   "isAdmin": true,
-  "domain": "http://localhost:3001"
+  "domain": "http://localhost:3001",
+  "companyId": 1
 }
 
 ### signin
@@ -56,7 +57,8 @@ Content-Type: application/json
   "password": "password1234",
   "mfaEnabled": false,
   "active": true,
-  "isAdmin": true
+  "isAdmin": true,
+  "companyId": 2
 }
 
 ### signin
@@ -72,3 +74,11 @@ Content-Type: application/json
 DELETE http://localhost:3000/users/1
 
 
+###
+POST http://localhost:3000/auth/forgotPassword
+Content-Type: application/json
+
+{
+  "email": "fgp555@gmail.com",
+  "domain": "http://localhost:3001"
+}

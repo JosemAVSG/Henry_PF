@@ -7,19 +7,23 @@ import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { MailService } from '../mail/mail.service';
 import { SignUpDto } from 'src/interfaces/dtos/signup.dto';
+import { Company } from 'src/entities/company.entity';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    @InjectRepository(Company)
+    private companyRepository: Repository<Company>,
     private mailService: MailService, // Inject MailService
+
   ) {}
 
-    // Método para verificar si el correo electrónico ya existe
-    async checkEmailExists(email: string): Promise<boolean> {
-      const user = await this.userRepository.findOne({ where: { email: email } });
-      return !!user;
-    }
+  // Método para verificar si el correo electrónico ya existe
+  async checkEmailExists(email: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { email: email } });
+    return !!user;
+  }
 
   async signIn(email: string, password: string): Promise<UserEntity | null> {
     const user = await this.userRepository.findOne({ where: { email: email } });
@@ -36,103 +40,111 @@ export class AuthService {
 
   async signUpService(body: SignUpDto) {
     console.log('body', body);
-
+  
+    // Verificar si el usuario ya existe
     const userExists = await this.userRepository.findOne({
       where: { email: body.email },
     });
     if (userExists) throw new BadRequestException('User already exists');
-
-    const plainPassword = body.password; // Guardar la contraseña sin cifrar
+  
+    // Verificar si la compañía existe si se proporciona companyId
+    let company = null;
+    if (body.companyId) {
+      company = await this.companyRepository.findOne({ where: { id: body.companyId } });
+      if (!company) {
+        throw new BadRequestException('Company not found');
+      }
+    }
+  
+    // Guardar la contraseña sin cifrar para el correo
+    const plainPassword = body.password; 
     const hashedPassword = await hashPassword(body.password);
     body.password = hashedPassword;
-
-    const user = this.userRepository.create(body);
+  
+    // Crear el usuario y asignar la compañía si está presente
+    const user = this.userRepository.create({
+      ...body,
+      company,  // Asignar la compañía al usuario
+    });
+  
+    // Guardar el usuario en la base de datos
     const userSave = await this.userRepository.save(user);
-
+  
     // Función para cifrar un mensaje usando XOR y convertirlo a hexadecimal
     function encryptToHex(text: string, key: string) {
       let encryptedHex = '';
       for (let i = 0; i < text.length; i++) {
         const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-        encryptedHex += charCode.toString(16).padStart(2, '0'); // Convierte a hexadecimal y rellena con ceros si es necesario
+        encryptedHex += charCode.toString(16).padStart(2, '0');
       }
       return encryptedHex;
     }
-
+  
     // Cifrar el mensaje
     const encryptedHexMessage = encryptToHex(body.email, 'secretkey');
-
-    // Utiliza el dominio recibido desde el frontend
+  
+    // Utilizar el dominio recibido desde el frontend
     const resetLink = `${body.domain}/forgotPassword/${encryptedHexMessage}`;
-
-    // URL de la imagen que deseas incluir en el correo (asegúrate de que sea accesible públicamente)
-    const logoUrl = 'https://i.postimg.cc/BZ5YWZCk/bpventures-logo.png'; // Reemplaza con la URL real de tu imagen
-
-    // // Crear el contenido HTML del correo
-    // const htmlContent = `
-    //   <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-    //     <div style="text-align: center; margin-bottom: 20px;">
-    //       <img src="${logoUrl}" alt="BP Ventures Logo" style="max-width: 200px;">
-    //     </div>
-    //     <h2>Hola ${body.Names},</h2>
-    //     <p>¡Gracias por registrarte en <strong>BP Ventures</strong>! A continuación, encontrarás tus datos de inicio de sesión:</p>
-    //     <p>
-    //       <strong>Web:</strong> ${body.domain}<br><br>
-    //        <strong>Email:</strong> ${body.email}<br>
-    //        <strong>Contraseña:</strong> ${plainPassword}<br>
-    //     </p>
-    //     <p>Puedes restablecer tu contraseña utilizando el siguiente enlace:</p>
-    //     <p><a href="${resetLink}" style="color: #1a73e8;">Restablecer Contraseña</a></p>
-    //     <p>¡Bienvenido a nuestro equipo!</p>
-    //     <p>Saludos cordiales,<br>Equipo de BP Ventures</p>
-    //   </div>
-    // `;
-
-        // Contenido HTML
-        const htmlContent = `
-        <div style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">
-          <h1>Registro Exitoso!</h1>
-          <p>Hola ${body.Names},</p>
-          <p>¡Gracias por registrarte en <strong>BP Ventures</strong>! A continuación, encontrarás tus datos de inicio de sesión:</p>
-          <p>
-          <strong>Web:</strong> ${body.domain}<br><br>
-           <strong>Email:</strong> ${body.email}<br>
-           <strong>Contraseña:</strong> ${plainPassword}<br>
-          </p>
-          <p>Puedes restablecer tu contraseña utilizando el siguiente enlace:</p>
-          <a href="${resetLink}" style="display: inline-block; padding: 10px 15px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
-          <p>¡Bienvenido a nuestro equipo!</p>
-          <p>Saludos cordiales,<br>Equipo de BP Ventures</p>
-          <img src="https://i.postimg.cc/BZ5YWZCk/bpventures-logo.png" alt="BP Ventures" style="max-width: 600px; margin-top: 20px;">
-        </div>
-      `;
-
-    // Opcional: Crear una versión de texto plano del correo (para clientes de correo que no soporten HTML)
+  
+    // URL de la imagen del logo
+    const logoUrl = 'https://i.postimg.cc/BZ5YWZCk/bpventures-logo.png';
+  
+    // Contenido HTML del correo
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">
+        <img src="${logoUrl}" alt="BP Ventures" style="max-width: 600px; margin-top: 20px;">
+        <h1>Registro Exitoso!</h1>
+        <p>Hola ${body.Names},</p>
+        <p>¡Gracias por registrarte en <strong>BP Ventures</strong>! A continuación, encontrarás tus datos de inicio de sesión:</p>
+        <p>
+        <strong>Web:</strong> ${body.domain}<br><br>
+         <strong>Email:</strong> ${body.email}<br>
+         <strong>Contraseña:</strong> ${plainPassword}<br>
+        </p>
+        <p>Puedes restablecer tu contraseña utilizando el siguiente enlace:</p>
+        
+        <a href="${resetLink}"
+        style="font-family: 'Futura', sans-serif; background-color: #2b4168; color: white; font-weight: bold; padding: 0.5rem 1rem; border-radius: 9999px; width: 100%; outline: none; box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0); cursor: pointer; max-width: 20em; text-decoration: none; font-size: 1em; text-align: center; display: inline-block;"
+        onmouseover="this.style.backgroundColor='#1e2a44'"
+        onmouseout="this.style.backgroundColor='#2b4168'"
+        onfocus="this.style.boxShadow='0 0 0 0.2rem rgba(43, 65, 104, 0.5)'"
+        onblur="this.style.boxShadow='0 0 0 0.2rem rgba(255, 255, 255, 0)'"
+        >
+        Restablecer Contraseña
+        </a>
+  
+        <p>¡Bienvenido a nuestro equipo!</p>
+        <p>Saludos cordiales,<br>Equipo de BP Ventures</p>
+      </div>
+    `;
+  
+    // Versión de texto plano del correo
     const textContent = `
-  Hola ${body.Names},
-
-  ¡Gracias por registrarte en BP Ventures! A continuación, te proporcionamos tus datos de acceso:
-
-  Correo electrónico: ${body.email}
-  Contraseña: ${plainPassword}
-
-  Puedes restablecer tu contraseña utilizando el siguiente enlace:
-  ${resetLink}
-
-  Saludos cordiales,
-  Equipo de BP Ventures
-`;
-
-    // Enviar el correo electrónico con contenido HTML y texto plano alternativo
+      Hola ${body.Names},
+  
+      ¡Gracias por registrarte en BP Ventures! A continuación, te proporcionamos tus datos de acceso:
+  
+      Correo electrónico: ${body.email}
+      Contraseña: ${plainPassword}
+  
+      Puedes restablecer tu contraseña utilizando el siguiente enlace:
+      ${resetLink}
+  
+      Saludos cordiales,
+      Equipo de BP Ventures
+    `;
+  
+    // Enviar el correo electrónico
     await this.mailService.sendMail(
       body.email,
       'Bienvenido a BP Ventures - Sus datos de inicio de sesión',
-      textContent, // Texto plano
-      htmlContent, // Contenido HTML
+      textContent,
+      htmlContent,
     );
-
+  
     return { userSave, encryptedHexMessage };
   }
+  
 
   async forgotMyPassword(email: string, domain: string) {
     try {
@@ -160,13 +172,24 @@ export class AuthService {
       // Contenido HTML
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; font-size: 16px; color: #333;">
+          <img src="https://i.postimg.cc/BZ5YWZCk/bpventures-logo.png" alt="BP Ventures" style="max-width: 600px; margin-top: 20px;">
+
           <h1>Solicitud de Restablecimiento de Contraseña</h1>
           <p>Hola ${userExists.Names},</p>
           <p>Puedes restablecer tu contraseña utilizando el siguiente enlace:</p>
-          <a href="${resetLink}" style="display: inline-block; padding: 10px 15px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Restablecer Contraseña</a>
+
+          <a href="${resetLink}"
+          style="font-family: 'Futura', sans-serif; background-color: #2b4168; color: white; font-weight: bold; padding: 0.5rem 1rem; border-radius: 9999px; width: 100%; outline: none; box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0); cursor: pointer; max-width: 20em; text-decoration: none; font-size: 1em; text-align: center; display: inline-block;"
+          onmouseover="this.style.backgroundColor='#1e2a44'"
+          onmouseout="this.style.backgroundColor='#2b4168'"
+          onfocus="this.style.boxShadow='0 0 0 0.2rem rgba(43, 65, 104, 0.5)'"
+          onblur="this.style.boxShadow='0 0 0 0.2rem rgba(255, 255, 255, 0)'"
+          >
+          Restablecer Contraseña
+          </a>
+
           <p>Si no solicitaste un restablecimiento de contraseña, ignora este correo.</p>
           <p>Saludos cordiales,<br>Equipo de BP Ventures</p>
-          <img src="https://i.postimg.cc/BZ5YWZCk/bpventures-logo.png" alt="BP Ventures" style="max-width: 600px; margin-top: 20px;">
         </div>
       `;
 
