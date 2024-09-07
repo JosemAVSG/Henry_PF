@@ -5,9 +5,11 @@ import {
   OneToOne,
   JoinColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { Permission } from './permission.entity';
 import { Invoice } from './invoice.entity';
+import { Company } from './company.entity';
 @Entity({ name: 'users' })
 export class UserEntity {
   @PrimaryGeneratedColumn()
@@ -69,4 +71,7 @@ export class UserEntity {
 
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean;
+
+  @ManyToOne(() => Company, (company) => company.users, { nullable: true })
+  company: Company;
 }

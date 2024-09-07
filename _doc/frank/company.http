@@ -1,0 +1,28 @@
+### Crear una nueva empresa (Company)
+POST http://localhost:3000/companies
+Content-Type: application/json
+
+{
+  "name": "Tech Solutions",
+  "address": "123 Main St",
+  "cuit": 12345678901
+}
+
+### Obtener todas las empresas
+GET http://localhost:3000/companies
+
+### Obtener una empresa por ID
+GET http://localhost:3000/companies/1
+
+### Actualizar una empresa por ID
+PATCH http://localhost:3000/companies/1
+Content-Type: application/json
+
+{
+  "name": "Tech Solutions Updated",
+  "address": "456 Secondary St",
+  "cuit": 98765432109
+}
+
+### Eliminar una empresa por ID
+DELETE http://localhost:3000/companies/1

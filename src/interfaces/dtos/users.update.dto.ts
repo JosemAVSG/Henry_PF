@@ -1,13 +1,9 @@
-import { IsOptional, IsString, IsBoolean, IsDateString, IsNumberString } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsBoolean, IsDate, IsNumber } from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
-  @IsString()
+  @IsEmail()
   email?: string;
-
-  @IsOptional()
-  @IsString()
-  oldPassword?: string;
 
   @IsOptional()
   @IsString()
@@ -42,7 +38,7 @@ export class UpdateUserDto {
   mfaSecret?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsDate()
   mfaVerified?: Date;
 
   @IsOptional()
@@ -50,15 +46,10 @@ export class UpdateUserDto {
   active?: boolean;
 
   @IsOptional()
-  @IsString()
-  empresa: string;
+  @IsBoolean()
+  isAdmin?: boolean;
 
   @IsOptional()
-  @IsNumberString()
-  cuit: number;
-  
-  @IsOptional()
-  @IsString()
-  domicilio: string;
-
+  @IsNumber()
+  companyId?: number; // Si quieres actualizar la empresa asociada al usuario
 }

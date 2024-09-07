@@ -2,9 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { DataSource } from 'typeorm';
-
+import { ILike, Repository } from 'typeorm';
 import { Deliverable } from '../../entities/deliverable.entity';
 import { DeliverableType } from '../../entities/deliverableType.entity';
 import { google } from 'googleapis';
@@ -49,11 +48,11 @@ export class DeliverablesService {
   }
 
   async create(
-    createDeliverableDto: CreateDeliverableDto, 
+    createDeliverableDto: CreateDeliverableDto,
     userId: number,
-    isFolder: boolean 
+    isFolder: boolean,
   ) {
-    const {name, path, deliverableTypeId, parentId} = createDeliverableDto
+    const { name, path, deliverableTypeId, parentId } = createDeliverableDto;
 
     const deliverableType = await this.deliverableTypeRepository.findOneBy({
       id: deliverableTypeId,
@@ -69,29 +68,30 @@ export class DeliverablesService {
       deliverableType,
       isFolder,
       parentId,
-    })
-    
+    });
+
     const deliveryResult = await this.deliverableRepository.save(deliverable);
 
     let ownerPermissionTypeId = 1;
     let deliverableId = deliveryResult.id;
 
-    const permissionObject =  this.permissionsRepository.create({
+    const permissionObject = this.permissionsRepository.create({
       userId: userId.toString(),
-      user: await this.userRepository.findOneBy({id: Number(userId)}),
+      user: await this.userRepository.findOneBy({ id: Number(userId) }),
 
       permissionTypeId: ownerPermissionTypeId,
-      permissionType: await this.permissionTypeRepository.findOneBy(
-          {id: Number(ownerPermissionTypeId)}
-      ),
-      
-      deliverable: await this.deliverableRepository.findOneBy(
-        {id: deliverableId}
-      ),
-      deliverableId: deliverableId.toString(),
-    })
+      permissionType: await this.permissionTypeRepository.findOneBy({
+        id: Number(ownerPermissionTypeId),
+      }),
 
-    const permissionResult = await this.permissionsRepository.save(permissionObject)
+      deliverable: await this.deliverableRepository.findOneBy({
+        id: deliverableId,
+      }),
+      deliverableId: deliverableId.toString(),
+    });
+
+    const permissionResult =
+      await this.permissionsRepository.save(permissionObject);
 
     return permissionResult;
   }
@@ -101,7 +101,7 @@ export class DeliverablesService {
     page: number = 1,
     pageSize: number = 10,
     parentId: number = null,
-    orderBy:  'name' | 'date' | 'category',
+    orderBy: 'name' | 'date' | 'category',
     isAdmin: boolean,
     orderOrientation: 'ASC' | 'DESC' = 'DESC',
     deliverableIds: number[] = null,
@@ -203,8 +203,6 @@ export class DeliverablesService {
     return { message: 'Deliverable status updated' };
   }
 
-
-
   // Función para encontrar los elementos de nivel superior
   findTopLevelItems(items) {
     const topLevelItems = [];
@@ -228,12 +226,11 @@ export class DeliverablesService {
   async getPermissions(deliverableId: number) {
     const data = await this.permissionsRepository.find({
       relations: { user: true, permissionType: true },
-      where: { deliverable: { id: deliverableId }, },
-      select: { permissionType:{name: true, id: true} },
+      where: { deliverable: { id: deliverableId } },
+      select: { permissionType: { name: true, id: true } },
     });
-    
+
     const permissions = data.map((item) => {
-    
       return {
         userId: item.userId,
         permissionType: item.permissionType,
@@ -255,34 +252,56 @@ export class DeliverablesService {
       return await this.permissionsRepository.save(newPermission);
     }
 
-    await this.permissionsRepository.remove(permissions)
+    await this.permissionsRepository.remove(permissions);
 
     const result = newPermission.map(async (item) => {
-
-      const permissionObject =  this.permissionsRepository.create({
+      const permissionObject = this.permissionsRepository.create({
         userId: item.userId,
         permissionTypeId: item.permissionTypeId,
-        user: await this.userRepository.findOneBy({id: Number(item.userId)}),
-        permissionType: await this.permissionTypeRepository.findOneBy({id: Number(item.permissionTypeId)}),
-        deliverable: await this.deliverableRepository.findOneBy({id: deliverableId}),
+        user: await this.userRepository.findOneBy({ id: Number(item.userId) }),
+        permissionType: await this.permissionTypeRepository.findOneBy({
+          id: Number(item.permissionTypeId),
+        }),
+        deliverable: await this.deliverableRepository.findOneBy({
+          id: deliverableId,
+        }),
         deliverableId: deliverableId.toString(),
-      })
-       return await this.permissionsRepository.save(permissionObject)
+      });
 
-    })
+      return await this.permissionsRepository.save(permissionObject);
+    });
 
-    return await Promise.all(result)
-
-    }
-  
-  async getByDeliverableID(deliverableId){
-    return await this.deliverableRepository.find({
-      relations: { permissions: true,
-        deliverableType: true, deliverableCategory: true },
-      where: { id: deliverableId },
-    })
-
+    return await Promise.all(result);
   }
 
-  
+  async getByDeliverableID(deliverableId) {
+    return await this.deliverableRepository.find({
+      relations: {
+        permissions: true,
+        deliverableType: true,
+        deliverableCategory: true,
+      },
+      where: { id: deliverableId },
+    });
+  }
+
+  async getByName(name: string, userId: string) {
+    const user = await this.userRepository.findOneBy({ id: Number(userId) });
+    if (user.isAdmin)
+      return this.deliverableRepository.find({
+        where: { name: ILike(`%${name}%`) },
+      });
+
+    const data = await this.deliverableRepository.find({
+      where: {
+        name: ILike(`%${name}%`),
+        permissions: { user: { id: Number(userId) } },
+      },
+      relations: { permissions: true },
+    });
+
+    if (!data)
+      throw new NotFoundException(`Deliverable with name ${name} not found`);
+    return data;
+  }
 }

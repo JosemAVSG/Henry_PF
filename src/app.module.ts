@@ -12,9 +12,10 @@ import { MailModule } from './modules/mail/mail.module';
 import { DeliverablesModule } from './modules/deliverables/deliverables.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { VouchersModule } from './modules/vouchers/vouchers.module';
+import { CompaniesModule } from './modules/company/companies.module';
 
 @Module({
-  imports: [AuthModule, UserModule, SeedModule,MailModule,
+  imports: [CompaniesModule, AuthModule, UserModule, SeedModule,MailModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load:[typeorm]
@@ -29,7 +30,7 @@ import { VouchersModule } from './modules/vouchers/vouchers.module';
     }),
     DeliverablesModule,
     VouchersModule,
-    InvoicesModule,
+    InvoicesModule,    
     ],
   controllers: [AppController],
   providers: [AppService],

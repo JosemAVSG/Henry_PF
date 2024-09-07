@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserSeeder } from './user-seeder';
-import { InvoiceStatusSeeder} from './invoiceStatus.seeder';
-import { DeliverableTypeSeeder} from './deliverableType.seeder';
+import { InvoiceStatusSeeder } from './invoiceStatus.seeder';
+import { DeliverableTypeSeeder } from './deliverableType.seeder';
 import { UserEntity } from '../../entities/user.entity';
 import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
 import { DeliverableType } from '../../entities/deliverableType.entity';
@@ -14,27 +14,35 @@ import { Permission } from '../../entities/permission.entity';
 import { PermissionSeeder } from './permission.seeder';
 import { Deliverable } from '../../entities/deliverable.entity';
 import { DeliverableSeeder } from './deliverable.seeder';
-
+import { CompanySeeder } from './company-seeder';
+import { Company } from 'src/entities/company.entity';
+import { InvoiceSeeder } from './invoices-seeder';
+import { Invoice } from 'src/entities/invoice.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature(
-    [
-      UserEntity, 
+  imports: [
+    TypeOrmModule.forFeature([
+      UserEntity,
+      Company,
+      Invoice,
       InvoiceStatus,
-      Deliverable, 
+      Deliverable,
       DeliverableType,
       DeliverableCategory,
       PermissionType,
-      Permission
-    ]
-  )],
+      Permission,
+    ]),
+  ],
   providers: [
-    UserSeeder, 
-    InvoiceStatusSeeder, 
+    UserSeeder,
+    CompanySeeder,
+    InvoiceSeeder,
+    InvoiceStatusSeeder,
     DeliverableSeeder,
-    DeliverableTypeSeeder, 
-    DeliverableCategorySeeder, 
+    DeliverableTypeSeeder,
+    DeliverableCategorySeeder,
     PermissionTypeSeeder,
-    PermissionSeeder],
+    PermissionSeeder,
+  ],
 })
 export class SeedModule {}

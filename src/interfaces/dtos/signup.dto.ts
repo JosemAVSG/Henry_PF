@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsBoolean, IsString, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsBoolean, IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class SignUpDto {
   @IsEmail()
@@ -50,4 +50,9 @@ export class SignUpDto {
   @IsOptional()
   @IsString()
   domain: string;
+
+  // Relación con Company
+  @IsOptional()
+  @IsNumber()
+  companyId?: number;
 }
