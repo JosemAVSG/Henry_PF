@@ -10,6 +10,7 @@ import { existsSync } from 'fs';
 import { Response } from 'express';
 import { Permission } from 'src/entities/permission.entity';
 import { PermissionType } from 'src/entities/permissionType.entity';
+import { Company } from 'src/entities/company.entity';
 @Injectable()
 export class InvoicesService {      
     constructor(
@@ -18,6 +19,9 @@ export class InvoicesService {
 
         @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
+        
+        @InjectRepository(Company)
+        private companyRepository: Repository<Company>,
 
         @InjectRepository(InvoiceStatus)
         private invoiceStatusRepository: Repository<InvoiceStatus>,
@@ -29,85 +33,85 @@ export class InvoicesService {
         private permissionTypeRepository: Repository<PermissionType>,
     
     ){}
+    // =====================================
     async checkInvoiceNumberExists(invoiceNumber: string): Promise<boolean> {
         const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
         return !!existingInvoice;
     }
    
+    // =====================================
     async createInvoice(createInvoiceDto: CreateInvoiceDto) {
         const {
-            invoiceNumber,
-            path,
-            issueDate,
-            dueDate,
-            amount,
-            userId,
-            invoiceStatusId
+          invoiceNumber,
+          path,
+          issueDate,
+          dueDate,
+          amount,
+          userId,
+          invoiceStatusId,
+          companyId // Añadido para la relación con Company
         } = createInvoiceDto;
     
-        // Check if an invoice with the same number already exists
         const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
         if (existingInvoice) {
-            throw new BadRequestException('Ya existe una factura con este número');
+          throw new BadRequestException('Ya existe una factura con este número');
         }
     
-        // Ensure invoiceStatus and user exist
         const invoiceStatus = await this.invoiceStatusRepository.findOneBy({ id: invoiceStatusId });
         const user = await this.userRepository.findOneBy({ id: userId });
+        const company = companyId ? await this.companyRepository.findOneBy({ id: companyId }) : null;
     
         if (!invoiceStatus || !user) {
-            throw new Error('invoiceStatus or user not found');
+          throw new BadRequestException('invoiceStatus o user no encontrado');
         }
     
-        // Create and save the new invoice
         const invoice = this.invoiceRepository.create({
-            number: invoiceNumber,
-            path,
-            issueDate,
-            dueDate,
-            amount,
-            user,
-            invoiceStatus
+          number: invoiceNumber,
+          path,
+          issueDate,
+          dueDate,
+          amount,
+          user,
+          invoiceStatus,
+          company
         });
-        
-        const result = await this.invoiceRepository.save(invoice);
-        return result;
-    }
     
-    async updateInvoice(id: number, updateInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
+        return this.invoiceRepository.save(invoice);
+      }
+    
+    // =====================================
+      async updateInvoice(id: number, updateInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
         const {
-            invoiceNumber,
-            path,
-            issueDate,
-            dueDate,
-            amount,
-            userId,
-            invoiceStatusId
+          invoiceNumber,
+          path,
+          issueDate,
+          dueDate,
+          amount,
+          userId,
+          invoiceStatusId,
+          companyId // Añadido para la relación con Company
         } = updateInvoiceDto;
-
-        // Find the invoice to update
+    
         const invoice = await this.invoiceRepository.findOneBy({ id });
         if (!invoice) {
-            throw new BadRequestException('Invoice not found');
+          throw new BadRequestException('Invoice not found');
         }
-
-        // Check if another invoice with the same number exists
+    
         if (invoiceNumber && invoiceNumber !== invoice.number) {
-            const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
-            if (existingInvoice) {
-                throw new BadRequestException('Ya existe una factura con este número');
-            }
+          const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
+          if (existingInvoice) {
+            throw new BadRequestException('Ya existe una factura con este número');
+          }
         }
-
-        // Ensure invoiceStatus and user exist
+    
         const invoiceStatus = await this.invoiceStatusRepository.findOneBy({ id: invoiceStatusId });
         const user = await this.userRepository.findOneBy({ id: userId });
-
+        const company = companyId ? await this.companyRepository.findOneBy({ id: companyId }) : null;
+    
         if (!invoiceStatus || !user) {
-            throw new BadRequestException('invoiceStatus or user not found');
+          throw new BadRequestException('invoiceStatus o user no encontrado');
         }
-
-        // Update invoice properties
+    
         invoice.number = invoiceNumber || invoice.number;
         invoice.path = path || invoice.path;
         invoice.issueDate = issueDate || invoice.issueDate;
@@ -115,10 +119,12 @@ export class InvoicesService {
         invoice.amount = amount || invoice.amount;
         invoice.user = user;
         invoice.invoiceStatus = invoiceStatus;
-
+        invoice.company = company;
+    
         return this.invoiceRepository.save(invoice);
-    }
-
+      }
+    
+    // =====================================
     async getInvoiceById(id: number): Promise<Invoice> {
         const invoice = await this.invoiceRepository.findOne({
             where: { id },

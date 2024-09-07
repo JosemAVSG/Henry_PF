@@ -12,6 +12,8 @@ import { PermissionSeeder } from './modules/seed/permission.seeder';
 import * as morgan from 'morgan';  // Importa morgan
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { CompanySeeder } from './modules/seed/company-seeder';
+import { InvoiceSeeder } from './modules/seed/invoices-seeder';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -28,6 +30,9 @@ async function bootstrap() {
     origin:'*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
+  const companySeeder = app.get(CompanySeeder);
+  await companySeeder.seed();
+
   const userSeeder = app.get(UserSeeder);
   await userSeeder.seed();
 
@@ -48,6 +53,9 @@ async function bootstrap() {
 
   const permissionSeeder = app.get(PermissionSeeder)
   await permissionSeeder.seedPermission();
+
+  const invoiceSeeder = app.get(InvoiceSeeder);
+  await invoiceSeeder.seed();
 
   const config = new DocumentBuilder()
   .setTitle('BP Ventures API')

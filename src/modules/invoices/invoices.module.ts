@@ -7,9 +7,10 @@ import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
 import { UserEntity } from '../../entities/user.entity';
 import { Permission } from 'src/entities/permission.entity';
 import { PermissionType } from 'src/entities/permissionType.entity';
+import { Company } from 'src/entities/company.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invoice,InvoiceStatus, UserEntity,Permission,PermissionType])],
+  imports: [TypeOrmModule.forFeature([Invoice,InvoiceStatus, UserEntity, Permission, PermissionType, Company])],
   providers: [InvoicesService],
   controllers: [InvoicesController]
 })
