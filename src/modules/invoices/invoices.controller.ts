@@ -27,6 +27,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../../guards/auth.guards';
 import { Request } from 'express';
 import { Permission } from 'src/entities/permission.entity';
+import { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
 @ApiTags('invoices')
 @Controller('invoices')
 export class InvoicesController {
@@ -35,6 +36,15 @@ export class InvoicesController {
   @Get()
   async getAllInvoices() {
     return this.invoicesService.getAllInvoices();
+  }
+
+  // =====================================
+  @Patch('status/:id')
+  async updateInvoiceStatus(
+    @Param('id') id: number,
+    @Body() updateInvoiceStatusDto: UpdateInvoiceStatusDto,
+  ) {
+    return this.invoicesService.updateInvoiceStatus(id, updateInvoiceStatusDto);
   }
 
   // =====================================
@@ -186,29 +196,29 @@ export class InvoicesController {
     }
   }
 
-  // @Get('permision/:invoiceId')
-  // async getPermision(
-  //   @Param('invoiceId') invoiceId: number,
-  // ) {
-  //   try {
-  //     return this.invoicesService.getPermissions(invoiceId);
-  //   } catch (error) {
-  //     throw new BadRequestException(error);
-  //   }
-  // }
+  @Get('permision/:invoiceId')
+  async getPermision(
+    @Param('invoiceId') invoiceId: number,
+  ) {
+    try {
+      return this.invoicesService.getPermissions(invoiceId);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
 
-  // @Put('permision/:invoiceId')
-  // async createPermision(
-  //   @Param('invoiceId') invoiceId: number,
-  //   @Body() permission: any,
-  // ): Promise<Permission[]> {
-  //   try {
-  //     return this.invoicesService.updatePermissions(
-  //       invoiceId,
-  //       permission,
-  //     );
-  //   } catch (error) {
-  //     throw new BadRequestException(error);
-  //   }
-  // }
+  @Put('permision/:invoiceId')
+  async createPermision(
+    @Param('invoiceId') invoiceId: number,
+    @Body() permission: any,
+  ): Promise<Permission[]> {
+    try {
+      return this.invoicesService.updatePermissions(
+        invoiceId,
+        permission,
+      );
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
 }

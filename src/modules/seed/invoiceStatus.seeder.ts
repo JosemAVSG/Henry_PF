@@ -18,16 +18,20 @@ export class InvoiceStatusSeeder {
     }
 
     let invoiceStatus = new InvoiceStatus();
-    invoiceStatus.name = "Pending"
+    invoiceStatus.name = "Pendiente"
     invoiceStatusData.push(invoiceStatus);
 
     invoiceStatus = new InvoiceStatus();
-    invoiceStatus.name = "Payed"
+    invoiceStatus.name = "Revisión"
     invoiceStatusData.push(invoiceStatus);
 
     invoiceStatus = new InvoiceStatus();
-    invoiceStatus.name = "Cancelled"
+    invoiceStatus.name = "Pagado"
     invoiceStatusData.push(invoiceStatus);
+
+    invoiceStatus = new InvoiceStatus();
+    invoiceStatus.name = "Anulado"
+    invoiceStatusData.push(invoiceStatus);    
 
     await this.invoiceStatusRepository.save(invoiceStatusData);
     console.info('Seeded invoice Status Data');
