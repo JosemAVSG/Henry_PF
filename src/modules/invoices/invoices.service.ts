@@ -34,6 +34,19 @@ export class InvoicesService {
     
     ){}
     // =====================================
+    async getAllInvoices() {
+      const invoices = await this.invoiceRepository.find({
+        relations: ['user', 'invoiceStatus', 'company'], // Relaciona otras entidades si es necesario
+      });
+    
+      if (!invoices || invoices.length === 0) {
+        throw new NotFoundException('No se encontraron facturas');
+      }
+    
+      return invoices;
+    }
+    
+    // =====================================
     async checkInvoiceNumberExists(invoiceNumber: string): Promise<boolean> {
         const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
         return !!existingInvoice;

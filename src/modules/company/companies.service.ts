@@ -31,11 +31,18 @@ export class CompaniesService {
       where: { id },
       relations: ['users', 'invoices'],
     });
+  
     if (!company) {
       throw new NotFoundException(`Company with ID ${id} not found`);
     }
+  
+    // Ordenar usuarios e invoices por id
+    company.users.sort((a, b) => a.id - b.id);
+    company.invoices.sort((a, b) => a.id - b.id);
+  
     return company;
   }
+  
 
   async update(id: number, updateCompanyDto: UpdateCompanyDto): Promise<Company> {
     const company = await this.findOne(id);
