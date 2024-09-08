@@ -1099,6 +1099,50 @@
           "invoices"
         ]
       }
+    },
+    "/invoices/permision/{invoiceId}": {
+      "get": {
+        "operationId": "InvoicesController_getPermision",
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      },
+      "put": {
+        "operationId": "InvoicesController_createPermision",
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      }
     }
   },
   "info": {
