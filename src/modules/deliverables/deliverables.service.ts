@@ -185,7 +185,7 @@ export class DeliverablesService {
     return result;
 
   }
-  async getRelativePath(deliverableId: number): Promise<string> {
+  async getParentFolders(deliverableId: number): Promise<string> {
     // Buscar el deliverable por ID
     const deliverable = await this.deliverableRepository.findOneBy({ id: deliverableId });
 
@@ -198,7 +198,7 @@ export class DeliverablesService {
 
     // Si hay un parentId, realizar la llamada recursiva para obtener la ruta del padre
     if (deliverable.parentId) {
-      const parentPath = await this.getRelativePath(deliverable.parentId);
+      const parentPath = await this.getParentFolders(deliverable.parentId);
       currentPath = parentPath + "/" + currentPath;
     }
 

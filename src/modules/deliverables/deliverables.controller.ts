@@ -31,6 +31,7 @@ import { Deliverable } from 'src/entities/deliverable.entity';
 import { Permission } from 'src/entities/permission.entity';
 import { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
+import { cwd } from 'process';
 
 @ApiTags('deliverables')
 @Controller('deliverables')
@@ -43,8 +44,7 @@ export class DeliverablesController {
     FileInterceptor('file', {
       storage: diskStorage({
         destination: async (req, file, callback) => {
-          const uploadPath = './uploads/deliverables';
-          //const relativePath = await this.deliverablesService.getRelativePath(createDeliverableDto.parentId);
+          const uploadPath = './uploads/deliverables/temporal';
 
           await fs.ensureDir(uploadPath); // Crea el directorio si no existe
           callback(null, uploadPath);
@@ -68,8 +68,23 @@ export class DeliverablesController {
     try {
       let userId = req?.user?.id || 1;
       let isFolder = false;
+      
+      const temporalPath = join(cwd(),'./uploads/deliverables/temporal/', file.filename);
+      
+      const parentFolders = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
+      const newRelativePath = join('uploads/deliverables', parentFolders, file.filename);
 
-      createDeliverableDto.path = file ? file.path : null;
+      const newPath = join(cwd(), newRelativePath);
+      
+      createDeliverableDto.path = newRelativePath;
+
+      fs.rename(temporalPath, newPath)
+      .then(() => {
+        console.log('File moved successfully!');
+      })
+      .catch(err => {
+        console.error('Error moving file:', err);
+      });
 
       return this.deliverablesService.create(
         createDeliverableDto,
@@ -130,7 +145,7 @@ export class DeliverablesController {
 
       const folderName = createDeliverableDto.name;
       //const relativePath = createDeliverableDto.path;
-      const relativePath = await this.deliverablesService.getRelativePath(createDeliverableDto.parentId);
+      const relativePath = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
       console.log(relativePath);
 
       const isFolder = true;
