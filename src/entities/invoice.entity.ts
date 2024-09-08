@@ -15,10 +15,10 @@ export class Invoice {
     @Column({nullable:true})
     path: string;
 
-    @Column({type:'timestamp', nullable:true})
+    @Column({type:'date', nullable:true})
     issueDate: Date; 
 
-    @Column({type:'timestamp', nullable:true})
+    @Column({type:'date', nullable:true})
     dueDate: Date; 
 
     @Column('decimal', { precision: 10, scale: 2 })
