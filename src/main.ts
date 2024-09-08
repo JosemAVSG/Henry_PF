@@ -29,6 +29,8 @@ async function bootstrap() {
   app.enableCors({
     origin:'*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: 'Content-Type, Accept, Authorization, Content-Disposition',
+    exposedHeaders: 'Content-Disposition'
   });
   const companySeeder = app.get(CompanySeeder);
   await companySeeder.seed();

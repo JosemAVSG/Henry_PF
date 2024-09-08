@@ -151,11 +151,16 @@ export class InvoicesController {
     @Res() res: Response,
   ) {
     try {
-      return this.invoicesService.getDonwloadInvoicesCopy(
+      
+      const data = await this.invoicesService.getDonwloadInvoicesCopy(
         userId,
         invoiceId,
         res,
       );
+      const { filePath, invoiceCopy, contentType,fileExtension } = data;
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${invoiceCopy.number}.${fileExtension}"`);
+      res.download(filePath);
     } catch (error) {
       throw new BadRequestException(error);
     }
