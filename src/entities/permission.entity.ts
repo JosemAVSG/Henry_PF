@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { UserEntity as User} from "./user.entity";
 import { PermissionType } from "./permissionType.entity";
 import { Deliverable } from "./deliverable.entity";
+import { Invoice } from "./invoice.entity";
 @Entity()
 export class Permission {
     @PrimaryGeneratedColumn()
@@ -36,5 +37,12 @@ export class Permission {
 
     @Column()
     permissionTypeId: number
+
+    // Relación Many-to-One con PermissionType
+    @ManyToOne(()=> Invoice, invoice => invoice.permissions )
+    @JoinColumn() 
+    invoice: Invoice
+
+    
 
 }

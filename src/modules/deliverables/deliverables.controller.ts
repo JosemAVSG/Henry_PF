@@ -329,8 +329,6 @@ export class DeliverablesController {
     @Body() permission: any,
   ): Promise<Permission[]> {
     try {
-      console.log(permission, deliverableId);
-
       return this.deliverablesService.updatePermissions(
         deliverableId,
         permission,

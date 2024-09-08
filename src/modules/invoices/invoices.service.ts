@@ -8,20 +8,44 @@ import { join } from 'path';
 import { CreateInvoiceDto } from './dto/create-invoices.dto';
 import { existsSync } from 'fs';
 import { Response } from 'express';
+import { Permission } from 'src/entities/permission.entity';
+import { PermissionType } from 'src/entities/permissionType.entity';
 import { Company } from 'src/entities/company.entity';
 @Injectable()
 export class InvoicesService {      
     constructor(
         @InjectRepository(Invoice)
         private invoiceRepository: Repository<Invoice>,
+
         @InjectRepository(UserEntity)
         private userRepository: Repository<UserEntity>,
+        
         @InjectRepository(Company)
         private companyRepository: Repository<Company>,
+
         @InjectRepository(InvoiceStatus)
         private invoiceStatusRepository: Repository<InvoiceStatus>,
-        
+
+        @InjectRepository(Permission)
+        private permissionsRepository: Repository<Permission>,
+
+        @InjectRepository(PermissionType)
+        private permissionTypeRepository: Repository<PermissionType>,
+    
     ){}
+    // =====================================
+    async getAllInvoices() {
+      const invoices = await this.invoiceRepository.find({
+        relations: ['user', 'invoiceStatus', 'company'], // Relaciona otras entidades si es necesario
+      });
+    
+      if (!invoices || invoices.length === 0) {
+        throw new NotFoundException('No se encontraron facturas');
+      }
+    
+      return invoices;
+    }
+    
     // =====================================
     async checkInvoiceNumberExists(invoiceNumber: string): Promise<boolean> {
         const existingInvoice = await this.invoiceRepository.findOneBy({ number: invoiceNumber });
@@ -65,7 +89,10 @@ export class InvoicesService {
           company
         });
     
-        return this.invoiceRepository.save(invoice);
+        const result = await this.invoiceRepository.save(invoice);
+        console.log(result);
+        
+        return result;
       }
     
     // =====================================
@@ -175,24 +202,94 @@ export class InvoicesService {
         const user = await this.userRepository.findOneBy({ id: userId });
         if (!user) throw new Error('User does not exist');
     
-        const invoiceCopy = await this.invoiceRepository.findOneBy({ id: invoiceId });
-        if (!invoiceCopy) throw new Error('Invoice does not exist');
+        const invoiceCopy = await this.invoiceRepository.findOne({where: {id: invoiceId}});
+        console.log(invoiceCopy.path);
+        
+        if (!invoiceCopy) throw new NotFoundException('Invoice does not exist');
     
-        const filePath = join(__dirname, '../../upload/invoices', invoiceCopy.path);
-    
-        if (!existsSync(filePath)) {
-            throw new Error('Invoice file not found');
+        const filePath = join(process.cwd(), invoiceCopy.path)
+        console.log(filePath);
+        
+        if (!existsSync(invoiceCopy.path)) {
+            throw new NotFoundException('Invoice file not found');
         }
+        const fileExtension = filePath.split('.').pop();
+        let contentType: string;
     
-        // Enviar el archivo directamente como respuesta
-        return res.download(filePath, invoiceCopy.number);
-
+        switch (fileExtension) {
+          case 'pdf':
+            contentType = 'application/pdf';
+            break;
+          case 'jpg':
+          case 'jpeg':
+            contentType = 'image/jpeg';
+            break;
+          case 'png':
+            contentType = 'image/png';
+            break;
+          case 'txt':
+            contentType = 'text/plain';
+            break;
+          default:
+            contentType = 'application/octet-stream'; // Tipo genérico para otros archivos
+        }      
+    
+        return { contentType, filePath,invoiceCopy, fileExtension };
     }
 
-    async deleteInvoice(id: number): Promise<void> {
-        
+    async deleteInvoice(id: number): Promise<void> {    
         const invoice = await this.invoiceRepository.findOneBy({id: id});
         await this.invoiceRepository.remove(invoice);
     }
 
+    // async getPermissions(invoiceId: number) {
+    //     const data = await this.permissionsRepository.find({
+    //         where: {invoice: {id: invoiceId}},
+    //         relations: { user: true, permissionType: true },
+    //         select: { permissionType: { name: true, id: true } },
+    //     });
+
+    //     const permissions = data.map((item) => {
+    //       return {
+    //         userId: item.userId,
+    //         permissionType: item.permissionType,
+    //       };
+    //     });
+    
+    //     return permissions;
+    //   }
+    
+
+    //   async updatePermissions(
+    //     invoiceId: number,
+    //     newPermission: Permission[],
+    //   ): Promise<Permission[]> {
+    //     const permissions = await this.permissionsRepository.find({
+    //       relations: { user: true, permissionType: true },
+    //       where: { invoice: { id: invoiceId } },
+    //     });
+    //     if (!permissions) {
+    //       return await this.permissionsRepository.save(newPermission);
+    //     }
+    
+    //     await this.permissionsRepository.remove(permissions);
+    
+    //     const result = newPermission.map(async (item) => {
+    //       const permissionObject = this.permissionsRepository.create({
+    //         userId: item.userId,
+    //         permissionTypeId: item.permissionTypeId,
+    //         user: await this.userRepository.findOneBy({ id: Number(item.userId) }),
+    //         permissionType: await this.permissionTypeRepository.findOneBy({
+    //           id: Number(item.permissionTypeId),
+    //         }),
+    //         invoice: await this.invoiceRepository.findOneBy({
+    //           id: invoiceId,
+    //         }),
+    //       });
+    
+    //       return await this.permissionsRepository.save(permissionObject);
+    //     });
+    
+    //     return await Promise.all(result);
+    //   }
 }

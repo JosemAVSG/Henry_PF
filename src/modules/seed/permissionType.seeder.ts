@@ -29,9 +29,6 @@ export class PermissionTypeSeeder {
     permissionType.name = "edit"
     permissionTypeData.push(permissionType);
 
-    permissionType = new PermissionType();
-    permissionType.name = "delete"
-    permissionTypeData.push(permissionType);
 
     await this.permissionTypeRepository.save(permissionTypeData);
     console.info('Seeded Permission Type Data');

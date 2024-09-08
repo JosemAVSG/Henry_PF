@@ -85,16 +85,21 @@ export class UsersService {
     }
     
 
-  // Método para obtener un usuario por su ID
+// Método para obtener un usuario por su ID junto con facturas y empresa
   async getUserById(id: number): Promise<Omit<UserEntity, 'password'>> {
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['invoices', 'company'], // Cargamos las facturas y la empresa relacionadas
+    });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    const { password, ...usuariosinpassword } = user;
-    return usuariosinpassword;
+
+    const { password, ...usuarioSinPassword } = user;
+    return usuarioSinPassword;
   }
+
 
   
   // Método para actualizar el estado de un usuario
