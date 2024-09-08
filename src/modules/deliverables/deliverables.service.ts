@@ -14,7 +14,7 @@ import { UserEntity } from 'src/entities/user.entity';
 export class DeliverablesService {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
-    
+
     @InjectRepository(Deliverable)
     private deliverableRepository: Repository<Deliverable>,
 
@@ -69,10 +69,9 @@ export class DeliverablesService {
       isFolder,
       parentId,
     });
-    
-    
+
     const deliveryResult = await this.deliverableRepository.save(deliverable);
-    
+
     let ownerPermissionTypeId = 1;
     let deliverableId = deliveryResult.id;
 
@@ -111,25 +110,25 @@ export class DeliverablesService {
 
     // Crear la subconsulta
     const queryBuilder = this.deliverableRepository
-    .createQueryBuilder('deliverable')
-    .leftJoin('deliverable.deliverableType', 'deliverableType')
-    .leftJoin('deliverable.permissions', 'permission')
-    .leftJoin('permission.permissionType', 'permissionType')
-    .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
-    .select([
-      'deliverable.id AS "id"',
-      'deliverable.parentId AS "parentId"',
-      'deliverable.name AS "deliverableName"',
-      'deliverable.isFolder AS "deliverableIsFolder"',
-      'deliverable.path AS "deliverablePath"',
-      'deliverableType.name AS "deliverableType"',
-      'deliverableCategory.name AS "deliverableCategory"',
-      `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
-      `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
-    ])
-    .groupBy(
-      'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
-    );
+      .createQueryBuilder('deliverable')
+      .leftJoin('deliverable.deliverableType', 'deliverableType')
+      .leftJoin('deliverable.permissions', 'permission')
+      .leftJoin('permission.permissionType', 'permissionType')
+      .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
+      .select([
+        'deliverable.id AS "id"',
+        'deliverable.parentId AS "parentId"',
+        'deliverable.name AS "deliverableName"',
+        'deliverable.isFolder AS "deliverableIsFolder"',
+        'deliverable.path AS "deliverablePath"',
+        'deliverableType.name AS "deliverableType"',
+        'deliverableCategory.name AS "deliverableCategory"',
+        `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
+        `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
+      ])
+      .groupBy(
+        'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
+      );
 
     queryBuilder.where('deliverable.statusId = 1');
 
@@ -139,17 +138,20 @@ export class DeliverablesService {
 
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
-    }else{
+    } else {
       // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
-      if(deliverableIds){
-        queryBuilder.andWhere('deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)', { deliverableIds })
+      if (deliverableIds) {
+        queryBuilder.andWhere(
+          'deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)',
+          { deliverableIds },
+        );
       }
     }
 
-    const queryBuilder2 =  this.dataSource
+    const queryBuilder2 = this.dataSource
       .createQueryBuilder()
       .select('*')
-      .from("(" + queryBuilder.getQuery() + ")", "subquery")
+      .from('(' + queryBuilder.getQuery() + ')', 'subquery')
       .setParameters(queryBuilder.getParameters()); // Pasar parámetros de la subconsulta
 
     // Aplicar filtros y ordenamientos adicionales
@@ -171,12 +173,12 @@ export class DeliverablesService {
     }
 
     if (parentId) {
-      queryBuilder2.limit(pageSize)
+      queryBuilder2.limit(pageSize);
       queryBuilder2.offset(offset);
-    }else{
+    } else {
       // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
-      if(deliverableIds){
-        queryBuilder2.limit(pageSize)
+      if (deliverableIds) {
+        queryBuilder2.limit(pageSize);
         queryBuilder2.offset(offset);
       }
     }
@@ -184,11 +186,12 @@ export class DeliverablesService {
     const result = await queryBuilder2.getRawMany();
 
     return result;
-
   }
   async getParentFolders(deliverableId: number): Promise<string> {
     // Buscar el deliverable por ID
-    const deliverable = await this.deliverableRepository.findOneBy({ id: deliverableId });
+    const deliverable = await this.deliverableRepository.findOneBy({
+      id: deliverableId,
+    });
 
     if (!deliverable) {
       throw new Error(`Deliverable with ID ${deliverableId} not found`);
@@ -200,7 +203,7 @@ export class DeliverablesService {
     // Si hay un parentId, realizar la llamada recursiva para obtener la ruta del padre
     if (deliverable.parentId) {
       const parentPath = await this.getParentFolders(deliverable.parentId);
-      currentPath = parentPath + "/" + currentPath;
+      currentPath = parentPath + '/' + currentPath;
     }
 
     return currentPath;
@@ -238,9 +241,8 @@ export class DeliverablesService {
   async getPermissions(deliverableId: number) {
     const data = await this.permissionsRepository.find({
       relations: { user: true, permissionType: true },
-      where: { deliverable: { id: deliverableId }},
+      where: { deliverable: { id: deliverableId } },
       select: { permissionType: { name: true, id: true } },
-      
     });
 
     const permissions = data.map((item) => {
@@ -300,55 +302,63 @@ export class DeliverablesService {
 
   async getByName(name: string, userId: string) {
     const user = await this.userRepository.findOneBy({ id: Number(userId) });
-    if (user.isAdmin){
+    if (user.isAdmin) {
       const result = await this.deliverableRepository.find({
         where: { name: ILike(`%${name}%`) },
-        relations: { permissions: {permissionType: true}, deliverableType: true, deliverableCategory: true,},
-        select:{
+        relations: {
+          permissions: { permissionType: true },
+          deliverableType: true,
+          deliverableCategory: true,
+        },
+        select: {
           id: true,
           parentId: true,
           name: true,
           isFolder: true,
           path: true,
-          deliverableType: {name: true,},
-          deliverableCategory: {name: true,},
+          deliverableType: { name: true },
+          deliverableCategory: { name: true },
           permissions: true,
           createdAt: true,
           updatedAt: true,
-        }
+        },
       });
       console.log(result);
       if (!result || result.length === 0) {
         throw new NotFoundException('No deliverables found');
       }
-      
+
       return result;
+    } else {
+      const data = await this.deliverableRepository.find({
+        where: {
+          name: ILike(`%${name}%`),
+          permissions: { user: { id: Number(userId) } },
+        },
+        relations: {
+          permissions: { permissionType: true },
+          deliverableType: true,
+          deliverableCategory: true,
+        },
+        select: {
+          id: true,
+          parentId: true,
+          name: true,
+          isFolder: true,
+          path: true,
+          deliverableType: { name: true },
+          deliverableCategory: { name: true },
+          permissions: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      console.log(data);
+
+      if (!data)
+        throw new NotFoundException(`Deliverable with name ${name} not found`);
+      return data;
     }
-
-    const data = await this.deliverableRepository.find({
-      where: {
-        name: ILike(`%${name}%`),
-        permissions: { user: { id: Number(userId) } },
-      },
-      relations: { permissions: {permissionType: true},deliverableType: true, deliverableCategory: true,  },
-      select:{
-        id: true,
-        parentId: true,
-        name: true,
-        isFolder: true,
-        path: true,
-        deliverableType: {name: true,},
-        deliverableCategory: {name: true,},
-        permissions: true,
-        createdAt: true,
-        updatedAt: true,
-      }
-    });
-
-    console.log(data);
-
-    if (!data)
-      throw new NotFoundException(`Deliverable with name ${name} not found`);
-    return data;
   }
 }
