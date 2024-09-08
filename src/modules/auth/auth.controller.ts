@@ -9,10 +9,10 @@ import {
   Query,
   ForbiddenException,
 } from '@nestjs/common';
-import { SingInDto } from '../../interfaces/dtos/singIn.dto';
+import { SingInDto } from './dtos/singIn.dto';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { SignUpDto } from '../../interfaces/dtos/signup.dto';
+import { SignUpDto } from './dtos/signup.dto';
 import { AuthGuard } from '../../guards/auth.guards';
 import { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';

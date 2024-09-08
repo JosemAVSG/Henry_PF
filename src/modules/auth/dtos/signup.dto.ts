@@ -51,7 +51,6 @@ export class SignUpDto {
   @IsString()
   domain: string;
 
-  // Relación con Company
   @IsOptional()
   @IsNumber()
   companyId?: number;
