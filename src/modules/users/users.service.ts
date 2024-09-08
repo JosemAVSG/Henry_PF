@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from '../../interfaces/dtos/users.update.dto';
 import { UserEntity } from '../../entities/user.entity';
 import {PaginatedUsers} from '../../interfaces/paginatedUser';
 import { hashPassword, isValidPassword } from 'src/utils/hash';
+import { UpdateUserDto } from './dtos/users.update.dto';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +12,22 @@ export class UsersService {
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
   ) {}
+
+  async getAllUsers() {
+    const users = await this.userRepository.find({
+      relations: ['company'], // Incluye la relación con la empresa
+      order: { id: 'ASC' },   // Ordenar por ID en orden ascendente
+    });
+  
+    // Omitir la contraseña de cada usuario
+    const usersWithoutPassword = users.map((user) => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+  
+    return usersWithoutPassword;
+  }
+  
 
     // Metodo para obtener todos los usuarios
    async getUsers(
@@ -21,6 +37,7 @@ export class UsersService {
 
     if(page === undefined || Limit === undefined) {
       const results = await this.userRepository.find({ 
+        relations: ['company'], // Carga la relación con la empresa
         order: { id: 'ASC' } // Ordenar por nombre ascendente
       });
       const users = results.map((user) => {
@@ -88,7 +105,7 @@ export class UsersService {
     async getUserById(id: number): Promise<Omit<UserEntity, 'password'>> {
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: ['invoices', 'invoices.invoiceStatus', 'company'], // Relacionar facturas, estado de facturas y empresa
+        relations: ['invoices', 'invoices.invoiceStatus', 'company', 'invoices.company'], // Relacionar facturas, estado de facturas y empresa
       });
     
       if (!user) {

@@ -6,6 +6,7 @@ import {
   JoinColumn,
   OneToMany,
   ManyToOne,
+  JoinTable,
 } from 'typeorm';
 import { Permission } from './permission.entity';
 import { Invoice } from './invoice.entity';
@@ -72,6 +73,13 @@ export class UserEntity {
   @Column({ type: 'boolean', default: false })
   isAdmin: boolean;
 
+  // @ManyToOne(() => Company, (company) => company.users, { nullable: true })
+  // // @JoinColumn({ name: 'companyId' }) // Nombre de la columna en la base de datos
+  // company: Company;
+
   @ManyToOne(() => Company, (company) => company.users, { nullable: true })
   company: Company;
+
+  // @Column({ type: 'int', nullable: true })
+  // companyId: number; //
 }

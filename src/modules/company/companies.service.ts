@@ -29,7 +29,7 @@ export class CompaniesService {
   async findOne(id: number): Promise<Company> {
     const company = await this.companyRepository.findOne({
       where: { id },
-      relations: ['users', 'invoices'],
+      relations: ['users', 'invoices', "invoices.invoiceStatus"],
     });
   
     if (!company) {

@@ -244,6 +244,20 @@
         ]
       }
     },
+    "/users/all": {
+      "get": {
+        "operationId": "UserController_getAllUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/users": {
       "get": {
         "operationId": "UserController_getUsers",

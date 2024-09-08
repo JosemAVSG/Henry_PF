@@ -50,6 +50,6 @@ export class UpdateUserDto {
   isAdmin?: boolean;
 
   @IsOptional()
-  @IsNumber()
-  companyId?: number; // Si quieres actualizar la empresa asociada al usuario
+  // @IsNumber()
+  companyId?: any; // Si quieres actualizar la empresa asociada al usuario
 }

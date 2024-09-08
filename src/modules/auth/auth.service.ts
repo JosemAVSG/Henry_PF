@@ -6,7 +6,7 @@ import { hashPassword, isValidPassword } from '../../utils/hash';
 import * as speakeasy from 'speakeasy';
 import * as qrcode from 'qrcode';
 import { MailService } from '../mail/mail.service';
-import { SignUpDto } from 'src/interfaces/dtos/signup.dto';
+import { SignUpDto } from 'src/modules/auth/dtos/signup.dto';
 import { Company } from 'src/entities/company.entity';
 @Injectable()
 export class AuthService {
@@ -64,7 +64,7 @@ export class AuthService {
     // Crear el usuario y asignar la compañía si está presente
     const user = this.userRepository.create({
       ...body,
-      company,  // Asignar la compañía al usuario
+      company: company,  // Asignar la compañía al usuario
     });
   
     // Guardar el usuario en la base de datos
