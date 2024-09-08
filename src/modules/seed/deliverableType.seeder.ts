@@ -26,23 +26,7 @@ export class DeliverableTypeSeeder {
     deliverableTypeData.push(deliverableType);
 
     deliverableType = new DeliverableType();
-    deliverableType.name = "pdf"
-    deliverableTypeData.push(deliverableType);
-
-    deliverableType = new DeliverableType();
-    deliverableType.name = "doc"
-    deliverableTypeData.push(deliverableType);
-
-    deliverableType = new DeliverableType();
-    deliverableType.name = "xls"
-    deliverableTypeData.push(deliverableType);
-
-    deliverableType = new DeliverableType();
-    deliverableType.name = "jpg"
-    deliverableTypeData.push(deliverableType);
-
-    deliverableType = new DeliverableType();
-    deliverableType.name = "png"
+    deliverableType.name = "file"
     deliverableTypeData.push(deliverableType);
 
     await this.deliverableTypeRepository.save(deliverableTypeData);

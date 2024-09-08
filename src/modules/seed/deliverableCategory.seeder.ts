@@ -18,15 +18,15 @@ export class DeliverableCategorySeeder {
     }
 
     let deliverableType = new DeliverableCategory();
-    deliverableType.name = "Actas"
+    deliverableType.name = "Final"
     deliverableCategoryData.push(deliverableType);
 
     deliverableType = new DeliverableCategory();
-    deliverableType.name = "Formularios"
+    deliverableType.name = "Parcial"
     deliverableCategoryData.push(deliverableType);
 
     deliverableType = new DeliverableCategory();
-    deliverableType.name = "Cartas"
+    deliverableType.name = "Borrador"
     deliverableCategoryData.push(deliverableType);
 
     await this.deliverableCategoryRepository.save(deliverableCategoryData);

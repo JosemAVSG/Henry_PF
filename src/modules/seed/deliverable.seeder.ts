@@ -21,7 +21,7 @@ export class DeliverableSeeder {
       { id: 1, name: "Folder A", parentId: 2, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 2 },
       { id: 2, name: "Folder B", parentId: 3, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 1 },
       { id: 3, name: "Folder C", parentId: 4, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 3 },
-      { id: 4, name: "Folder D", parentId: 30, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 3 },
+      { id: 4, name: "Folder D", parentId: null, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 3 },
       { id: 5, name: "File X", parentId: 1, isFolder: false, deliverableTypeId: 4, deliverableCategoryId: 1  },
       { id: 6, name: "File 1", parentId: 1, isFolder: false, deliverableTypeId: 5, deliverableCategoryId: 2  },
       { id: 7, name: "File 2", parentId: 2, isFolder: false, deliverableTypeId: 4, deliverableCategoryId: 2  },
