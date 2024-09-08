@@ -656,37 +656,6 @@
       }
     },
     "/deliverables/{id}": {
-      "patch": {
-        "operationId": "DeliverablesController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateDeliverableDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "deliverables"
-        ]
-      },
       "delete": {
         "operationId": "DeliverablesController_remove",
         "parameters": [
@@ -1130,50 +1099,6 @@
           "invoices"
         ]
       }
-    },
-    "/invoices/permision/{invoiceId}": {
-      "get": {
-        "operationId": "InvoicesController_getPermision",
-        "parameters": [
-          {
-            "name": "invoiceId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "invoices"
-        ]
-      },
-      "put": {
-        "operationId": "InvoicesController_createPermision",
-        "parameters": [
-          {
-            "name": "invoiceId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "invoices"
-        ]
-      }
     }
   },
   "info": {
@@ -1211,10 +1136,6 @@
         "properties": {}
       },
       "CreateDeliverableDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "UpdateDeliverableDto": {
         "type": "object",
         "properties": {}
       },
