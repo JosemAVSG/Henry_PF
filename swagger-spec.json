@@ -878,6 +878,75 @@
         }
       }
     },
+    "/invoices": {
+      "get": {
+        "operationId": "InvoicesController_getAllInvoices",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      },
+      "post": {
+        "operationId": "InvoicesController_createInvoice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
+    "/invoices/status/{id}": {
+      "patch": {
+        "operationId": "InvoicesController_updateInvoiceStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvoiceStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
     "/invoices/check-invoice-number": {
       "get": {
         "operationId": "InvoicesController_checkInvoiceNumber",
@@ -932,30 +1001,6 @@
         ],
         "responses": {
           "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "invoices"
-        ]
-      }
-    },
-    "/invoices": {
-      "post": {
-        "operationId": "InvoicesController_createInvoice",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateInvoiceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
             "description": ""
           }
         },
@@ -1164,6 +1209,10 @@
         "properties": {}
       },
       "UpdateVoucherDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateInvoiceStatusDto": {
         "type": "object",
         "properties": {}
       },
