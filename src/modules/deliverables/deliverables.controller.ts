@@ -15,10 +15,12 @@ import {
   Put,
   Res,
   HttpException,
+  ConflictException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { join, resolve, extname } from 'path';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { DeliverablesService } from './deliverables.service';
@@ -42,6 +44,8 @@ export class DeliverablesController {
       storage: diskStorage({
         destination: async (req, file, callback) => {
           const uploadPath = './uploads/deliverables';
+          //const relativePath = await this.deliverablesService.getRelativePath(createDeliverableDto.parentId);
+
           await fs.ensureDir(uploadPath); // Crea el directorio si no existe
           callback(null, uploadPath);
         },
@@ -113,52 +117,93 @@ export class DeliverablesController {
   }
 
   @Post('folder')
+  //@UseGuards(AuthGuard)
   async createFolderDeliverable(
     @Body() createDeliverableDto: CreateDeliverableDto,
     @Req() req: Request,
   ) {
     try {
-      const userId = req.user.id;
+      const userId = 1; // req.user?.id;
+      if (!userId) {
+        throw new BadRequestException('User ID is missing');
+      }
+
       const folderName = createDeliverableDto.name;
-      const relativePath = createDeliverableDto.path;
+      //const relativePath = createDeliverableDto.path;
+      const relativePath = await this.deliverablesService.getRelativePath(createDeliverableDto.parentId);
+      console.log(relativePath);
+
       const isFolder = true;
-      const folderPath = path.join(
-        __dirname,
-        '..',
+
+      // Construir la ruta completa a la carpeta uploads, que está al mismo nivel que src y dist
+      const folderPath = resolve(
+        process.cwd(), // Carpeta raíz del proyecto
         'uploads/deliverables',
         relativePath,
         folderName,
       );
 
-      if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath, { recursive: true });
-        await this.deliverablesService.create(
-          createDeliverableDto,
-          userId,
-          isFolder,
-        );
-        return `Folder ${folderName} created successfully`;
-      } else {
-        return `Folder ${folderName} already exists`;
+      
+      try {
+        const folderExists = await fs.stat(folderPath).catch(() => false);
+
+        if (!folderExists) {
+          createDeliverableDto.path = join('uploads/deliverables', relativePath ,   folderName)
+
+          await fs.mkdir(folderPath, { recursive: true });
+          await this.deliverablesService.create(
+            createDeliverableDto,
+            userId,
+            isFolder,
+          );
+          return {
+            message: `Folder ${folderName} created successfully`,
+            folderPath,
+          };
+        } else {
+          throw new ConflictException(`Folder ${folderName} already exists`);
+        }
+      } catch (error) {
+        throw new BadRequestException(`Error creating folder: ${error.message}`);
       }
     } catch (error) {
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
   @Post('link')
+  //@UseGuards(AuthGuard)
   async createLinkDeliverable(
     @Body() createDeliverableDto: CreateDeliverableDto,
     @Req() req: Request,
   ) {
-    const userId = req.user.id;
-    const isFolder = false;
-    return this.deliverablesService.create(
-      createDeliverableDto,
-      userId,
-      isFolder,
-    );
+    try {
+      const userId = 1; // req.user.id;
+      const isFolder = false;
+  
+      // Intentamos crear el deliverable con los datos proporcionados
+      const deliverable = await this.deliverablesService.create(
+        createDeliverableDto,
+        userId,
+        isFolder,
+      );
+      return {
+        message: `Link created successfully`,
+      };
+  
+    } catch (error) {
+      // Si ocurre un error en la creación, lo capturamos y lanzamos una excepción adecuada
+  
+      // En caso de que el error sea debido a datos de entrada no válidos
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException('Invalid data provided for creating deliverable');
+      }
+  
+      // Para cualquier otro tipo de error no previsto, retornamos una excepción genérica
+      throw new InternalServerErrorException('An unexpected error occurred while creating the deliverable');
+    }
   }
+
 
   @Get('user/:userId')
   @UseGuards(AuthGuard)
@@ -231,17 +276,7 @@ export class DeliverablesController {
     }
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateDeliverableDto: UpdateDeliverableDto,
-  ) {
-    try {
-      return this.deliverablesService.update(+id, updateDeliverableDto);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
-  }
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {

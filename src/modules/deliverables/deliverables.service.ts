@@ -185,13 +185,24 @@ export class DeliverablesService {
     return result;
 
   }
+  async getRelativePath(deliverableId: number): Promise<string> {
+    // Buscar el deliverable por ID
+    const deliverable = await this.deliverableRepository.findOneBy({ id: deliverableId });
 
-  findOne(id: number) {
-    return `This action returns a #${id} deliverable`;
-  }
+    if (!deliverable) {
+      throw new Error(`Deliverable with ID ${deliverableId} not found`);
+    }
 
-  update(id: number, updateDeliverableDto: UpdateDeliverableDto) {
-    return `This action updates a #${id} deliverable`;
+    // Inicializar la ruta actual con el nombre del deliverable
+    let currentPath = deliverable.name;
+
+    // Si hay un parentId, realizar la llamada recursiva para obtener la ruta del padre
+    if (deliverable.parentId) {
+      const parentPath = await this.getRelativePath(deliverable.parentId);
+      currentPath = parentPath + "/" + currentPath;
+    }
+
+    return currentPath;
   }
 
   async remove(id: number) {
