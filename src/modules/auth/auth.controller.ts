@@ -7,6 +7,7 @@ import {
   Get,
   UseGuards,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import { SingInDto } from '../../interfaces/dtos/singIn.dto';
 import { AuthService } from './auth.service';
@@ -88,8 +89,14 @@ export class AuthController {
   @Get('verifyToken')
   @UseGuards(AuthGuard)
   async verifyToken(@Req() req: Request) {
+    try {
     const user = req.user;
-    return user;
+        
+    if(!user) throw new ForbiddenException('No user found!');
+      return { message : 'Token verified!', user };
+    } catch (error) {
+      throw new ForbiddenException(error);
+    }
   }
 
   @UseGuards(AuthGuard)

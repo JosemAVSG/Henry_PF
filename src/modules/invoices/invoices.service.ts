@@ -76,7 +76,10 @@ export class InvoicesService {
           company
         });
     
-        return this.invoiceRepository.save(invoice);
+        const result = await this.invoiceRepository.save(invoice);
+        console.log(result);
+        
+        return result;
       }
     
     // =====================================
@@ -186,18 +189,39 @@ export class InvoicesService {
         const user = await this.userRepository.findOneBy({ id: userId });
         if (!user) throw new Error('User does not exist');
     
-        const invoiceCopy = await this.invoiceRepository.findOneBy({ id: invoiceId });
-        if (!invoiceCopy) throw new Error('Invoice does not exist');
+        const invoiceCopy = await this.invoiceRepository.findOne({where: {id: invoiceId}});
+        console.log(invoiceCopy.path);
+        
+        if (!invoiceCopy) throw new NotFoundException('Invoice does not exist');
     
-        const filePath = join(__dirname, '../../upload/invoices', invoiceCopy.path);
-    
-        if (!existsSync(filePath)) {
-            throw new Error('Invoice file not found');
+        const filePath = join(process.cwd(), invoiceCopy.path)
+        console.log(filePath);
+        
+        if (!existsSync(invoiceCopy.path)) {
+            throw new NotFoundException('Invoice file not found');
         }
+        const fileExtension = filePath.split('.').pop();
+        let contentType: string;
     
-        // Enviar el archivo directamente como respuesta
-        return res.download(filePath, invoiceCopy.number);
-
+        switch (fileExtension) {
+          case 'pdf':
+            contentType = 'application/pdf';
+            break;
+          case 'jpg':
+          case 'jpeg':
+            contentType = 'image/jpeg';
+            break;
+          case 'png':
+            contentType = 'image/png';
+            break;
+          case 'txt':
+            contentType = 'text/plain';
+            break;
+          default:
+            contentType = 'application/octet-stream'; // Tipo genérico para otros archivos
+        }      
+    
+        return { contentType, filePath,invoiceCopy, fileExtension };
     }
 
     async deleteInvoice(id: number): Promise<void> {    

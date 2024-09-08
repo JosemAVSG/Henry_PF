@@ -69,9 +69,10 @@ export class DeliverablesService {
       isFolder,
       parentId,
     });
-
+    
+    
     const deliveryResult = await this.deliverableRepository.save(deliverable);
-
+    
     let ownerPermissionTypeId = 1;
     let deliverableId = deliveryResult.id;
 
@@ -288,18 +289,52 @@ export class DeliverablesService {
 
   async getByName(name: string, userId: string) {
     const user = await this.userRepository.findOneBy({ id: Number(userId) });
-    if (user.isAdmin)
-      return this.deliverableRepository.find({
+    if (user.isAdmin){
+      const result = await this.deliverableRepository.find({
         where: { name: ILike(`%${name}%`) },
+        relations: { permissions: {permissionType: true}, deliverableType: true, deliverableCategory: true,},
+        select:{
+          id: true,
+          parentId: true,
+          name: true,
+          isFolder: true,
+          path: true,
+          deliverableType: {name: true,},
+          deliverableCategory: {name: true,},
+          permissions: true,
+          createdAt: true,
+          updatedAt: true,
+        }
       });
+      console.log(result);
+      if (!result || result.length === 0) {
+        throw new NotFoundException('No deliverables found');
+      }
+      
+      return result;
+    }
 
     const data = await this.deliverableRepository.find({
       where: {
         name: ILike(`%${name}%`),
         permissions: { user: { id: Number(userId) } },
       },
-      relations: { permissions: true },
+      relations: { permissions: {permissionType: true},deliverableType: true, deliverableCategory: true,  },
+      select:{
+        id: true,
+        parentId: true,
+        name: true,
+        isFolder: true,
+        path: true,
+        deliverableType: {name: true,},
+        deliverableCategory: {name: true,},
+        permissions: true,
+        createdAt: true,
+        updatedAt: true,
+      }
     });
+
+    console.log(data);
 
     if (!data)
       throw new NotFoundException(`Deliverable with name ${name} not found`);
