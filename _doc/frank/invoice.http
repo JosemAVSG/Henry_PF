@@ -37,5 +37,14 @@ Content-Type: application/json
 ### Obtener facturas por id
 GET http://localhost:3000/invoices/getbyid/1
 Content-Type: application/json
-###
+
+### Actualiza el estado de la factura
+PATCH http://localhost:3000/invoices/status/1
+Content-Type: application/json
+
+{
+  "invoiceStatusId": 1
+}
+
+### Comprobar si existe el numero de la factura
 GET http://localhost:3000/invoices/check-invoice-number?invoiceNumber=INV-001

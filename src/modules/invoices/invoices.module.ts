@@ -10,8 +10,17 @@ import { PermissionType } from 'src/entities/permissionType.entity';
 import { Company } from 'src/entities/company.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Invoice,InvoiceStatus, UserEntity, Permission, PermissionType, Company])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Invoice,
+      InvoiceStatus,
+      UserEntity,
+      Permission,
+      PermissionType,
+      Company,
+    ]),
+  ],
   providers: [InvoicesService],
-  controllers: [InvoicesController]
+  controllers: [InvoicesController],
 })
 export class InvoicesModule {}

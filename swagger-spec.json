@@ -883,6 +883,39 @@
         ]
       }
     },
+    "/invoices/status/{id}": {
+      "patch": {
+        "operationId": "InvoicesController_updateInvoiceStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvoiceStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
     "/invoices/check-invoice-number": {
       "get": {
         "operationId": "InvoicesController_checkInvoiceNumber",
@@ -1097,6 +1130,10 @@
         "properties": {}
       },
       "UpdateVoucherDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateInvoiceStatusDto": {
         "type": "object",
         "properties": {}
       },
