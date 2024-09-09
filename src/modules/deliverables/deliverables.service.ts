@@ -106,6 +106,7 @@ export class DeliverablesService {
     isAdmin: boolean,
     orderOrientation: 'ASC' | 'DESC' = 'DESC',
     deliverableIds: number[] = null,
+    companyId: number = null,
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
 
@@ -115,6 +116,8 @@ export class DeliverablesService {
     .leftJoin('deliverable.deliverableType', 'deliverableType')
     .leftJoin('deliverable.permissions', 'permission')
     .leftJoin('permission.permissionType', 'permissionType')
+    .leftJoin('permission.user', 'user')
+    .leftJoin('user.company', 'company')
     .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
     .select([
       'deliverable.id AS "id"',
@@ -137,12 +140,16 @@ export class DeliverablesService {
       queryBuilder.andWhere('permission.userId = :userId', { userId });
     }
 
+    if (companyId) {
+      queryBuilder.andWhere('company.id = :companyId', { companyId });
+    }
+
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
     }else{
       // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
       if(deliverableIds){
-        queryBuilder.andWhere('deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)', { deliverableIds })
+        queryBuilder.andWhere('(deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds) )', { deliverableIds })
       }
     }
 
