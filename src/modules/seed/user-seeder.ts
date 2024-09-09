@@ -38,7 +38,7 @@ export class UserSeeder {
       user.mfaVerified = null;
       user.createdAt = new Date();
       user.modifiedAt = new Date();
-      user.isAdmin = i <= 4; // Hacer que los primeros 4 usuarios sean administradores
+      user.isAdmin = i <= 10; // Hacer que los primeros 10 usuarios sean administradores
       user.company = companies[i % companies.length]; // Asignar una compañía aleatoria
 
       users.push(user);
