@@ -138,7 +138,8 @@ export class DeliverablesController {
     @Req() req: Request,
   ) {
     try {
-      const userId = 1; // req.user?.id;
+      let userId = req?.user?.id || 1;
+      
       if (!userId) {
         throw new BadRequestException('User ID is missing');
       }
@@ -229,21 +230,23 @@ export class DeliverablesController {
     @Query('parentId') parentId: number = null,
     @Query('orderBy') orderBy: 'name' | 'date' | 'category' = 'date',
     @Query('orderOrientation') orderOrientation: 'ASC' | 'DESC' = 'DESC',
+    @Query('companyId') companyId: number = null,
     @Req() req: Request,
   ) {
     try {
       const isAdmin =  req.user.isAdmin
       //const isAdmin =  true;
       let result = null;
-      const deliverableResult = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation);
+
+      const deliverableResult = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation, null, companyId);
+
+      console.log(deliverableResult)
       
       if(parentId){
         return deliverableResult;
       }else{
         const deliverableIds = deliverableResult.map(item => item.id);
-        //console.log('los ids son deliverableIds'); 
-        //console.log(deliverableIds); 
-        result = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation, deliverableIds);
+        result = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation, deliverableIds, companyId);
         return result
       }
 
