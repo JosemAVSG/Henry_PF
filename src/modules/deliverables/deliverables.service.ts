@@ -52,27 +52,41 @@ export class DeliverablesService {
     userId: number,
     isFolder: boolean,
   ) {
-    const { name, path, deliverableTypeId, parentId } = createDeliverableDto;
-
+    const { name, path, deliverableTypeId, deliverableCategoryId, parentId } = createDeliverableDto;
+    
     const deliverableType = await this.deliverableTypeRepository.findOneBy({
       id: deliverableTypeId,
     });
 
     if (!deliverableType) {
-      throw new Error('DeliverableType not found');
+      throw new Error('Deliverable Type not found');
     }
 
-    const deliverable = this.deliverableRepository.create({
+    const deliverableCategory = await this.deliverableTypeRepository.findOneBy({
+      id: deliverableCategoryId,
+    });
+
+    if (!deliverableType) {
+      throw new Error('Deliverable Categpry not found');
+    }
+
+    const deliverableData: any = {
       name,
       path,
       deliverableType,
+      deliverableCategory,
       isFolder,
-      parentId,
-    });
+    };
     
-    
-    const deliveryResult = await this.deliverableRepository.save(deliverable);
-    
+    //const deliverable = this.deliverableRepository.create(deliverableData);
+
+    // Solo añadir `parentId` si no es `null` o `undefined`
+    if (parentId != null && parentId.toString() != "" && parentId != undefined) {
+      deliverableData.parentId = parentId;
+    }
+   
+    const deliveryResult = await this.deliverableRepository.save(deliverableData);
+
     let ownerPermissionTypeId = 1;
     let deliverableId = deliveryResult.id;
 
@@ -193,6 +207,7 @@ export class DeliverablesService {
     return result;
 
   }
+
   async getParentFolders(deliverableId: number): Promise<string> {
     // Buscar el deliverable por ID
     const deliverable = await this.deliverableRepository.findOneBy({ id: deliverableId });
@@ -211,6 +226,47 @@ export class DeliverablesService {
     }
 
     return currentPath;
+  }
+
+  async updateDeliverable(id: number, updateDeliverableDto: UpdateDeliverableDto, isFolder: boolean) {
+    
+    const { name, path, deliverableTypeId, deliverableCategoryId, parentId } = updateDeliverableDto;
+    
+    const deliverableType = await this.deliverableTypeRepository.findOneBy({
+      id: deliverableTypeId,
+    });
+
+    if (!deliverableType) {
+      throw new Error('Deliverable Type not found');
+    }
+
+    const deliverableCategory = await this.deliverableTypeRepository.findOneBy({
+      id: deliverableCategoryId,
+    });
+
+    if (!deliverableType) {
+      throw new Error('Deliverable Categpry not found');
+    }
+
+    const deliverableData: any = {
+      name,
+      path,
+      deliverableType,
+      deliverableCategory,
+      isFolder,
+    };
+    
+    //const deliverable = this.deliverableRepository.create(deliverableData);
+
+    // Solo añadir `parentId` si no es `null` o `undefined`
+    if (parentId != null && parentId.toString() != "" && parentId != undefined) {
+      deliverableData.parentId = parentId;
+    }
+
+    const result = await this.deliverableRepository.update(id, deliverableData);
+    
+    return result;
+
   }
 
   async remove(id: number) {
