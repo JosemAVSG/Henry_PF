@@ -10,6 +10,9 @@ import { google } from 'googleapis';
 import { PermissionType } from '../../entities/permissionType.entity';
 import { Permission } from '../../entities/permission.entity';
 import { UserEntity } from 'src/entities/user.entity';
+import { join } from 'path';
+import { existsSync } from 'fs';
+
 @Injectable()
 export class DeliverablesService {
   constructor(
@@ -364,5 +367,49 @@ export class DeliverablesService {
         throw new NotFoundException(`Deliverable with name ${name} not found`);
       return data;
     }
+  }
+
+  async getDonwloadDeliverableCopy(
+    userId: number,
+    deliverableId: number,
+  ) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new Error('User does not exist');
+
+    const deliverableCopy = await this.deliverableRepository.findOne({
+      where: { id: deliverableId },
+    });
+    console.log(deliverableCopy.path);
+
+    if (!deliverableCopy) throw new NotFoundException('Deliverable not found');
+
+    const filePath = join(process.cwd(), deliverableCopy.path);
+    console.log(filePath);
+
+    if (!existsSync(deliverableCopy.path)) {
+      throw new NotFoundException('Invoice file not found');
+    }
+    const fileExtension = filePath.split('.').pop();
+    let contentType: string;
+
+    switch (fileExtension) {
+      case 'pdf':
+        contentType = 'application/pdf';
+        break;
+      case 'jpg':
+      case 'jpeg':
+        contentType = 'image/jpeg';
+        break;
+      case 'png':
+        contentType = 'image/png';
+        break;
+      case 'txt':
+        contentType = 'text/plain';
+        break;
+      default:
+        contentType = 'application/octet-stream'; // Tipo genérico para otros archivos
+    }
+
+    return { contentType, filePath, deliverableCopy, fileExtension };
   }
 }
