@@ -14,7 +14,7 @@ import { UserEntity } from 'src/entities/user.entity';
 export class DeliverablesService {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
-    
+
     @InjectRepository(Deliverable)
     private deliverableRepository: Repository<Deliverable>,
 
@@ -52,27 +52,41 @@ export class DeliverablesService {
     userId: number,
     isFolder: boolean,
   ) {
-    const { name, path, deliverableTypeId, parentId } = createDeliverableDto;
-
+    const { name, path, deliverableTypeId, deliverableCategoryId, parentId } = createDeliverableDto;
+    
     const deliverableType = await this.deliverableTypeRepository.findOneBy({
       id: deliverableTypeId,
     });
 
     if (!deliverableType) {
-      throw new Error('DeliverableType not found');
+      throw new Error('Deliverable Type not found');
     }
 
-    const deliverable = this.deliverableRepository.create({
+    const deliverableCategory = await this.deliverableTypeRepository.findOneBy({
+      id: deliverableCategoryId,
+    });
+
+    if (!deliverableType) {
+      throw new Error('Deliverable Categpry not found');
+    }
+
+    const deliverableData: any = {
       name,
       path,
       deliverableType,
+      deliverableCategory,
       isFolder,
-      parentId,
-    });
+    };
     
-    
-    const deliveryResult = await this.deliverableRepository.save(deliverable);
-    
+    //const deliverable = this.deliverableRepository.create(deliverableData);
+
+    // Solo añadir `parentId` si no es `null` o `undefined`
+    if (parentId != null && parentId.toString() != "" && parentId != undefined) {
+      deliverableData.parentId = parentId;
+    }
+   
+    const deliveryResult = await this.deliverableRepository.save(deliverableData);
+
     let ownerPermissionTypeId = 1;
     let deliverableId = deliveryResult.id;
 
@@ -146,17 +160,17 @@ export class DeliverablesService {
 
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
-    }else{
+    } else {
       // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
       if(deliverableIds){
         queryBuilder.andWhere('(deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds) )', { deliverableIds })
       }
     }
 
-    const queryBuilder2 =  this.dataSource
+    const queryBuilder2 = this.dataSource
       .createQueryBuilder()
       .select('*')
-      .from("(" + queryBuilder.getQuery() + ")", "subquery")
+      .from('(' + queryBuilder.getQuery() + ')', 'subquery')
       .setParameters(queryBuilder.getParameters()); // Pasar parámetros de la subconsulta
 
     // Aplicar filtros y ordenamientos adicionales
@@ -178,12 +192,12 @@ export class DeliverablesService {
     }
 
     if (parentId) {
-      queryBuilder2.limit(pageSize)
+      queryBuilder2.limit(pageSize);
       queryBuilder2.offset(offset);
-    }else{
+    } else {
       // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
-      if(deliverableIds){
-        queryBuilder2.limit(pageSize)
+      if (deliverableIds) {
+        queryBuilder2.limit(pageSize);
         queryBuilder2.offset(offset);
       }
     }
@@ -191,11 +205,13 @@ export class DeliverablesService {
     const result = await queryBuilder2.getRawMany();
 
     return result;
-
   }
+
   async getParentFolders(deliverableId: number): Promise<string> {
     // Buscar el deliverable por ID
-    const deliverable = await this.deliverableRepository.findOneBy({ id: deliverableId });
+    const deliverable = await this.deliverableRepository.findOneBy({
+      id: deliverableId,
+    });
 
     if (!deliverable) {
       throw new Error(`Deliverable with ID ${deliverableId} not found`);
@@ -207,10 +223,51 @@ export class DeliverablesService {
     // Si hay un parentId, realizar la llamada recursiva para obtener la ruta del padre
     if (deliverable.parentId) {
       const parentPath = await this.getParentFolders(deliverable.parentId);
-      currentPath = parentPath + "/" + currentPath;
+      currentPath = parentPath + '/' + currentPath;
     }
 
     return currentPath;
+  }
+
+  async updateDeliverable(id: number, updateDeliverableDto: UpdateDeliverableDto, isFolder: boolean) {
+    
+    const { name, path, deliverableTypeId, deliverableCategoryId, parentId } = updateDeliverableDto;
+    
+    const deliverableType = await this.deliverableTypeRepository.findOneBy({
+      id: deliverableTypeId,
+    });
+
+    if (!deliverableType) {
+      throw new Error('Deliverable Type not found');
+    }
+
+    const deliverableCategory = await this.deliverableTypeRepository.findOneBy({
+      id: deliverableCategoryId,
+    });
+
+    if (!deliverableType) {
+      throw new Error('Deliverable Categpry not found');
+    }
+
+    const deliverableData: any = {
+      name,
+      path,
+      deliverableType,
+      deliverableCategory,
+      isFolder,
+    };
+    
+    //const deliverable = this.deliverableRepository.create(deliverableData);
+
+    // Solo añadir `parentId` si no es `null` o `undefined`
+    if (parentId != null && parentId.toString() != "" && parentId != undefined) {
+      deliverableData.parentId = parentId;
+    }
+
+    const result = await this.deliverableRepository.update(id, deliverableData);
+    
+    return result;
+
   }
 
   async remove(id: number) {
@@ -245,9 +302,8 @@ export class DeliverablesService {
   async getPermissions(deliverableId: number) {
     const data = await this.permissionsRepository.find({
       relations: { user: true, permissionType: true },
-      where: { deliverable: { id: deliverableId }},
+      where: { deliverable: { id: deliverableId } },
       select: { permissionType: { name: true, id: true } },
-      
     });
 
     const permissions = data.map((item) => {
@@ -307,55 +363,63 @@ export class DeliverablesService {
 
   async getByName(name: string, userId: string) {
     const user = await this.userRepository.findOneBy({ id: Number(userId) });
-    if (user.isAdmin){
+    if (user.isAdmin) {
       const result = await this.deliverableRepository.find({
         where: { name: ILike(`%${name}%`) },
-        relations: { permissions: {permissionType: true}, deliverableType: true, deliverableCategory: true,},
-        select:{
+        relations: {
+          permissions: { permissionType: true },
+          deliverableType: true,
+          deliverableCategory: true,
+        },
+        select: {
           id: true,
           parentId: true,
           name: true,
           isFolder: true,
           path: true,
-          deliverableType: {name: true,},
-          deliverableCategory: {name: true,},
+          deliverableType: { name: true },
+          deliverableCategory: { name: true },
           permissions: true,
           createdAt: true,
           updatedAt: true,
-        }
+        },
       });
       console.log(result);
       if (!result || result.length === 0) {
         throw new NotFoundException('No deliverables found');
       }
-      
+
       return result;
+    } else {
+      const data = await this.deliverableRepository.find({
+        where: {
+          name: ILike(`%${name}%`),
+          permissions: { user: { id: Number(userId) } },
+        },
+        relations: {
+          permissions: { permissionType: true },
+          deliverableType: true,
+          deliverableCategory: true,
+        },
+        select: {
+          id: true,
+          parentId: true,
+          name: true,
+          isFolder: true,
+          path: true,
+          deliverableType: { name: true },
+          deliverableCategory: { name: true },
+          permissions: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      console.log(data);
+
+      if (!data)
+        throw new NotFoundException(`Deliverable with name ${name} not found`);
+      return data;
     }
-
-    const data = await this.deliverableRepository.find({
-      where: {
-        name: ILike(`%${name}%`),
-        permissions: { user: { id: Number(userId) } },
-      },
-      relations: { permissions: {permissionType: true},deliverableType: true, deliverableCategory: true,  },
-      select:{
-        id: true,
-        parentId: true,
-        name: true,
-        isFolder: true,
-        path: true,
-        deliverableType: {name: true,},
-        deliverableCategory: {name: true,},
-        permissions: true,
-        createdAt: true,
-        updatedAt: true,
-      }
-    });
-
-    console.log(data);
-
-    if (!data)
-      throw new NotFoundException(`Deliverable with name ${name} not found`);
-    return data;
   }
 }

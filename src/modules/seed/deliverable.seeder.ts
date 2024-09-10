@@ -22,9 +22,9 @@ export class DeliverableSeeder {
       { id: 2, name: "Folder B", parentId: 3, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 1 },
       { id: 3, name: "Folder C", parentId: 4, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 3 },
       { id: 4, name: "Folder D", parentId: null, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 3 },
-      { id: 5, name: "File X", parentId: 1, isFolder: false, deliverableTypeId: 4, deliverableCategoryId: 1  },
-      { id: 6, name: "File 1", parentId: 1, isFolder: false, deliverableTypeId: 5, deliverableCategoryId: 2  },
-      { id: 7, name: "File 2", parentId: 2, isFolder: false, deliverableTypeId: 4, deliverableCategoryId: 2  },
+      { id: 5, name: "File X", parentId: 1, isFolder: false, deliverableTypeId: 3, deliverableCategoryId: 1  },
+      { id: 6, name: "File 1", parentId: 1, isFolder: false, deliverableTypeId: 3, deliverableCategoryId: 2  },
+      { id: 7, name: "File 2", parentId: 2, isFolder: false, deliverableTypeId: 3, deliverableCategoryId: 2  },
       { id: 8, name: "File 3", parentId: 3, isFolder: false, deliverableTypeId: 3, deliverableCategoryId: 3  },
       { id: 9, name: "Folder F", parentId: 4, isFolder: true, deliverableTypeId: 1, deliverableCategoryId: 1  }
     ];
