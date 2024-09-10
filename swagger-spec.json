@@ -574,6 +574,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "companyId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {

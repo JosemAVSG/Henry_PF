@@ -105,30 +105,33 @@ export class DeliverablesService {
     isAdmin: boolean,
     orderOrientation: 'ASC' | 'DESC' = 'DESC',
     deliverableIds: number[] = null,
+    companyId: number = null,
   ): Promise<Deliverable[]> {
     const offset = (page - 1) * pageSize;
 
     // Crear la subconsulta
     const queryBuilder = this.deliverableRepository
-      .createQueryBuilder('deliverable')
-      .leftJoin('deliverable.deliverableType', 'deliverableType')
-      .leftJoin('deliverable.permissions', 'permission')
-      .leftJoin('permission.permissionType', 'permissionType')
-      .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
-      .select([
-        'deliverable.id AS "id"',
-        'deliverable.parentId AS "parentId"',
-        'deliverable.name AS "deliverableName"',
-        'deliverable.isFolder AS "deliverableIsFolder"',
-        'deliverable.path AS "deliverablePath"',
-        'deliverableType.name AS "deliverableType"',
-        'deliverableCategory.name AS "deliverableCategory"',
-        `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
-        `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
-      ])
-      .groupBy(
-        'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
-      );
+    .createQueryBuilder('deliverable')
+    .leftJoin('deliverable.deliverableType', 'deliverableType')
+    .leftJoin('deliverable.permissions', 'permission')
+    .leftJoin('permission.permissionType', 'permissionType')
+    .leftJoin('permission.user', 'user')
+    .leftJoin('user.company', 'company')
+    .leftJoin('deliverable.deliverableCategory', 'deliverableCategory')
+    .select([
+      'deliverable.id AS "id"',
+      'deliverable.parentId AS "parentId"',
+      'deliverable.name AS "deliverableName"',
+      'deliverable.isFolder AS "deliverableIsFolder"',
+      'deliverable.path AS "deliverablePath"',
+      'deliverableType.name AS "deliverableType"',
+      'deliverableCategory.name AS "deliverableCategory"',
+      `ARRAY_AGG(permissionType.name) AS "permissionTypes"`,
+      `TO_CHAR(COALESCE(deliverable.updatedAt, deliverable.createdAt), 'DD-MM-YYYY') AS "lastDate"`,
+    ])
+    .groupBy(
+      'deliverable.id, deliverable.parentId, deliverable.name, deliverable.isFolder, deliverable.path, deliverableType.name, deliverableCategory.name',
+    );
 
     queryBuilder.where('deliverable.statusId = 1');
 
@@ -136,15 +139,16 @@ export class DeliverablesService {
       queryBuilder.andWhere('permission.userId = :userId', { userId });
     }
 
+    if (companyId) {
+      queryBuilder.andWhere('company.id = :companyId', { companyId });
+    }
+
     if (parentId) {
       queryBuilder.andWhere('deliverable.parentId = :parentId', { parentId });
     } else {
       // Entregables a excluir si no se especifica una carpeta padre. Mostrando los entregables de mayor jerarquía a los que se tiene acceso.
-      if (deliverableIds) {
-        queryBuilder.andWhere(
-          'deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds)',
-          { deliverableIds },
-        );
+      if(deliverableIds){
+        queryBuilder.andWhere('(deliverable.parentId IS NULL OR deliverable.parentId NOT IN (:...deliverableIds) )', { deliverableIds })
       }
     }
 
