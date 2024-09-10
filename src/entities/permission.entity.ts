@@ -23,11 +23,11 @@ export class Permission {
     userId: string; // FK hacia User
 
     // Relación Many-to-One con Deliverable
-    @ManyToOne(() => Deliverable, deliverable => deliverable.permissions)
+    @ManyToOne(() => Deliverable, deliverable => deliverable.permissions,{nullable:true})
     @JoinColumn({ name: 'deliverableId' }) // Especifica el nombre de la columna FK
     deliverable: Deliverable;
 
-    @Column()
+    @Column({nullable:true})
     deliverableId: string; // FK hacia Deliverable
 
     // Relación Many-to-One con PermissionType
