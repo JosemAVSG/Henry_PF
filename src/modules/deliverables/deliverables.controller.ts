@@ -96,7 +96,10 @@ export class DeliverablesController {
     }
   }
 
+
+
   @Put('file/:deliverableId')
+  @UseGuards(AuthGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -128,37 +131,42 @@ export class DeliverablesController {
       createDeliverableDto.path = file ? file.path : null;
       const isFolder = false;
 
-      //Pasar el archivo de la carpeta temporal a la carpeta definitiva
-      const temporalPath = join(cwd(),'./uploads/deliverables/temporal/', file.filename);
-      
-      const parentFolders = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
-      const newRelativePath = join('uploads/deliverables', parentFolders, file.filename);
-
-      const newPath = join(cwd(), newRelativePath);
-      
-      createDeliverableDto.path = newRelativePath;
-
-      fs.rename(temporalPath, newPath)
-      .then(() => {
-        console.log('File moved successfully!');
-      })
-      .catch(err => {
-        console.error('Error moving file:', err);
-      });
-
-      //eliminar el archivo anterior
-      const oldFileResult = await this.deliverablesService.getByDeliverableID(deliverableId);
-      let oldFileRelativePath = oldFileResult[0].path;
-      oldFileRelativePath = join('uploads/deliverables', oldFileRelativePath);
-      const oldFilePath = join(cwd(), oldFileRelativePath);
-     
-      fs.unlink(oldFilePath, (err) => {
-        if (err) {
-          console.error(err);
-        } else {
-          console.log('File deleted successfully!');
+      // Si existe el archivo, procesar
+      if (file) {
+        const temporalPath = join(cwd(), './uploads/deliverables/temporal/', file.filename);
+        
+        const parentFolders = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
+        const newRelativePath = join('uploads/deliverables', parentFolders, file.filename);
+        const newPath = join(cwd(), newRelativePath);
+        
+        createDeliverableDto.path = newRelativePath;
+  
+        await fs.rename(temporalPath, newPath)
+          .then(() => {
+            console.log('File moved successfully!');
+          })
+          .catch(err => {
+            console.error('Error moving file:', err);
+          });
+  
+        // Eliminar el archivo anterior
+        const oldFileResult = await this.deliverablesService.getByDeliverableID(deliverableId);
+        const oldFileRelativePath = oldFileResult[0]?.path;
+        if (oldFileRelativePath) {
+          const oldFilePath = join(cwd(), 'uploads/deliverables', oldFileRelativePath);
+          await fs.unlink(oldFilePath, (err) => {
+            if (err) {
+              console.error('Error deleting old file:', err);
+            } else {
+              console.log('Old file deleted successfully!');
+            }
+          });
         }
-      });
+      } else {
+        // Si no se recibe archivo, conservar la ruta existente
+        const existingDeliverable = await this.deliverablesService.getByDeliverableID(deliverableId);
+        createDeliverableDto.path = existingDeliverable[0]?.path || null;
+      }
 
       //actualizar información en la base de datos
       return this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
@@ -297,7 +305,7 @@ export class DeliverablesController {
   }
 
   @Post('link')
-  //@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   async createLinkDeliverable(
     @Body() createDeliverableDto: CreateDeliverableDto,
     @Req() req: Request,
@@ -340,7 +348,7 @@ export class DeliverablesController {
 
     try {
       let userId = req?.user?.id || 1;
-     
+      createDeliverableDto.deliverableTypeId = 2;
       if (!userId) {
         throw new BadRequestException('User ID is missing');
       }
