@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,11 @@ import { google } from 'googleapis';
 import { PermissionType } from '../../entities/permissionType.entity';
 import { Permission } from '../../entities/permission.entity';
 import { UserEntity } from 'src/entities/user.entity';
+import { join } from 'path';
+import { existsSync,createWriteStream } from 'fs';
+import { Response } from 'express';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 @Injectable()
 export class DeliverablesService {
   constructor(
@@ -422,4 +427,94 @@ export class DeliverablesService {
       return data;
     }
   }
+
+  async getDonwloadDeliverableCopy(userId: number,deliverableId: number,) {
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new Error('User does not exist');
+
+    const deliverableCopy = await this.deliverableRepository.findOne({
+      where: { id: deliverableId },
+    });
+    console.log(deliverableCopy.path);
+
+    if (!deliverableCopy) throw new NotFoundException('Deliverable not found');
+
+    const filePath = join(process.cwd(), deliverableCopy.path);
+    console.log(filePath);
+
+    if (!existsSync(deliverableCopy.path)) {
+      throw new NotFoundException('Invoice file not found');
+    }
+    const fileExtension = filePath.split('.').pop();
+    let contentType: string;
+
+    switch (fileExtension) {
+      case 'pdf':
+        contentType = 'application/pdf';
+        break;
+      case 'jpg':
+      case 'jpeg':
+        contentType = 'image/jpeg';
+        break;
+      case 'png':
+        contentType = 'image/png';
+        break;
+      case 'txt':
+        contentType = 'text/plain';
+        break;
+      default:
+        contentType = 'application/octet-stream'; // Tipo genérico para otros archivos
+    }
+
+    return { contentType, filePath, deliverableCopy, fileExtension };
+  }
+
+  async uploadGoogleFile (userId: number, deliverableId: number, fileName:string,res : Response) {
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('User does not exist');
+
+
+    const fileUrl = `https://drive.google.com/uc?export=download&id=${deliverableId}`;
+    const filePath = join(process.cwd(), 'uploads/deliverables', fileName); 
+  
+    try {
+      // Descargar el archivo desde Google Drive
+      const response = await fetch(fileUrl, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        throw new BadRequestException('Error al descargar el archivo');
+      }
+        // Crear un stream de escritura para el archivo en el servidor
+        const fileStream = createWriteStream(filePath);
+
+        // Promisify pipeline para trabajar con async/await
+        const streamPipeline = promisify(pipeline);
+  
+        // Usar pipeline para manejar el stream de forma segura
+        await streamPipeline(response.body, fileStream);
+  
+        console.log(`Archivo guardado en: ${filePath}`);
+        const deliverableObject = {
+          name: fileName,
+          path: filePath,
+          deliverableCategoryId: 1,
+          deliverableTypeId: 2,
+          parentId: null
+        }
+        const deliverable = await this.create(deliverableObject,userId,false);
+        console.log(`Deliverable: ${deliverable}`);
+        
+        res.status(200).json({ message: 'Archivo guardado exitosamente.', filePath });
+
+    } catch (error) {
+      console.error('Error al descargar o guardar el archivo:', error);
+      throw new BadRequestException('Error al descargar o guardar el archivo');
+    }
+
+  }
+
 }

@@ -27,12 +27,11 @@ import { DeliverablesService } from './deliverables.service';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { AuthGuard } from '../../guards/auth.guards';
-import { Deliverable } from 'src/entities/deliverable.entity';
 import { Permission } from 'src/entities/permission.entity';
 import { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { cwd } from 'process';
-
+import { Response } from 'express';
 @ApiTags('deliverables')
 @Controller('deliverables')
 export class DeliverablesController {
@@ -403,22 +402,29 @@ export class DeliverablesController {
     }
   }
 
-  @Get('download/:id')
-  async downloadFile(@Param('id') id: string, @Res() res: Response) {
-    // const user = await this.userRepository.findOneBy({ id: userId });
-    // if (!user) throw new Error('User does not exist');
 
-    // const invoiceCopy = await this.invoiceRepository.findOneBy({ id: invoiceId });
-    // if (!invoiceCopy) throw new Error('Invoice does not exist');
+  @UseGuards(AuthGuard)
+  @Get('download/:deliverableId')
+  async downloadFile(
+  
+    @Param('invoiceId') deliverableId: number,
+    @Res() res: Response,
+    @Req() req: Request
+  ) {
 
-    // const filePath = join(__dirname, '../../upload/invoices', invoiceCopy.path);
-
-    // if (!existsSync(filePath)) {
-    //     throw new Error('Invoice file not found');
-    // }
-
-    // // Enviar el archivo directamente como respuesta
-    // return res.download(filePath, invoiceCopy.number);
+    try {
+      const userId = req.user.id;
+      const data = await this.deliverablesService.getDonwloadDeliverableCopy(
+        userId,
+        deliverableId,
+      );
+      const { filePath, deliverableCopy, contentType,fileExtension } = data;
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', `attachment; filename="${deliverableCopy.name}.${fileExtension}"`);
+      res.download(filePath);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   @Get('file/:name')
@@ -474,6 +480,23 @@ export class DeliverablesController {
         deliverableId,
         permission,
       );
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('uploadGoogleFile')
+  async uploadGoogleFile(@Body() body: any,
+    @Req() req: Request,
+    @Res() res: Response
+  )
+  {
+    try {
+      const userId = req.user.id;
+      const {fileName,deliverableId} = body;
+      
+      return this.deliverablesService.uploadGoogleFile(userId,deliverableId,fileName,res)
     } catch (error) {
       throw new BadRequestException(error);
     }

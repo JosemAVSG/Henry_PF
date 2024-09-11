@@ -694,16 +694,16 @@
         ]
       }
     },
-    "/deliverables/download/{id}": {
+    "/deliverables/download/{deliverableId}": {
       "get": {
         "operationId": "DeliverablesController_downloadFile",
         "parameters": [
           {
-            "name": "id",
+            "name": "invoiceId",
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -822,6 +822,20 @@
         ],
         "responses": {
           "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "deliverables"
+        ]
+      }
+    },
+    "/deliverables/uploadGoogleFile": {
+      "post": {
+        "operationId": "DeliverablesController_uploadGoogleFile",
+        "parameters": [],
+        "responses": {
+          "201": {
             "description": ""
           }
         },
