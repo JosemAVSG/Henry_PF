@@ -95,12 +95,13 @@ export class DeliverablesController {
     }
   }
 
-  @Put('file')
+  @Put('file/:deliverableId')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
         destination: async (req, file, callback) => {
-          const uploadPath = './uploads/deliverables';
+          const uploadPath = './uploads/deliverables/temporal';
+
           await fs.ensureDir(uploadPath); // Crea el directorio si no existe
           callback(null, uploadPath);
         },
@@ -118,20 +119,56 @@ export class DeliverablesController {
   async updateDeliverableFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() createDeliverableDto: CreateDeliverableDto,
+    @Param('deliverableId') deliverableId: number,
     @Req() req: Request,
   ) {
     try {
       let userId = req?.user?.id || 1;
       createDeliverableDto.path = file ? file.path : null;
+      const isFolder = false;
 
-      //return this.deliverablesService.update(createDeliverableDto, userId);
+      //Pasar el archivo de la carpeta temporal a la carpeta definitiva
+      const temporalPath = join(cwd(),'./uploads/deliverables/temporal/', file.filename);
+      
+      const parentFolders = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
+      const newRelativePath = join('uploads/deliverables', parentFolders, file.filename);
+
+      const newPath = join(cwd(), newRelativePath);
+      
+      createDeliverableDto.path = newRelativePath;
+
+      fs.rename(temporalPath, newPath)
+      .then(() => {
+        console.log('File moved successfully!');
+      })
+      .catch(err => {
+        console.error('Error moving file:', err);
+      });
+
+      //eliminar el archivo anterior
+      const oldFileResult = await this.deliverablesService.getByDeliverableID(deliverableId);
+      let oldFileRelativePath = oldFileResult[0].path;
+      oldFileRelativePath = join('uploads/deliverables', oldFileRelativePath);
+      const oldFilePath = join(cwd(), oldFileRelativePath);
+     
+      fs.unlink(oldFilePath, (err) => {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log('File deleted successfully!');
+        }
+      });
+
+      //actualizar información en la base de datos
+      return this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
 
   @Post('folder')
-  //@UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   async createFolderDeliverable(
     @Body() createDeliverableDto: CreateDeliverableDto,
     @Req() req: Request,
@@ -145,8 +182,14 @@ export class DeliverablesController {
 
       const folderName = createDeliverableDto.name;
       //const relativePath = createDeliverableDto.path;
-      const relativePath = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
-      console.log(relativePath);
+
+      let relativePath = ""
+
+      if(createDeliverableDto.parentId){
+        relativePath = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
+
+        console.log(relativePath);
+      }
 
       const isFolder = true;
 
@@ -157,8 +200,10 @@ export class DeliverablesController {
         relativePath,
         folderName,
       );
+      console.log("folderPath")
+      console.log(folderPath)
 
-      
+
       try {
         const folderExists = await fs.stat(folderPath).catch(() => false);
 
@@ -186,6 +231,70 @@ export class DeliverablesController {
     }
   }
 
+  @Put('folder/:deliverableId')
+  @UseGuards(AuthGuard)
+  async updateFolderDeliverable(
+    @Body() createDeliverableDto: CreateDeliverableDto,
+    @Param('deliverableId') deliverableId: number,
+    @Req() req: Request,
+  ) {
+    const isFolder = true;
+
+    try {
+      let userId = req?.user?.id || 1;
+     
+      if (!userId) {
+        throw new BadRequestException('User ID is missing');
+      }
+
+      const newFolderName = createDeliverableDto.name;
+      //const relativePath = createDeliverableDto.path;
+
+      let relativePath = ""
+
+      if(createDeliverableDto.parentId){
+        relativePath = await this.deliverablesService.getParentFolders(createDeliverableDto.parentId);
+
+        console.log(relativePath);
+      }
+
+      const oldFolderNameResult = await this.deliverablesService.getByDeliverableID(deliverableId);
+      const oldFolderName = oldFolderNameResult[0].name;
+
+      console.log("oldFolderName")
+      console.log(oldFolderName)
+
+      // Ruta actual de la carpeta que deseas renombrar
+      const oldPath = path.join(process.cwd(), 'uploads/deliverables', relativePath,
+      oldFolderName);
+
+      // Construir la ruta completa a la carpeta uploads, que está al mismo nivel que src y dist
+      const newFolderPath = resolve(
+        process.cwd(), // Carpeta raíz del proyecto
+        'uploads/deliverables',
+        relativePath,
+        newFolderName,
+      );
+
+      console.log("newFolderPath")
+      console.log(newFolderPath)
+
+      createDeliverableDto.path = join('uploads/deliverables', relativePath ,   newFolderName)
+
+      fs.rename(oldPath, newFolderPath, (err) => {
+        if (err) {
+          console.error('Error al renombrar la carpeta:', err);
+        } else {
+          console.log('Carpeta renombrada con éxito');
+        }
+      });
+
+      return this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
   @Post('link')
   //@UseGuards(AuthGuard)
   async createLinkDeliverable(
@@ -193,7 +302,7 @@ export class DeliverablesController {
     @Req() req: Request,
   ) {
     try {
-      const userId = 1; // req.user.id;
+      let userId = req?.user?.id || 1;
       const isFolder = false;
   
       // Intentamos crear el deliverable con los datos proporcionados
@@ -219,6 +328,27 @@ export class DeliverablesController {
     }
   }
 
+  @Put('link/:deliverableId')
+  @UseGuards(AuthGuard)
+  async updateLinkDeliverable(
+    @Body() createDeliverableDto: CreateDeliverableDto,
+    @Param('deliverableId') deliverableId: number,
+    @Req() req: Request,
+  ){
+    const isFolder = false;
+
+    try {
+      let userId = req?.user?.id || 1;
+     
+      if (!userId) {
+        throw new BadRequestException('User ID is missing');
+      }
+
+      return this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
 
   @Get('user/:userId')
   @UseGuards(AuthGuard)
@@ -239,7 +369,7 @@ export class DeliverablesController {
 
       const deliverableResult = await this.deliverablesService.findAll(userId, page, limit, parentId, orderBy, isAdmin, orderOrientation, null, companyId);
 
-      console.log(deliverableResult)
+      //console.log(deliverableResult)
       
       if(parentId){
         return deliverableResult;

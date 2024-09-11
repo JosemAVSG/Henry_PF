@@ -499,6 +499,39 @@
         ]
       }
     },
+    "/deliverables/folder/{deliverableId}": {
+      "put": {
+        "operationId": "DeliverablesController_updateFolderDeliverable",
+        "parameters": [
+          {
+            "name": "deliverableId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeliverableDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "deliverables"
+        ]
+      }
+    },
     "/deliverables/link": {
       "post": {
         "operationId": "DeliverablesController_createLinkDeliverable",
