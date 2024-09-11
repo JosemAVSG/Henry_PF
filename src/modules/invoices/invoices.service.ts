@@ -219,10 +219,13 @@ export class InvoicesService {
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.invoiceStatus', 'invoiceStatus')
       .leftJoinAndSelect('invoice.user', 'users')
+      .leftJoinAndSelect('invoice.company', 'company')
+      .leftJoinAndSelect('invoice.permissions', 'permissions')
       .select([
         'invoice.id AS "id"',
         'invoice.path AS "invoicePath"',
         'invoice.number AS "invoiceNumber"',
+        'ARRAY_AGG(permissions.permissionTypes.name) AS "permissionType"',
         `TO_CHAR(invoice.issueDate, 'DD-MM-YYYY') AS "invoiceIssueDate"`,
         `TO_CHAR(invoice.dueDate, 'DD-MM-YYYY') AS "invoiceDueDate"`,
         'invoice.amount AS "invoiceAmount"',
@@ -235,6 +238,7 @@ export class InvoicesService {
       .orderBy('"invoiceDueDate"', 'DESC')
       .limit(pageSize)
       .offset(offset);
+
 
     if (idsInvoiceStatus) {
       queryBuilder.where('invoiceStatus.id IN (:...statusIds)', {

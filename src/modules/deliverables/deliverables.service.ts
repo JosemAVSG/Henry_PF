@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -11,8 +11,10 @@ import { PermissionType } from '../../entities/permissionType.entity';
 import { Permission } from '../../entities/permission.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { join } from 'path';
-import { existsSync } from 'fs';
+import { existsSync,createWriteStream } from 'fs';
 import { Response } from 'express';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 @Injectable()
 export class DeliverablesService {
   constructor(
@@ -468,43 +470,51 @@ export class DeliverablesService {
     return { contentType, filePath, deliverableCopy, fileExtension };
   }
 
-  // async uploadGoogleFile (userId: number, deliverableId: number, fileName:string,res : Response) {
+  async uploadGoogleFile (userId: number, deliverableId: number, fileName:string,res : Response) {
 
-  //   const user = await this.userRepository.findOneBy({ id: userId });
-  //   if (!user) throw new NotFoundException('User does not exist');
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('User does not exist');
 
 
-  //   const fileUrl = `https://drive.google.com/uc?export=download&id=${deliverableId}`;
-  //   const filePath = join(process.cwd(), 'uploads/deliverables', fileName); // Ruta del archivo guardado
+    const fileUrl = `https://drive.google.com/uc?export=download&id=${deliverableId}`;
+    const filePath = join(process.cwd(), 'uploads/deliverables', fileName); 
+  
+    try {
+      // Descargar el archivo desde Google Drive
+      const response = await fetch(fileUrl, {
+        method: 'GET',
+      })
 
-  //   try {
-  //     // Descargar el archivo desde Google Drive
-  //     const response = await lastValueFrom(this.httpService.get(fileUrl, { responseType: 'stream' }));
+      if (!response.ok) {
+        throw new BadRequestException('Error al descargar el archivo');
+      }
+        // Crear un stream de escritura para el archivo en el servidor
+        const fileStream = createWriteStream(filePath);
 
-  //     // Verifica si la respuesta es correcta
-  //     if (!response || response.status !== 200) {
-  //       throw new BadRequestException('Error al descargar el archivo');
-  //     }
+        // Promisify pipeline para trabajar con async/await
+        const streamPipeline = promisify(pipeline);
+  
+        // Usar pipeline para manejar el stream de forma segura
+        await streamPipeline(response.body, fileStream);
+  
+        console.log(`Archivo guardado en: ${filePath}`);
+        const deliverableObject = {
+          name: fileName,
+          path: filePath,
+          deliverableCategoryId: 1,
+          deliverableTypeId: 2,
+          parentId: null
+        }
+        const deliverable = await this.create(deliverableObject,userId,false);
+        console.log(`Deliverable: ${deliverable}`);
+        
+        res.status(200).json({ message: 'Archivo guardado exitosamente.', filePath });
 
-  //     // Crear un stream para guardar el archivo en el servidor
-  //     const fileStream = fs.createWriteStream(filePath);
-  //     response.data.pipe(fileStream);
+    } catch (error) {
+      console.error('Error al descargar o guardar el archivo:', error);
+      throw new BadRequestException('Error al descargar o guardar el archivo');
+    }
 
-  //     // Esperar hasta que el archivo esté completamente escrito
-  //     await new Promise((resolve, reject) => {
-  //       fileStream.on('finish', resolve);
-  //       fileStream.on('error', reject);
-  //     });
-
-  //     // Retornar el archivo guardado exitosamente
-  //     console.log(`Archivo guardado en: ${filePath}`);
-  //     res.status(200).json({ message: 'Archivo guardado exitosamente.', filePath });
-
-  //   } catch (error) {
-  //     console.error('Error al descargar o guardar el archivo:', error);
-  //     throw new InternalServerErrorException('Error al procesar el archivo');
-  //   }
-
-  // }
+  }
 
 }
