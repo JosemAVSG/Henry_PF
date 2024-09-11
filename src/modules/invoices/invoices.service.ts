@@ -40,7 +40,7 @@ export class InvoicesService {
   // =====================================
   async getAllInvoices() {
     const invoices = await this.invoiceRepository.find({
-      relations: ['user', 'invoiceStatus', 'company'], // Relaciona otras entidades si es necesario
+      relations:{ user:true, company:true, invoiceStatus:true, permissions:{permissionType:true} },
       order: {
         id: 'ASC', // Ordena por id de manera ascendente, puedes cambiar a 'DESC' si deseas orden descendente
       },

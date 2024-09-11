@@ -346,4 +346,21 @@ export class DeliverablesController {
       throw new BadRequestException(error);
     }
   }
+
+  // @UseGuards(AuthGuard)
+  // @Post('uploadGoogleFile')
+  // async uploadGoogleFile(@Body() body: any,
+  //   @Req() req: Request,
+  //   @Res() res: Response
+  // )
+  // {
+  //   try {
+  //     const userId = req.user.id;
+  //     const deliverableId = body.deliverableId
+  //     const fileName = body.fileName
+  //     return this.deliverablesService.uploadGoogleFile(userId,deliverableId,fileName,res)
+  //   } catch (error) {
+  //     throw new BadRequestException(error);
+  //   }
+  // }
 }
