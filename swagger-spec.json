@@ -451,10 +451,21 @@
         "tags": [
           "deliverables"
         ]
-      },
+      }
+    },
+    "/deliverables/file/{deliverableId}": {
       "put": {
         "operationId": "DeliverablesController_updateDeliverableFile",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "deliverableId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -548,6 +559,39 @@
         },
         "responses": {
           "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "deliverables"
+        ]
+      }
+    },
+    "/deliverables/link/{deliverableId}": {
+      "put": {
+        "operationId": "DeliverablesController_updateLinkDeliverable",
+        "parameters": [
+          {
+            "name": "deliverableId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeliverableDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
             "description": ""
           }
         },
