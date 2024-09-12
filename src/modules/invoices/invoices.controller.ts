@@ -154,6 +154,15 @@ export class InvoicesController {
     }
   }
 
+  @Get('user/:id')
+  async getInvoice(@Param('id') id: number) {
+    try {
+      return await this.invoicesService.getInvoicesById(id);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
   @Get('download/:userId/:invoiceId')
   async getDonwloadInvoicesCopy(
     @Param('userId') userId: number,
