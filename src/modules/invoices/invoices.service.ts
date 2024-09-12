@@ -220,12 +220,10 @@ export class InvoicesService {
       .leftJoinAndSelect('invoice.invoiceStatus', 'invoiceStatus')
       .leftJoinAndSelect('invoice.user', 'users')
       .leftJoinAndSelect('invoice.company', 'company')
-      .leftJoinAndSelect('invoice.permissions', 'permissions')
       .select([
         'invoice.id AS "id"',
         'invoice.path AS "invoicePath"',
         'invoice.number AS "invoiceNumber"',
-        'ARRAY_AGG(permissions.permissionTypes.name) AS "permissionType"',
         `TO_CHAR(invoice.issueDate, 'DD-MM-YYYY') AS "invoiceIssueDate"`,
         `TO_CHAR(invoice.dueDate, 'DD-MM-YYYY') AS "invoiceDueDate"`,
         'invoice.amount AS "invoiceAmount"',
@@ -252,6 +250,20 @@ export class InvoicesService {
     const result = await queryBuilder.getRawMany();
 
     return result;
+  }
+
+  async getInvoicesById(id: number) {
+    const invoice = await this.invoiceRepository.findOne({
+      where: {permissions: {user:{id:id}} },
+      relations:{invoiceStatus:true, permissions:{permissionType:true}, company:true, user:true},
+      order: {
+        dueDate: 'DESC',
+      }
+    });
+    if (!invoice) {
+      throw new NotFoundException(`Invoice with ID ${id} not found`);
+    }
+    return invoice;
   }
 
   async getDonwloadInvoicesCopy(

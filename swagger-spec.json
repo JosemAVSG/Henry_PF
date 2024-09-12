@@ -1168,6 +1168,29 @@
         ]
       }
     },
+    "/invoices/user/{id}": {
+      "get": {
+        "operationId": "InvoicesController_getInvoice",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      }
+    },
     "/invoices/download/{userId}/{invoiceId}": {
       "get": {
         "operationId": "InvoicesController_getDonwloadInvoicesCopy",
