@@ -13,6 +13,7 @@ import { DeliverablesModule } from './modules/deliverables/deliverables.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { VouchersModule } from './modules/vouchers/vouchers.module';
 import { CompaniesModule } from './modules/company/companies.module';
+import { NotificationsModule } from './websockets/notifications/notifications.module';
 
 @Module({
   imports: [CompaniesModule, AuthModule, UserModule, SeedModule,MailModule,
@@ -30,7 +31,8 @@ import { CompaniesModule } from './modules/company/companies.module';
     }),
     DeliverablesModule,
     VouchersModule,
-    InvoicesModule,    
+    InvoicesModule,
+    NotificationsModule,    
     ],
   controllers: [AppController],
   providers: [AppService],

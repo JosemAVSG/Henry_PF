@@ -253,7 +253,7 @@ export class InvoicesService {
   }
 
   async getInvoicesById(id: number) {
-    const invoice = await this.invoiceRepository.findOne({
+    const invoice = await this.invoiceRepository.find({
       where: {permissions: {user:{id:id}} },
       relations:{invoiceStatus:true, permissions:{permissionType:true}, company:true, user:true},
       order: {
