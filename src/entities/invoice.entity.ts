@@ -30,9 +30,9 @@ export class Invoice {
     @Column({type:'timestamp', nullable:true})
     updatedAt: Date;
 
-    @ManyToOne(()=> UserEntity, user => user.invoices)
-    user: UserEntity
-
+    @ManyToOne(() => UserEntity, user => user.invoices, { nullable: true })
+    user: UserEntity;
+    
     @ManyToOne(()=> InvoiceStatus, invoiceStatus => invoiceStatus.invoices)
     invoiceStatus: InvoiceStatus
 
