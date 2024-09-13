@@ -31,7 +31,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         const {room, message} = payload;
         console.log(payload);
-        client.broadcast.emit('message', message);
         this.server.to(`room-${room}`).emit('message', message);   
     }
 

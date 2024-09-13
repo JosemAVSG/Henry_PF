@@ -150,7 +150,7 @@ export class InvoicesService {
       issueDate,
       dueDate,
       amount,
-      userId,
+      // userId,
       invoiceStatusId,
       companyId, // Añadido para la relación con Company
     } = updateInvoiceDto;
@@ -172,12 +172,12 @@ export class InvoicesService {
     const invoiceStatus = await this.invoiceStatusRepository.findOneBy({
       id: invoiceStatusId,
     });
-    const user = await this.userRepository.findOneBy({ id: userId });
+    // const user = await this.userRepository.findOneBy({ id: userId });
     const company = companyId
       ? await this.companyRepository.findOneBy({ id: companyId })
       : null;
 
-    if (!invoiceStatus || !user) {
+    if (!invoiceStatus /* || !user*/) {
       throw new BadRequestException('invoiceStatus o user no encontrado');
     }
 
@@ -186,7 +186,7 @@ export class InvoicesService {
     invoice.issueDate = issueDate || invoice.issueDate;
     invoice.dueDate = dueDate || invoice.dueDate;
     invoice.amount = amount || invoice.amount;
-    invoice.user = user;
+    // invoice.user = user;
     invoice.invoiceStatus = invoiceStatus;
     invoice.company = company;
 
