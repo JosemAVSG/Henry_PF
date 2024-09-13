@@ -16,7 +16,6 @@ import { Permission } from 'src/entities/permission.entity';
 import { PermissionType } from 'src/entities/permissionType.entity';
 import { Company } from 'src/entities/company.entity';
 import { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
-import { NotificationsGateway } from 'src/websockets/notifications/notifications.gateway';
 @Injectable()
 export class InvoicesService {
   constructor(
@@ -37,29 +36,23 @@ export class InvoicesService {
 
     @InjectRepository(PermissionType)
     private permissionTypeRepository: Repository<PermissionType>,
-
-    private readonly notificationsGateway: NotificationsGateway,
   ) {}
   // =====================================
   async getAllInvoices() {
     const invoices = await this.invoiceRepository.find({
-      relations: {
-        user: true,
-        company: true,
-        invoiceStatus: true,
-        permissions: { permissionType: true },
-      },
+      relations:{ user:true, company:true, invoiceStatus:true, permissions:{permissionType:true}, voucher:true },
       order: {
         id: 'ASC', // Ordena por id de manera ascendente, puedes cambiar a 'DESC' si deseas orden descendente
       },
     });
-
+  
     if (!invoices || invoices.length === 0) {
       throw new NotFoundException('No se encontraron facturas');
     }
-
+  
     return invoices;
   }
+  
 
   // =====================================
   async checkInvoiceNumberExists(invoiceNumber: string): Promise<boolean> {
@@ -70,10 +63,7 @@ export class InvoicesService {
   }
 
   // =====================================
-  async updateInvoiceStatus(
-    id: number,
-    updateInvoiceStatusDto: UpdateInvoiceStatusDto,
-  ) {
+  async updateInvoiceStatus(id: number, updateInvoiceStatusDto: UpdateInvoiceStatusDto) {
     const { invoiceStatusId } = updateInvoiceStatusDto;
 
     const invoice = await this.invoiceRepository.findOne({
@@ -86,13 +76,11 @@ export class InvoicesService {
     }
 
     const invoiceStatus = await this.invoiceStatusRepository.findOne({
-      where: { id: invoiceStatusId },
+      where: { id: invoiceStatusId }
     });
-
+        
     if (!invoiceStatus) {
-      throw new NotFoundException(
-        `No se encontró el estado de factura con el ID ${invoiceStatusId}`,
-      );
+      throw new NotFoundException(`No se encontró el estado de factura con el ID ${invoiceStatusId}`);
     }
 
     invoice.invoiceStatus = invoiceStatus; // Asigna el nuevo estado
@@ -100,6 +88,7 @@ export class InvoicesService {
 
     return invoice;
   }
+
 
   // =====================================
   async createInvoice(createInvoiceDto: CreateInvoiceDto) {
@@ -166,10 +155,7 @@ export class InvoicesService {
       companyId, // Añadido para la relación con Company
     } = updateInvoiceDto;
 
-    const invoice = await this.invoiceRepository.findOne({
-      where: { id },
-      relations: { user: true, invoiceStatus: true, permissions: true },
-    });
+    const invoice = await this.invoiceRepository.findOneBy({ id });
     if (!invoice) {
       throw new BadRequestException('Invoice not found');
     }
@@ -203,26 +189,7 @@ export class InvoicesService {
     invoice.user = user;
     invoice.invoiceStatus = invoiceStatus;
     invoice.company = company;
-    const data = invoice.permissions.map((permission) => {
-      return permission.userId;
-    });
-    // Sala para el administrador
-    const salaAdmin = 'Admin';
 
-    // Emitir notificación al administrador
-    this.notificationsGateway.emitNotificationToUser(salaAdmin, {
-      message: 'New invoice uploaded',
-      invoiceId: invoice.id,
-    });
-
-    // Emitir notificación a los usuarios en el array
-    data.forEach((userId) => {
-      const userRoom = `${userId}`;
-      this.notificationsGateway.emitNotificationToUser(userRoom, {
-        message: 'New invoice uploaded',
-        invoiceId: invoice.id,
-      });
-    });
     return this.invoiceRepository.save(invoice);
   }
 
@@ -230,7 +197,7 @@ export class InvoicesService {
   async getInvoiceById(id: number): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id },
-      relations: ['user', 'invoiceStatus', 'company'], // Adjust if needed
+      relations: ['user', 'invoiceStatus', 'company', 'voucher'], // Adjust if needed
     });
 
     if (!invoice) {
@@ -270,6 +237,7 @@ export class InvoicesService {
       .limit(pageSize)
       .offset(offset);
 
+
     if (idsInvoiceStatus) {
       queryBuilder.where('invoiceStatus.id IN (:...statusIds)', {
         statusIds: idsInvoiceStatus,
@@ -286,16 +254,11 @@ export class InvoicesService {
 
   async getInvoicesById(id: number) {
     const invoice = await this.invoiceRepository.find({
-      where: { permissions: { user: { id: id } } },
-      relations: {
-        invoiceStatus: true,
-        permissions: { permissionType: true },
-        company: true,
-        user: true,
-      },
+      where: {permissions: {user:{id:id}} },
+      relations:{invoiceStatus:true, permissions:{permissionType:true}, company:true, user:true},
       order: {
         dueDate: 'DESC',
-      },
+      }
     });
     if (!invoice) {
       throw new NotFoundException(`Invoice with ID ${id} not found`);

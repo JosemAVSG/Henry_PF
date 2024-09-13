@@ -18,14 +18,14 @@ GET http://localhost:3000/vouchers
 ###
 
 ### Get Voucher by ID
-GET http://localhost:3000/vouchers/1
+GET http://localhost:3000/vouchers/5
 
 ###
 GET http://localhost:3000/vouchers/invoice/1
 
 
 ### Update a Voucher
-PATCH  http://localhost:3000/vouchers/1
+PUT http://localhost:3000/vouchers/1
 Content-Type: application/json
 
 {

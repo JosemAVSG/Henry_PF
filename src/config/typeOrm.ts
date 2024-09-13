@@ -1,12 +1,12 @@
 import { DataSource, DataSourceOptions } from "typeorm";
 import {config as dotevn} from "dotenv";
 import {registerAs} from '@nestjs/config';
-import { logging } from "googleapis/build/src/apis/logging";
 
 dotevn({path:'.env'});
 
 console.info("dropSchema: ", process.env.DROPSCHEMA)
 console.info("DB_TYPE: ", process.env.DB_TYPE)
+console.info("EMAIL_USER: ", process.env.EMAIL_USER)
 
 const typeOrmConfig={
     type: process.env.DB_TYPE,
