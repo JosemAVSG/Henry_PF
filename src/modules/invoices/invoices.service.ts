@@ -40,7 +40,7 @@ export class InvoicesService {
   // =====================================
   async getAllInvoices() {
     const invoices = await this.invoiceRepository.find({
-      relations: ['user', 'invoiceStatus', 'company'], // Relaciona otras entidades si es necesario
+      relations:{ user:true, company:true, invoiceStatus:true, permissions:{permissionType:true} },
       order: {
         id: 'ASC', // Ordena por id de manera ascendente, puedes cambiar a 'DESC' si deseas orden descendente
       },
@@ -98,7 +98,7 @@ export class InvoicesService {
       issueDate,
       dueDate,
       amount,
-      userId,
+      // userId,
       invoiceStatusId,
       companyId, // Añadido para la relación con Company
     } = createInvoiceDto;
@@ -113,12 +113,12 @@ export class InvoicesService {
     const invoiceStatus = await this.invoiceStatusRepository.findOneBy({
       id: invoiceStatusId,
     });
-    const user = await this.userRepository.findOneBy({ id: userId });
+    // const user = await this.userRepository.findOneBy({ id: userId });
     const company = companyId
       ? await this.companyRepository.findOneBy({ id: companyId })
       : null;
 
-    if (!invoiceStatus || !user) {
+    if (!invoiceStatus /* || !user */) {
       throw new BadRequestException('invoiceStatus o user no encontrado');
     }
 
@@ -128,7 +128,7 @@ export class InvoicesService {
       issueDate,
       dueDate,
       amount,
-      user,
+      // user,
       invoiceStatus,
       company,
     });
@@ -219,6 +219,7 @@ export class InvoicesService {
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.invoiceStatus', 'invoiceStatus')
       .leftJoinAndSelect('invoice.user', 'users')
+      .leftJoinAndSelect('invoice.company', 'company')
       .select([
         'invoice.id AS "id"',
         'invoice.path AS "invoicePath"',
@@ -236,6 +237,7 @@ export class InvoicesService {
       .limit(pageSize)
       .offset(offset);
 
+
     if (idsInvoiceStatus) {
       queryBuilder.where('invoiceStatus.id IN (:...statusIds)', {
         statusIds: idsInvoiceStatus,
@@ -248,6 +250,20 @@ export class InvoicesService {
     const result = await queryBuilder.getRawMany();
 
     return result;
+  }
+
+  async getInvoicesById(id: number) {
+    const invoice = await this.invoiceRepository.find({
+      where: {permissions: {user:{id:id}} },
+      relations:{invoiceStatus:true, permissions:{permissionType:true}, company:true, user:true},
+      order: {
+        dueDate: 'DESC',
+      }
+    });
+    if (!invoice) {
+      throw new NotFoundException(`Invoice with ID ${id} not found`);
+    }
+    return invoice;
   }
 
   async getDonwloadInvoicesCopy(
