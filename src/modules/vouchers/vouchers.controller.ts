@@ -48,6 +48,7 @@ export class VouchersController {
     @Body() createVoucherDto: CreateVoucherDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    console.log("createVoucherDto",createVoucherDto)
     if (file) {
       createVoucherDto.path = file.path;
     }
@@ -78,6 +79,9 @@ export class VouchersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateVoucherDto: UpdateVoucherDto,
   ): Promise<Voucher> {
+    console.log("id",id)
+    console.log("updateVoucherDto",updateVoucherDto)
+
     return this.vouchersService.updateVoucher(id, updateVoucherDto);
   }
 

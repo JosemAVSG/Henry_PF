@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/entities/company.entity';
 import { Repository } from 'typeorm';
@@ -51,8 +51,34 @@ export class CompaniesService {
   }
 
   async remove(id: number): Promise<void> {
-    console.log("id",id)
-    const company = await this.findOne(id);
+    // Buscamos la empresa con sus relaciones
+    const company = await this.companyRepository.findOne({
+      where: { id },
+      relations: ['users', 'invoices'],
+    });
+
+    // Si no existe la empresa, lanzamos una excepción NotFound
+    if (!company) {
+      throw new NotFoundException(`No se encontró una empresa con el ID: ${id}`);
+    }
+
+    const hasUsers = company.users && company.users.length > 0;
+    const hasInvoices = company.invoices && company.invoices.length > 0;
+
+    // Verificamos si tiene relaciones con usuarios o facturas
+    if (hasUsers || hasInvoices) {
+      let relations = [];
+      if (hasUsers) relations.push('usuarios');
+      if (hasInvoices) relations.push('facturas');
+
+      throw new BadRequestException(
+        `No se puede eliminar la empresa porque está relacionada con los siguientes elementos: ${relations.join(' y ')}.`
+      );
+    }
+
+    // Si no tiene relaciones, procedemos a eliminar
     await this.companyRepository.remove(company);
   }
+
+  
 }

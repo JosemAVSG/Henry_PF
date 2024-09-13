@@ -4,6 +4,9 @@ GET http://localhost:3000/invoices/1?page=1&limit=10
 ### Obtener facturas por usuario
 GET http://localhost:3000/invoices
 
+### Obtener facturas por id
+GET http://localhost:3000/invoices/getbyid/1
+
 ### Crear una nueva factura
 POST http://localhost:3000/invoices
 Content-Type: application/json

@@ -1,9 +1,10 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { InvoiceStatus } from "./invoiceStatus.entity";
 import { UserEntity } from "./user.entity";
 import { Permission } from "./permission.entity";
 import { Company } from "./company.entity";
 import { Notification } from "./notification.entity";
+import { Voucher } from "./vouchers.entity";
 
 @Entity()
 export class Invoice {
@@ -45,4 +46,8 @@ export class Invoice {
 
     @ManyToOne(() => Company, (company) => company.invoices, { nullable: true })
     company: Company;
+
+    @OneToOne(() => Voucher, voucher => voucher.invoiceId, { nullable: true })
+    @JoinColumn() // Esto asegura que "Invoice" es el lado propietario de la relación
+    voucher: Voucher;
 }

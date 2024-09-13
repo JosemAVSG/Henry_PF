@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Invoice } from './invoice.entity';
 
 @Entity()
@@ -13,12 +13,12 @@ export class Voucher {
   path: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  paymentDate: Date; // Fecha de Emisión
+  paymentDate: Date; // Fecha de pago
 
   @Column('decimal', { precision: 10, scale: 2 })
   amount: number;
 
-  @ManyToOne(() => Invoice)
+  @OneToOne(() => Invoice, invoice => invoice.voucher)
   invoiceId: Invoice;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

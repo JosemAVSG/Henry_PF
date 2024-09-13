@@ -40,7 +40,7 @@ export class InvoicesService {
   // =====================================
   async getAllInvoices() {
     const invoices = await this.invoiceRepository.find({
-      relations:{ user:true, company:true, invoiceStatus:true, permissions:{permissionType:true} },
+      relations:{ user:true, company:true, invoiceStatus:true, permissions:{permissionType:true}, voucher:true },
       order: {
         id: 'ASC', // Ordena por id de manera ascendente, puedes cambiar a 'DESC' si deseas orden descendente
       },
@@ -197,7 +197,7 @@ export class InvoicesService {
   async getInvoiceById(id: number): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id },
-      relations: ['user', 'invoiceStatus', 'company'], // Adjust if needed
+      relations: ['user', 'invoiceStatus', 'company', 'voucher'], // Adjust if needed
     });
 
     if (!invoice) {
