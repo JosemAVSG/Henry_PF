@@ -14,6 +14,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { CompanySeeder } from './modules/seed/company-seeder';
 import { InvoiceSeeder } from './modules/seed/invoices-seeder';
+import { NotificationTypeSeeder } from './modules/seed/notificationType.seeder';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -58,6 +59,9 @@ async function bootstrap() {
 
   const invoiceSeeder = app.get(InvoiceSeeder);
   await invoiceSeeder.seed();
+
+  const notificationSeeder = app.get(NotificationTypeSeeder); 
+  await notificationSeeder.seedNotificationType();
 
   const config = new DocumentBuilder()
   .setTitle('BP Ventures API')
