@@ -7,7 +7,7 @@ import {
   SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { NotificationsService } from './notifications.service';
+import { NotificationsService } from '../../modules/notifications/notifications.service';
 
 @WebSocketGateway()
 export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -32,8 +32,7 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
   handleNotification(client: Socket, payload: any): void {
       // Emite la notificación de inmediato a todos los clientes
       this.server.emit('newNotification', payload);
-  
-      // Guarda la notificación en segundo plano sin bloquear la emisión
+
       // this.notificationsService.saveNotification(payload, client.id)
       //     .then(() => {
       //         console.log('Notification saved successfully');

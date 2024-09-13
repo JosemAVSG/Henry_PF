@@ -1,4 +1,6 @@
 import {
+    ConnectedSocket,
+    MessageBody,
     OnGatewayConnection,
     OnGatewayDisconnect,
     OnGatewayInit,
@@ -26,15 +28,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('message')
-    handleMessage(client: Socket, payload: any) {
+    handleMessage(@ConnectedSocket() client: Socket, @MessageBody() payload: any) {
         const {room, message} = payload;
         console.log(payload);
-        
         this.server.to(`room-${room}`).emit('message', message);   
     }
 
     @SubscribeMessage('joinRoom')
-    joinRoom(client: Socket, room: string): void {
+    joinRoom(@ConnectedSocket() client: Socket, room: string): void {
         client.join(`room-${room}`);
         console.log(`Client ${client.id} joined room ${room}`);
     }
