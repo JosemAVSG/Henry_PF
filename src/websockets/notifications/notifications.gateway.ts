@@ -5,6 +5,8 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { NotificationsService } from '../../modules/notifications/notifications.service';
@@ -21,25 +23,33 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
   }
 
   handleConnection(client: Socket) {
-      console.log(`Client connected: ${client.id}`);
+    const userId = this.getUserIdFromClient(client); // Obtén el userId de alguna manera (ej. de los datos de conexión)
+    if (userId) {
+      // Asigna al cliente a una sala basada en su userId
+      client.join(`user_${userId}`);
+      console.log(`Client ${client.id} joined room: user_${userId}`);
+    }
   }
 
   handleDisconnect(client: Socket) {
       console.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('notification')
-  handleNotification(client: Socket, payload: any): void {
-      // Emite la notificación de inmediato a todos los clientes
-      this.server.emit('newNotification', payload);
-
-      // this.notificationsService.saveNotification(payload, client.id)
-      //     .then(() => {
-      //         console.log('Notification saved successfully');
-      //     })
-      //     .catch(err => {
-      //         console.error('Failed to save notification:', err);
-      //     });
+  @SubscribeMessage('joinRoom')
+  joinRoom(@ConnectedSocket() client: Socket, room: string): void {
+      client.join(`room-${room}`);
+      console.log(`Client ${client.id} joined room ${room}`);
   }
-  
+
+  emitNotificationToUser(userId: string | string[] | number[], payload: any): void {
+    console.log(`Emitting notification to user ${userId}:`, payload);
+    
+    this.server.to(`user_${userId}`).emit('newNotification', payload);
+
+  }
+
+  private getUserIdFromClient(client: Socket): string | string[] {
+    // Supongamos que envías el userId cuando el cliente se conecta
+    return client.handshake.query.userId;
+  }
 }
