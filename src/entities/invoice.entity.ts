@@ -3,6 +3,7 @@ import { InvoiceStatus } from "./invoiceStatus.entity";
 import { UserEntity } from "./user.entity";
 import { Permission } from "./permission.entity";
 import { Company } from "./company.entity";
+import { Notification } from "./notification.entity";
 
 @Entity()
 export class Invoice {
@@ -38,6 +39,9 @@ export class Invoice {
 
     @OneToMany(() => Permission, permission => permission.invoice)
     permissions: Permission[];
+
+    @OneToMany(() => Notification, notification => notification.invoice)
+    notifications: Notification[];
 
     @ManyToOne(() => Company, (company) => company.invoices, { nullable: true })
     company: Company;

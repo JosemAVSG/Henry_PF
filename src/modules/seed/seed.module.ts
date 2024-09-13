@@ -15,9 +15,11 @@ import { PermissionSeeder } from './permission.seeder';
 import { Deliverable } from '../../entities/deliverable.entity';
 import { DeliverableSeeder } from './deliverable.seeder';
 import { CompanySeeder } from './company-seeder';
-import { Company } from 'src/entities/company.entity';
+import { Company } from '../../entities/company.entity';
 import { InvoiceSeeder } from './invoices-seeder';
-import { Invoice } from 'src/entities/invoice.entity';
+import { Invoice } from '../../entities/invoice.entity';
+import { NotificationType } from '../../entities/notificationType.entity';
+import { NotificationTypeSeeder } from './notificationType.seeder';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { Invoice } from 'src/entities/invoice.entity';
       DeliverableCategory,
       PermissionType,
       Permission,
+      NotificationType
     ]),
   ],
   providers: [
@@ -43,6 +46,7 @@ import { Invoice } from 'src/entities/invoice.entity';
     DeliverableCategorySeeder,
     PermissionTypeSeeder,
     PermissionSeeder,
+    NotificationTypeSeeder
   ],
 })
 export class SeedModule {}

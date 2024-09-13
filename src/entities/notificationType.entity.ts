@@ -5,21 +5,12 @@ import { DeliverableCategory } from "./deliverableCategory.entity";
 import { Notification } from "./notification.entity";
 
 @Entity()
-export class Deliverable {
+export class NotificationType {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column({nullable:true})
     name: string;
-
-    @Column({nullable:true})
-    path: string;
-
-    @Column({nullable:true})
-    parentId: number;
-
-    @Column()
-    isFolder: boolean;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP',   })
     createdAt: Date;
@@ -30,16 +21,7 @@ export class Deliverable {
     @Column({ type: 'int', default: 1 })
     statusId: number;
     
-    @ManyToOne(()=> DeliverableType, deliverableType => deliverableType.deliverables)
-    deliverableType: DeliverableType
-    
-    @ManyToOne(()=> DeliverableCategory, deliverableCategory => deliverableCategory.deliverables)
-    deliverableCategory: DeliverableCategory
-    
-    @OneToMany(() => Permission, permission => permission.deliverable)
-    permissions: Permission[];
-
-    @OneToMany(() => Notification, notification => notification.deliverable)
+    @OneToMany(() => Notification, notification => notification.notificationType)
     notifications: Notification[];
 
 }
