@@ -12,7 +12,7 @@ Content-Type: application/json
 GET http://localhost:3000/companies
 
 ### Obtener una empresa por ID
-GET http://localhost:3000/companies/1
+GET http://localhost:3000/companies/7
 
 ### Actualizar una empresa por ID
 PATCH http://localhost:3000/companies/1

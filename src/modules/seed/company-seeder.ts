@@ -42,6 +42,13 @@ export class CompanySeeder {
 
     companies.push(additionalCompany2);
 
+    const additionalCompany3 = new Company();
+    additionalCompany3.name = 'Henry Company';
+    additionalCompany3.address = 'Calle Falsa 123';
+    additionalCompany3.cuit = 500000000; // Just a sample value
+
+    companies.push(additionalCompany3);
+
     // Guardar todas las compañías en la base de datos
     await this.companyRepository.save(companies);
     console.info('Seeded 6 companies');
