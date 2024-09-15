@@ -117,7 +117,7 @@ export class DeliverablesController {
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(canalAdmin, {
         note: '',
-        notificationType: 'cargar el entregable', 
+        notificationType: {name:'cargar el entregable'}, 
         impactedUser: null,
         triggerUser: { Names: user.names, LastName: user.lastName},
         deliverable: { 
@@ -224,7 +224,7 @@ export class DeliverablesController {
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(canalAdmin, {
         note: '',
-        notificationType: 'editar el entregable', 
+        notificationType: {name:'editar el entregable'}, 
         impactedUser: null,
         triggerUser: { Names: user.names, LastName: user.lastName},
         deliverable: { 
@@ -307,7 +307,7 @@ export class DeliverablesController {
           // Emitir notificación al administrador
           this.notificationsGateway.emitNotificationToUser(canalAdmin, {
             note: '',
-            notificationType: 'cargar el entregable', 
+            notificationType: {name:'cargar el entregable'}, 
             impactedUser: null,
             triggerUser: { Names: user.names, LastName: user.lastName},
             deliverable: { 
@@ -407,7 +407,7 @@ export class DeliverablesController {
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(canalAdmin, {
         note: '',
-        notificationType: 'editar el entregable', 
+        notificationType: {name:'editar el entregable'}, 
         impactedUser: null,
         triggerUser: { Names: user.names, LastName: user.lastName},
         deliverable: { 
@@ -455,7 +455,7 @@ export class DeliverablesController {
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(canalAdmin, {
         note: '',
-        notificationType: 'cargar el entregable', 
+        notificationType: {name:'cargar el entregable'}, 
         impactedUser: null,
         triggerUser: { Names: user.names, LastName: user.lastName},
         deliverable: { 
@@ -516,7 +516,7 @@ export class DeliverablesController {
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(canalAdmin, {
         note: '',
-        notificationType: 'editar el entregable', 
+        notificationType: {name:'editar el entregable'}, 
         impactedUser: null,
         triggerUser: { Names: user.names, LastName: user.lastName},
         deliverable: { 
@@ -578,14 +578,12 @@ export class DeliverablesController {
   @UseGuards(AuthGuard)
   @Get('download/:deliverableId')
   async downloadFile(
-  
     @Param('deliverableId') deliverableId: number,
     @Res() res: Response,
     @Req() req: Request
   ) {
 
     try {
-
       const userId = req.user.id;
       const user = req.user;
       
@@ -614,7 +612,7 @@ export class DeliverablesController {
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(canalAdmin, {
         note: '',
-        notificationType: 'editar el entregable', 
+        notificationType: { name:'editar el entregable'}, 
         impactedUser: null,
         triggerUser: { Names: user.names, LastName: user.lastName},
         deliverable: { 
@@ -628,7 +626,7 @@ export class DeliverablesController {
     }
   }
 
-  
+
   @Get('file/:name')
   @UseGuards(AuthGuard)
   async getByName(@Param('name') name: string, @Req() req: Request) {
