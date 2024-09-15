@@ -466,7 +466,7 @@ export class InvoicesService {
     userId: number,
   ): Promise<Permission[]> {
     const permissions = await this.permissionsRepository.find({
-      relations: { user: true, permissionType: true },
+      relations: { user: true, permissionType: true , invoice: true},
       where: { invoice: { id: invoiceId } },
     });
     if (!permissions) {
@@ -495,36 +495,38 @@ export class InvoicesService {
     const user= await this.userRepository.findOneBy({id: userId});
     // Sala para el administrador
     const salaAdmin = 'Admin';
-    
+    const invoice = await this.invoiceRepository.findOne({
+      where: { id: invoiceId },})
     addedPermissions.map(async (perm)=>{
+      console.log(perm.userId);
       
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(salaAdmin, {
         notificationType: {name: "otorgar permisos de lectura a la factura"},
-        impactedUser: perm.userId,
+        impactedUser: perm?.userId,
         triggerUser: user.Names,
-        invoice: { number: perm.invoice.number },
+        invoice: { number: invoice.number },
       });
 
       await this.notificationsService.createNotification({
-        invoiceId: perm.invoice.id,
-        impactedUserId: null,
-        notificationTypeId: 0,
+        invoiceId: invoiceId,
+        impactedUserId: Number(perm.userId),
+        notificationTypeId: 1,
         triggerUserId: user.id,
       });
 
-      // Emitir notificación al administrador
-      this.notificationsGateway.emitNotificationToUser(perm.userId, {
+      // Emitir notificación al usuario que otorgó permisos
+      this.notificationsGateway.emitNotificationToUser(perm?.userId, {
         notificationType: {name: "otorgar permisos de lectura a la factura"},
         impactedUser: perm.userId,
         triggerUser: user.Names,
-        invoice: { number: perm.invoice.number },
+        invoice: { number: invoice.number },
       });
 
       await this.notificationsService.createNotification({
-        invoiceId: perm.invoice.id,
-        impactedUserId: null,
-        notificationTypeId: 0,
+        invoiceId: invoiceId,
+        impactedUserId: Number(perm.userId),
+        notificationTypeId: 1,
         triggerUserId: user.id,
       });
 
@@ -532,7 +534,7 @@ export class InvoicesService {
 
 
 
-    console.log(addedPermissions, removedPermissions);
+    console.log(addedPermissions, removedPermissions,currentPermissionsSet);
     
     await this.permissionsRepository.remove(permissions);
 

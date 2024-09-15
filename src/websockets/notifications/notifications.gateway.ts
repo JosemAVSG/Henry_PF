@@ -11,7 +11,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { NotificationsService } from '../../modules/notifications/notifications.service';
 
-@WebSocketGateway()
+@WebSocketGateway({cors:true})
 export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer() server: Server;
