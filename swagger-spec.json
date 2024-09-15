@@ -1227,7 +1227,7 @@
         ]
       }
     },
-    "/invoices/download/{userId}/{invoiceId}": {
+    "/invoices/download/{invoiceId}": {
       "get": {
         "operationId": "InvoicesController_getDonwloadInvoicesCopy",
         "parameters": [

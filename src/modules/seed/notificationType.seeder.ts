@@ -28,6 +28,9 @@ export class NotificationTypeSeeder {
                 {name: "cargar el entregable"},
                 {name: "editar la factura"},
                 {name: "editar el entregable"},
+                {name: "se ha cargado un voucher de pago"},
+                {name: "la factura ya fue revisada y aprobada"},
+
             ]
 
             await this.notificationTypeRepository.save(notificationTypeData);

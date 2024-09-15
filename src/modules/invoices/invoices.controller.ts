@@ -39,12 +39,21 @@ export class InvoicesController {
   }
 
   // =====================================
+  @UseGuards(AuthGuard)
   @Patch('status/:id')
   async updateInvoiceStatus(
     @Param('id') id: number,
     @Body() updateInvoiceStatusDto: UpdateInvoiceStatusDto,
+    @Req() req: Request,
   ) {
-    return this.invoicesService.updateInvoiceStatus(id, updateInvoiceStatusDto);
+    try {
+      const user =  req.user.id;
+      console.log(updateInvoiceStatusDto);
+      
+      return this.invoicesService.updateInvoiceStatus(id, updateInvoiceStatusDto,user);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   // =====================================
@@ -80,6 +89,7 @@ export class InvoicesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
@@ -102,11 +112,13 @@ export class InvoicesController {
   async createInvoice(
     @UploadedFile() file: Express.Multer.File,
     @Body() createInvoiceDto: CreateInvoiceDto,
+    @Req() req: Request,
   ) {
     try {
+      const userId= req.user.id;
       // Asigna el path del archivo al DTO
       createInvoiceDto.path = file ? file.path : null;
-      return this.invoicesService.createInvoice(createInvoiceDto);
+      return this.invoicesService.createInvoice(createInvoiceDto, userId);
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -163,14 +175,16 @@ export class InvoicesController {
     }
   }
 
-  @Get('download/:userId/:invoiceId')
+  @UseGuards(AuthGuard)
+  @Get('download/:invoiceId')
   async getDonwloadInvoicesCopy(
     @Param('userId') userId: number,
     @Param('invoiceId') invoiceId: number,
     @Res() res: Response,
+    @Req() req: Request
   ) {
     try {
-      
+      const userId =req.user.id;
       const data = await this.invoicesService.getDonwloadInvoicesCopy(
         userId,
         invoiceId,
@@ -216,15 +230,19 @@ export class InvoicesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Put('permision/:invoiceId')
   async createPermision(
     @Param('invoiceId') invoiceId: number,
     @Body() permission: any,
+    @Req() req: Request
   ): Promise<Permission[]> {
     try {
+      const userId = req.user.id;
       return this.invoicesService.updatePermissions(
         invoiceId,
         permission,
+        userId
       );
     } catch (error) {
       throw new BadRequestException(error);

@@ -35,11 +35,6 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
       console.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('joinRoom')
-  joinRoom(@ConnectedSocket() client: Socket, room: string): void {
-      client.join(`room-${room}`);
-      console.log(`Client ${client.id} joined room ${room}`);
-  }
 
   emitNotificationToUser(userId: string | string[] | number[], payload: any): void {
     console.log(`Emitting notification to user ${userId}:`, payload);
@@ -47,6 +42,12 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
     this.server.to(`user_${userId}`).emit('newNotification', payload);
 
   }
+
+  // emitNotificationToUserAdmin(userId: string | string[] | number[], payload: any): void {
+  //   console.log(`Emitting notification to user ${userId}:`, payload);
+  //   this.server.to('Admin').except(userId as string).emit('newNotification', payload);
+
+  // }
 
   private getUserIdFromClient(client: Socket): string | string[] {
     // Supongamos que envías el userId cuando el cliente se conecta

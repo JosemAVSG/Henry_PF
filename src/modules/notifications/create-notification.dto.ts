@@ -4,5 +4,5 @@ export class CreateNotificationDto {
     impactedUserId: number;
     deliverableId?: number;
     invoiceId?: number;
-    note: string;
+    note?: string;
 }
