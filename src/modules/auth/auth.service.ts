@@ -185,10 +185,10 @@ export class AuthService {
           onfocus="this.style.boxShadow='0 0 0 0.2rem rgba(43, 65, 104, 0.5)'"
           onblur="this.style.boxShadow='0 0 0 0.2rem rgba(255, 255, 255, 0)'"
           >
-          Restablecer Contraseña
+          Restablecer Contrase&ntilde;a
           </a>
 
-          <p>Si no solicitaste un restablecimiento de contraseña, ignora este correo.</p>
+          <p>Si no solicitaste un restablecimiento de contrase&ntilde;a, ignora este correo.</p>
           <p>Saludos cordiales,<br>Equipo de BP Ventures</p>
         </div>
       `;

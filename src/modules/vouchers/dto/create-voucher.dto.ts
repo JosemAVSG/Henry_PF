@@ -4,7 +4,7 @@ import { IsNotEmpty, IsNumber, IsOptional, IsDate, IsString } from 'class-valida
 export class CreateVoucherDto {
   @IsOptional()
   @IsString()
-  number: string;
+  number?: string;
 
   @IsOptional()
   @IsString()
@@ -12,11 +12,11 @@ export class CreateVoucherDto {
 
   @IsNotEmpty()
   @IsDate()
-  paymentDate: Date;
+  paymentDate?: Date;
 
   @IsNotEmpty()
   @IsNumber()
-  amount: number;
+  amount?: number;
 
   @IsNotEmpty()
   @IsNumber()
