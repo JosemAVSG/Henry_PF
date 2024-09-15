@@ -14,6 +14,7 @@ import { Deliverable } from '../../entities/deliverable.entity';
     Notification, NotificationType, UserEntity, Invoice, Deliverable
   ])],
   providers: [NotificationsGateway, NotificationsService],
-  controllers: [NotificationsController]
+  controllers: [NotificationsController],
+  exports: [NotificationsService],
 })
 export class NotificationsModule {}
