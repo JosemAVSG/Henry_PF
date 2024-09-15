@@ -497,13 +497,14 @@ export class InvoicesService {
     const salaAdmin = 'Admin';
     const invoice = await this.invoiceRepository.findOne({
       where: { id: invoiceId },})
+
     addedPermissions.map(async (perm)=>{
       console.log(perm.userId);
-      
+      const impactedUser = await this.userRepository.findOneBy({id: Number(perm.userId)});
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(salaAdmin, {
         notificationType: {name: "otorgar permisos de lectura a la factura"},
-        impactedUser: perm?.userId,
+        impactedUser: {name:impactedUser.Names , lastName: impactedUser.LastName},
         triggerUser: user.Names,
         invoice: { number: invoice.number },
       });
@@ -518,7 +519,7 @@ export class InvoicesService {
       // Emitir notificación al usuario que otorgó permisos
       this.notificationsGateway.emitNotificationToUser(perm?.userId, {
         notificationType: {name: "otorgar permisos de lectura a la factura"},
-        impactedUser: perm.userId,
+        impactedUser: {name:impactedUser.Names , lastName: impactedUser.LastName},
         triggerUser: user.Names,
         invoice: { number: invoice.number },
       });
