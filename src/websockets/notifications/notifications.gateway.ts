@@ -43,6 +43,12 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
 
   }
 
+  // emitNotificationToUserAdmin(userId: string | string[] | number[], payload: any): void {
+  //   console.log(`Emitting notification to user ${userId}:`, payload);
+  //   this.server.to('Admin').except(userId as string).emit('newNotification', payload);
+
+  // }
+
   private getUserIdFromClient(client: Socket): string | string[] {
     // Supongamos que envías el userId cuando el cliente se conecta
     return client.handshake.query.userId;

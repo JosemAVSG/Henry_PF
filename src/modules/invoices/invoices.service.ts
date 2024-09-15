@@ -17,6 +17,8 @@ import { PermissionType } from 'src/entities/permissionType.entity';
 import { Company } from 'src/entities/company.entity';
 import { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
 import { NotificationsGateway } from 'src/websockets/notifications/notifications.gateway';
+import { NotificationsService } from 'src/modules/notifications/notifications.service';
+import { Socket } from 'socket.io';
 @Injectable()
 export class InvoicesService {
   constructor(
@@ -37,6 +39,8 @@ export class InvoicesService {
 
     @InjectRepository(PermissionType)
     private permissionTypeRepository: Repository<PermissionType>,
+
+    private readonly notificationsService: NotificationsService,
 
     private readonly notificationsGateway: NotificationsGateway,
   ) {}
@@ -73,13 +77,16 @@ export class InvoicesService {
   async updateInvoiceStatus(
     id: number,
     updateInvoiceStatusDto: UpdateInvoiceStatusDto,
+    user: number,
   ) {
     const { invoiceStatusId } = updateInvoiceStatusDto;
 
     const invoice = await this.invoiceRepository.findOne({
       where: { id },
-      relations: ['invoiceStatus'],
+      relations: { invoiceStatus: true, permissions: { user: true } },
     });
+
+    const userTrigger = await this.userRepository.findOneBy({ id: user });
 
     if (!invoice) {
       throw new NotFoundException(`No se encontró la factura con el ID ${id}`);
@@ -95,14 +102,62 @@ export class InvoicesService {
       );
     }
 
-    invoice.invoiceStatus = invoiceStatus; // Asigna el nuevo estado
+    invoice.invoiceStatus = invoiceStatus;
+    console.log(invoice);
+    invoice.permissions.map((item) => item.user.Names);
     await this.invoiceRepository.save(invoice); // Guarda los cambios
+    console.log(invoiceStatus.name);
+
+    if (invoiceStatus.name === 'Revisión' || invoiceStatus.name === 'Pagado') {
+      const impactedUser = invoice.permissions.map(
+        (permission) => permission.user,
+      );
+      // Sala para el administrador
+      const salaAdmin = 'Admin';
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(salaAdmin, {
+        notificationType:
+          invoiceStatus.name === 'Revisión'
+            ? 'se ha cargado un voucher de pago'
+            : 'la factura ya fue revisada y aprobada',
+        impactedUser: null,
+        triggerUser: userTrigger.Names,
+        invoice: { number: invoice.number },
+      });
+      await this.notificationsService.createNotification({
+        invoiceId: id,
+        impactedUserId: null,
+        notificationTypeId: invoiceStatus.name === 'Revisión' ? 11 : 12,
+        triggerUserId: userTrigger.id,
+      });
+      // Emitir notificación a los usuarios en el array
+      impactedUser.forEach(async (user) => {
+        const userId = user.id;
+        const userRoom = `${userId}`;
+        this.notificationsGateway.emitNotificationToUser(userRoom, {
+          notificationType:
+            invoiceStatus.name === 'Revisión'
+              ? 'se ha cargado un voucher de pago'
+              : 'la factura ya fue revisada y aprobada',
+          impactedUser: { Names: user.Names, LastName: user.LastName },
+          triggerUser: userTrigger.Names,
+          invoice: { number: invoice.number },
+        });
+        await this.notificationsService.createNotification({
+          invoiceId: id,
+          impactedUserId: userId,
+          notificationTypeId: invoiceStatus.name === 'Revisión' ? 11 : 12,
+          triggerUserId: userTrigger.id,
+        });
+      });
+    }
 
     return invoice;
   }
 
   // =====================================
-  async createInvoice(createInvoiceDto: CreateInvoiceDto) {
+  async createInvoice(createInvoiceDto: CreateInvoiceDto, userId: number) {
     const {
       invoiceNumber,
       path,
@@ -124,7 +179,7 @@ export class InvoicesService {
     const invoiceStatus = await this.invoiceStatusRepository.findOneBy({
       id: invoiceStatusId,
     });
-    // const user = await this.userRepository.findOneBy({ id: userId });
+    const userTrigger = await this.userRepository.findOneBy({ id: userId });
     const company = companyId
       ? await this.companyRepository.findOneBy({ id: companyId })
       : null;
@@ -145,7 +200,24 @@ export class InvoicesService {
     });
 
     const result = await this.invoiceRepository.save(invoice);
-    console.log(result);
+
+    // Sala para el administrador
+    const salaAdmin = 'Admin';
+
+    // Emitir notificación al administrador
+    this.notificationsGateway.emitNotificationToUser(salaAdmin, {
+      notificationType: { name: 'cargar la factura' },
+      impactedUser: null,
+      triggerUser: userTrigger.Names,
+      invoice: { number: result.number },
+    });
+
+    await this.notificationsService.createNotification({
+      invoiceId: result.id,
+      impactedUserId: null,
+      notificationTypeId: 6,
+      triggerUserId: userTrigger.id,
+    });
 
     return result;
   }
@@ -203,24 +275,42 @@ export class InvoicesService {
     invoice.user = user;
     invoice.invoiceStatus = invoiceStatus;
     invoice.company = company;
-    const data = invoice.permissions.map((permission) => permission.userId);
+    const data = invoice.permissions.map((permission) => permission.user);
     console.log(data);
-    
+
     // Sala para el administrador
     const salaAdmin = 'Admin';
 
     // Emitir notificación al administrador
     this.notificationsGateway.emitNotificationToUser(salaAdmin, {
-      message: 'New invoice uploaded',
+      notificationType: { name: 'cargar la factura' },
+      impactedUser: null,
+      triggerUser: user.Names,
+      invoice: { number: invoice.number },
+    });
+
+    await this.notificationsService.createNotification({
       invoiceId: invoice.id,
+      impactedUserId: null,
+      notificationTypeId: 8,
+      triggerUserId: user.id,
     });
 
     // Emitir notificación a los usuarios en el array
-    data.forEach((userId) => {
+    data?.forEach(async (ImpactedUser) => {
+      const userId = ImpactedUser.id;
       const userRoom = `${userId}`;
       this.notificationsGateway.emitNotificationToUser(userRoom, {
-        message: 'New invoice uploaded',
-        invoiceId: invoice.id,
+        notificationType: { name: 'editar la factura' },
+        impactedUser: { Names: user.Names, LastName: user.LastName },
+        triggerUser: user.Names,
+        invoice: { number: invoice.number },
+      });
+      await this.notificationsService.createNotification({
+        invoiceId: id,
+        impactedUserId: userId,
+        notificationTypeId: 8,
+        triggerUserId: user.id,
       });
     });
     return this.invoiceRepository.save(invoice);
@@ -373,6 +463,7 @@ export class InvoicesService {
   async updatePermissions(
     invoiceId: number,
     newPermission: Permission[],
+    userId: number,
   ): Promise<Permission[]> {
     const permissions = await this.permissionsRepository.find({
       relations: { user: true, permissionType: true },
@@ -381,7 +472,68 @@ export class InvoicesService {
     if (!permissions) {
       return await this.permissionsRepository.save(newPermission);
     }
+    console.log(permissions);
+    
+    // Convertir a sets para comparación
+    const currentPermissionsSet = new Set(
+        permissions.map((p) => `${p.userId}-${p.permissionTypeId}`),
+    );
+    const newPermissionsSet = new Set(
+      newPermission.map((p) => `${p.userId}-${p.permissionTypeId}`),
+    );
 
+    // Determinar permisos agregados
+    const addedPermissions = newPermission.filter(
+      (p) => !currentPermissionsSet.has(`${p.userId}-${p.permissionTypeId}`),
+    );
+
+    // Determinar permisos eliminados
+    const removedPermissions = permissions.filter(
+      (p) => !newPermissionsSet.has(`${p.userId}-${p.permissionTypeId}`),
+    );
+
+    const user= await this.userRepository.findOneBy({id: userId});
+    // Sala para el administrador
+    const salaAdmin = 'Admin';
+    
+    addedPermissions.map(async (perm)=>{
+      
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(salaAdmin, {
+        notificationType: {name: "otorgar permisos de lectura a la factura"},
+        impactedUser: perm.userId,
+        triggerUser: user.Names,
+        invoice: { number: perm.invoice.number },
+      });
+
+      await this.notificationsService.createNotification({
+        invoiceId: perm.invoice.id,
+        impactedUserId: null,
+        notificationTypeId: 0,
+        triggerUserId: user.id,
+      });
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(perm.userId, {
+        notificationType: {name: "otorgar permisos de lectura a la factura"},
+        impactedUser: perm.userId,
+        triggerUser: user.Names,
+        invoice: { number: perm.invoice.number },
+      });
+
+      await this.notificationsService.createNotification({
+        invoiceId: perm.invoice.id,
+        impactedUserId: null,
+        notificationTypeId: 0,
+        triggerUserId: user.id,
+      });
+
+    })
+
+
+
+    console.log(addedPermissions, removedPermissions);
+    
     await this.permissionsRepository.remove(permissions);
 
     const result = newPermission.map(async (item) => {
