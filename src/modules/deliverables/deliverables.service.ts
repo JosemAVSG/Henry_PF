@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -9,12 +9,16 @@ import { DeliverableType } from '../../entities/deliverableType.entity';
 import { google } from 'googleapis';
 import { PermissionType } from '../../entities/permissionType.entity';
 import { Permission } from '../../entities/permission.entity';
-import { UserEntity } from 'src/entities/user.entity';
+import { UserEntity } from '../../entities/user.entity';
 import { join } from 'path';
 import { existsSync,createWriteStream } from 'fs';
 import { Response } from 'express';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationsGateway } from '../../websockets/notifications/notifications.gateway';
+
+
 @Injectable()
 export class DeliverablesService {
   constructor(
@@ -34,6 +38,10 @@ export class DeliverablesService {
 
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
+    
+    private readonly notificationsService: NotificationsService,
+
+    private readonly notificationsGateway: NotificationsGateway
   ) {}
 
   private drive = google.drive({
@@ -304,14 +312,84 @@ export class DeliverablesService {
   async updatePermissions(
     deliverableId: number,
     newPermission: Permission[],
+    userId: number
   ): Promise<Permission[]> {
     const permissions = await this.permissionsRepository.find({
-      relations: { user: true, permissionType: true },
+      relations: { user: true, permissionType: true, deliverable: true },
       where: { deliverable: { id: deliverableId } },
     });
     if (!permissions) {
       return await this.permissionsRepository.save(newPermission);
     }
+
+    console.log(permissions);
+    
+    // Convertir a sets para comparación
+    const currentPermissionsSet = new Set(
+        permissions.map((p) => `${p.userId}-${p.permissionTypeId}`),
+    );
+    const newPermissionsSet = new Set(
+      newPermission.map((p) => `${p.userId}-${p.permissionTypeId}`),
+    );
+
+    // Determinar permisos agregados
+    const addedPermissions = newPermission.filter(
+      (p) => !currentPermissionsSet.has(`${p.userId}-${p.permissionTypeId}`),
+    );
+
+    // Determinar permisos eliminados
+    const removedPermissions = permissions.filter(
+      (p) => !newPermissionsSet.has(`${p.userId}-${p.permissionTypeId}`),
+    );
+
+    const triggerUser= await this.userRepository.findOneBy({id: userId});
+    // Sala para el administrador
+    const salaAdmin = 'Admin';
+    
+    // Obtener la información del entregable
+    const deliverable = await this.deliverableRepository.findOne({
+      where: { id: deliverableId }})
+
+    addedPermissions.map(async (perm)=>{
+      let impactedUserData = await this.userRepository.findOneBy({id: Number(perm.userId)});
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(salaAdmin, {
+        notificationType: {
+          name: `otorgar permisos de ${ perm.permissionTypeId==2 ? "lectura" : perm.permissionTypeId==3?"edición":"indefinido" } al entregable`
+        },
+        impactedUser: { Names: impactedUserData.Names, LastName: impactedUserData.LastName },
+        triggerUser: { Names: triggerUser.Names, LastName: triggerUser.LastName },
+        deliverable: { name: deliverable.name, path: deliverable.path },
+      });
+
+      await this.notificationsService.createNotification({
+        deliverableId: deliverableId,
+        impactedUserId: Number(perm.userId),
+        notificationTypeId: perm.permissionTypeId==2 ? 3 : perm.permissionTypeId==3?4:undefined ,
+        triggerUserId: triggerUser.id,
+      });
+
+      // Emitir notificación al usuario impactado
+      this.notificationsGateway.emitNotificationToUser(perm.userId, {
+        notificationType: {
+          name: `otorgar permisos de ${ perm.permissionTypeId==2 ? "lectura" : perm.permissionTypeId==3?"edición":"indefinido" } al entregable`
+        },
+        impactedUser: { Names: impactedUserData.Names, LastName: impactedUserData.LastName },
+        triggerUser: { Names: triggerUser.Names, LastName: triggerUser.LastName },
+        deliverable: { name: deliverable.name, path: deliverable.path },
+      });
+
+      await this.notificationsService.createNotification({
+        deliverableId: deliverableId,
+        impactedUserId: Number(perm.userId),
+        notificationTypeId: perm.permissionTypeId==2 ? 3 : perm.permissionTypeId==3?4:undefined,
+        triggerUserId: triggerUser.id,
+      });
+
+    })
+
+    console.log(addedPermissions, removedPermissions);
 
     await this.permissionsRepository.remove(permissions);
 
