@@ -27,15 +27,23 @@ import { DeliverablesService } from './deliverables.service';
 import { CreateDeliverableDto } from './dto/create-deliverable.dto';
 import { UpdateDeliverableDto } from './dto/update-deliverable.dto';
 import { AuthGuard } from '../../guards/auth.guards';
-import { Permission } from 'src/entities/permission.entity';
+import { Permission } from '../../entities/permission.entity';
 import { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { cwd } from 'process';
 import { Response } from 'express';
+import { NotificationsService } from '../notifications/notifications.service';
+import { CreateNotificationDto } from '../notifications/create-notification.dto';
+import { NotificationsGateway } from '../../websockets/notifications/notifications.gateway';
+
 @ApiTags('deliverables')
 @Controller('deliverables')
 export class DeliverablesController {
-  constructor(private readonly deliverablesService: DeliverablesService) {}
+  constructor(
+    private readonly deliverablesService: DeliverablesService,
+    private readonly notificationsService: NotificationsService,
+    private readonly notificationsGateway: NotificationsGateway
+  ) {}
 
   @Post('file')
   @UseGuards(AuthGuard)
@@ -66,6 +74,8 @@ export class DeliverablesController {
   ) {
     try {
       let userId = req?.user?.id || 1;
+      let user = req?.user;
+
       let isFolder = false;
       
       const temporalPath = join(cwd(),'./uploads/deliverables/temporal/', file.filename);
@@ -85,11 +95,38 @@ export class DeliverablesController {
         console.error('Error moving file:', err);
       });
 
-      return this.deliverablesService.create(
+      
+      const deliverableResult = await this.deliverablesService.create(
         createDeliverableDto,
         userId,
         isFolder,
       );
+
+      if(deliverableResult) {
+        const createNotificationDto = new CreateNotificationDto();
+        createNotificationDto.deliverableId = deliverableResult.deliverableId;
+        createNotificationDto.notificationTypeId = 8;
+        createNotificationDto.triggerUserId = userId;
+
+        this.notificationsService.createNotification(createNotificationDto)
+      }  
+
+      // canal para el administrador
+      const canalAdmin = 'Admin';
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(canalAdmin, {
+        note: '',
+        notificationType: {name:'cargar el entregable'}, 
+        impactedUser: null,
+        triggerUser: { Names: user.names, LastName: user.lastName},
+        deliverable: { 
+          name: createDeliverableDto.name, 
+          path: createDeliverableDto.path 
+        },
+      });
+
+      return true
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -127,6 +164,8 @@ export class DeliverablesController {
   ) {
     try {
       let userId = req?.user?.id || 1;
+      let user = req?.user;
+
       createDeliverableDto.path = file ? file.path : null;
       const isFolder = false;
 
@@ -168,7 +207,33 @@ export class DeliverablesController {
       }
 
       //actualizar información en la base de datos
-      return this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+      const deliverableResult = this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+
+      if(deliverableResult) {
+        const createNotificationDto = new CreateNotificationDto();
+        createNotificationDto.deliverableId = deliverableId;
+        createNotificationDto.notificationTypeId = 10;
+        createNotificationDto.triggerUserId = userId;
+
+        this.notificationsService.createNotification(createNotificationDto)
+      }
+      
+      // canal para el administrador
+      const canalAdmin = 'Admin';
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(canalAdmin, {
+        note: '',
+        notificationType: {name:'editar el entregable'}, 
+        impactedUser: null,
+        triggerUser: { Names: user.names, LastName: user.lastName},
+        deliverable: { 
+          name: createDeliverableDto.name, 
+          path: createDeliverableDto.path 
+        },
+      });
+
+      return deliverableResult;
 
     } catch (error) {
       throw new BadRequestException(error);
@@ -183,6 +248,7 @@ export class DeliverablesController {
   ) {
     try {
       let userId = req?.user?.id || 1;
+      let user = req?.user;
       
       if (!userId) {
         throw new BadRequestException('User ID is missing');
@@ -219,11 +285,37 @@ export class DeliverablesController {
           createDeliverableDto.path = join('uploads/deliverables', relativePath ,   folderName)
 
           await fs.mkdir(folderPath, { recursive: true });
-          await this.deliverablesService.create(
+          
+          const deliverableResult = await this.deliverablesService.create(
             createDeliverableDto,
             userId,
             isFolder,
           );
+
+          if(deliverableResult) {
+            const createNotificationDto = new CreateNotificationDto();
+            createNotificationDto.deliverableId = deliverableResult.deliverableId;
+            createNotificationDto.notificationTypeId = 8;
+            createNotificationDto.triggerUserId = userId;
+    
+            this.notificationsService.createNotification(createNotificationDto)
+          }  
+
+          // canal para el administrador
+          const canalAdmin = 'Admin';
+
+          // Emitir notificación al administrador
+          this.notificationsGateway.emitNotificationToUser(canalAdmin, {
+            note: '',
+            notificationType: {name:'cargar el entregable'}, 
+            impactedUser: null,
+            triggerUser: { Names: user.names, LastName: user.lastName},
+            deliverable: { 
+              name: createDeliverableDto.name, 
+              path: createDeliverableDto.path 
+            },
+          });
+
           return {
             message: `Folder ${folderName} created successfully`,
             folderPath,
@@ -250,6 +342,7 @@ export class DeliverablesController {
 
     try {
       let userId = req?.user?.id || 1;
+      let user = req?.user;
      
       if (!userId) {
         throw new BadRequestException('User ID is missing');
@@ -297,7 +390,33 @@ export class DeliverablesController {
         }
       });
 
-      return this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+      const deliverableResult = this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+
+      if(deliverableResult) {
+        const createNotificationDto = new CreateNotificationDto();
+        createNotificationDto.deliverableId = deliverableId;
+        createNotificationDto.notificationTypeId = 10;
+        createNotificationDto.triggerUserId = userId;
+
+        this.notificationsService.createNotification(createNotificationDto)
+      }
+
+      // canal para el administrador
+      const canalAdmin = 'Admin';
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(canalAdmin, {
+        note: '',
+        notificationType: {name:'editar el entregable'}, 
+        impactedUser: null,
+        triggerUser: { Names: user.names, LastName: user.lastName},
+        deliverable: { 
+          name: createDeliverableDto.name, 
+          path: createDeliverableDto.path 
+        },
+      });
+
+      return deliverableResult 
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -311,14 +430,40 @@ export class DeliverablesController {
   ) {
     try {
       let userId = req?.user?.id || 1;
+      let user = req?.user;
       const isFolder = false;
   
       // Intentamos crear el deliverable con los datos proporcionados
-      const deliverable = await this.deliverablesService.create(
+      const deliverableResult = await this.deliverablesService.create(
         createDeliverableDto,
         userId,
         isFolder,
       );
+
+      if(deliverableResult) {
+        const createNotificationDto = new CreateNotificationDto();
+        createNotificationDto.deliverableId = deliverableResult.deliverableId;
+        createNotificationDto.notificationTypeId = 8;
+        createNotificationDto.triggerUserId = userId;
+
+        this.notificationsService.createNotification(createNotificationDto)
+      }
+
+      // canal para el administrador
+      const canalAdmin = 'Admin';
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(canalAdmin, {
+        note: '',
+        notificationType: {name:'cargar el entregable'}, 
+        impactedUser: null,
+        triggerUser: { Names: user.names, LastName: user.lastName},
+        deliverable: { 
+          name: createDeliverableDto.name, 
+          path: createDeliverableDto.path 
+        },
+      });
+
       return {
         message: `Link created successfully`,
       };
@@ -347,12 +492,39 @@ export class DeliverablesController {
 
     try {
       let userId = req?.user?.id || 1;
+      let user = req?.user
+
       createDeliverableDto.deliverableTypeId = 2;
       if (!userId) {
         throw new BadRequestException('User ID is missing');
       }
 
-      return this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+      const deliverableResult = await this.deliverablesService.updateDeliverable(deliverableId, createDeliverableDto, isFolder);
+
+      if(deliverableResult) {
+        const createNotificationDto = new CreateNotificationDto();
+        createNotificationDto.deliverableId = deliverableId;
+        createNotificationDto.notificationTypeId = 10;
+        createNotificationDto.triggerUserId = userId;
+
+        this.notificationsService.createNotification(createNotificationDto)
+      }
+
+      // canal para el administrador
+      const canalAdmin = 'Admin';
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(canalAdmin, {
+        note: '',
+        notificationType: {name:'editar el entregable'}, 
+        impactedUser: null,
+        triggerUser: { Names: user.names, LastName: user.lastName},
+        deliverable: { 
+          name: createDeliverableDto.name, 
+          path: createDeliverableDto.path 
+        },
+      });
+
     } catch (error) {
       throw new BadRequestException(error);
     }
@@ -406,26 +578,54 @@ export class DeliverablesController {
   @UseGuards(AuthGuard)
   @Get('download/:deliverableId')
   async downloadFile(
-  
-    @Param('invoiceId') deliverableId: number,
+    @Param('deliverableId') deliverableId: number,
     @Res() res: Response,
     @Req() req: Request
   ) {
 
     try {
       const userId = req.user.id;
-      const data = await this.deliverablesService.getDonwloadDeliverableCopy(
+      const user = req.user;
+      
+      const data = await this.deliverablesService.getDownloadDeliverableCopy(
         userId,
         deliverableId,
       );
+
       const { filePath, deliverableCopy, contentType,fileExtension } = data;
+
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Disposition', `attachment; filename="${deliverableCopy.name}.${fileExtension}"`);
       res.download(filePath);
+
+      //Crear notificación en base de datos
+      const createNotificationDto = new CreateNotificationDto();
+      createNotificationDto.deliverableId = deliverableId;
+      createNotificationDto.notificationTypeId = 5;
+      createNotificationDto.triggerUserId = userId;
+
+      this.notificationsService.createNotification(createNotificationDto)
+
+      // canal para el administrador
+      const canalAdmin = 'Admin';
+
+      // Emitir notificación al administrador
+      this.notificationsGateway.emitNotificationToUser(canalAdmin, {
+        note: '',
+        notificationType: { name:'editar el entregable'}, 
+        impactedUser: null,
+        triggerUser: { Names: user.names, LastName: user.lastName},
+        deliverable: { 
+          name: deliverableCopy.name, 
+          path: filePath
+        },
+      });
+
     } catch (error) {
       throw new BadRequestException(error);
     }
   }
+
 
   @Get('file/:name')
   @UseGuards(AuthGuard)

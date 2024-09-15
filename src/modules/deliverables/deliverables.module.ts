@@ -7,10 +7,17 @@ import { DeliverableType } from '../../entities/deliverableType.entity';
 import { Permission } from '../../entities/permission.entity';
 import { PermissionType } from '../../entities/permissionType.entity';
 import { UserEntity } from '../../entities/user.entity';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { NotificationsGateway } from 'src/websockets/notifications/notifications.gateway';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Deliverable, DeliverableType,Permission,PermissionType, UserEntity])],
+  imports: [
+    TypeOrmModule.forFeature(
+      [Deliverable, DeliverableType,Permission,PermissionType, UserEntity]
+    ),
+    NotificationsModule,    
+  ],
   controllers: [DeliverablesController],
-  providers: [DeliverablesService],
+  providers: [DeliverablesService, NotificationsGateway],
 })
 export class DeliverablesModule {}

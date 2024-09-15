@@ -320,7 +320,7 @@ export class InvoicesService {
   async getInvoiceById(id: number): Promise<Invoice> {
     const invoice = await this.invoiceRepository.findOne({
       where: { id },
-      relations: ['user', 'invoiceStatus', 'company', 'permissions'], // Adjust if needed
+      relations: ['user', 'invoiceStatus', 'company', 'voucher', "permissions"], // Adjust if needed
     });
 
     if (!invoice) {

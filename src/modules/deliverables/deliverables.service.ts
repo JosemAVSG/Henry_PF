@@ -110,10 +110,9 @@ export class DeliverablesService {
       deliverableId: deliverableId.toString(),
     });
 
-    const permissionResult =
-      await this.permissionsRepository.save(permissionObject);
+    const permissionResult = await this.permissionsRepository.save(permissionObject);
 
-    return permissionResult;
+    return { deliverableId, permissionResult };
   }
 
   async findAll(
@@ -284,25 +283,6 @@ export class DeliverablesService {
     return { message: 'Deliverable status updated' };
   }
 
-  // Función para encontrar los elementos de nivel superior
-  findTopLevelItems(items) {
-    const topLevelItems = [];
-    const itemMap = new Map();
-
-    // Mapa de id -> item
-    items.forEach((item) => {
-      itemMap.set(item.id, item);
-    });
-
-    // Verifica cada elemento; si su padre no está en la lista, es de nivel superior
-    items.forEach((item) => {
-      if (!itemMap.has(item.parentId)) {
-        topLevelItems.push(item);
-      }
-    });
-
-    return topLevelItems;
-  }
 
   async getPermissions(deliverableId: number) {
     const data = await this.permissionsRepository.find({
@@ -428,7 +408,7 @@ export class DeliverablesService {
     }
   }
 
-  async getDonwloadDeliverableCopy(userId: number,deliverableId: number,) {
+  async getDownloadDeliverableCopy(userId: number,deliverableId: number,) {
 
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new Error('User does not exist');
