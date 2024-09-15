@@ -12,14 +12,14 @@ import {
     @PrimaryGeneratedColumn()
     id: number;
   
-    @Column({ type: 'varchar', length: 100, nullable: false })
+    @Column({ type: 'varchar', length: 100, unique:true })
     name: string;
-  
+    
+    @Column({ type: 'bigint', unique:true })
+    cuit: number;
+
     @Column({ type: 'varchar', nullable: true })
     address: string;
-
-    @Column({ type: 'bigint', nullable: true })
-    cuit: number;
   
     @OneToMany(() => UserEntity, (user) => user.company)
     users: UserEntity[];

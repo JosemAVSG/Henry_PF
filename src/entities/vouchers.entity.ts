@@ -7,16 +7,16 @@ export class Voucher {
   id: number;
 
   @Column({ nullable: true })
-  number: string;
+  number?: string;
 
   @Column({ nullable: true })
   path: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  paymentDate: Date; // Fecha de pago
+  paymentDate?: Date; // Fecha de pago
 
   @Column('decimal', { precision: 10, scale: 2 })
-  amount: number;
+  amount?: number;
 
   @OneToOne(() => Invoice, invoice => invoice.voucher)
   invoiceId: Invoice;
