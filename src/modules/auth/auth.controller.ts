@@ -59,6 +59,8 @@ export class AuthController {
         sub: result.id,
         email: result.email,
         isAdmin: result.isAdmin,
+        names: result.Names,
+        lastName: result.LastName,
       };
       const token = this.jwtService.sign(userPayload);
 

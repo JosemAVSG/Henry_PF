@@ -408,7 +408,7 @@ export class DeliverablesService {
     }
   }
 
-  async getDonwloadDeliverableCopy(userId: number,deliverableId: number,) {
+  async getDownloadDeliverableCopy(userId: number,deliverableId: number,) {
 
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new Error('User does not exist');
