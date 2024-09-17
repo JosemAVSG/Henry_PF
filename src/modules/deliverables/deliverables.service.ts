@@ -450,7 +450,7 @@ export class DeliverablesService {
     return { contentType, filePath, deliverableCopy, fileExtension };
   }
 
-  async uploadGoogleFile (userId: number, deliverableId: number, fileName:string,res : Response) {
+  async uploadGoogleFile (userId: number, deliverableId: number, fileName:string,res : Response,parentId?:string) {
 
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('User does not exist');
@@ -482,11 +482,11 @@ export class DeliverablesService {
           name: fileName,
           path: filePath,
           deliverableCategoryId: 1,
-          deliverableTypeId: 2,
-          parentId: null
+          deliverableTypeId: 3,
+          parentId: Number(parentId) || null
+        
         }
-        const deliverable = await this.create(deliverableObject,userId,false);
-        console.log(`Deliverable: ${deliverable}`);
+        await this.create(deliverableObject,userId,false);
         
         res.status(200).json({ message: 'Archivo guardado exitosamente.', filePath });
 

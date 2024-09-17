@@ -9,7 +9,7 @@ export class Deliverable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({nullable:true})
+    @Column({ type: 'varchar', length: 255 ,  nullable:true})
     name: string;
 
     @Column({nullable:true})

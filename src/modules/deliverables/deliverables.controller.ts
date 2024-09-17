@@ -694,9 +694,9 @@ export class DeliverablesController {
   {
     try {
       const userId = req.user.id;
-      const {fileName,deliverableId} = body;
+      const {fileName,deliverableId,parentId} = body;
       
-      return this.deliverablesService.uploadGoogleFile(userId,deliverableId,fileName,res)
+      return this.deliverablesService.uploadGoogleFile(userId,deliverableId,fileName,res,parentId);
     } catch (error) {
       throw new BadRequestException(error);
     }
