@@ -670,15 +670,19 @@ export class DeliverablesController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @Put('permision/:deliverableId')
   async createPermision(
     @Param('deliverableId') deliverableId: number,
     @Body() permission: any,
+    @Req() req: Request
   ): Promise<Permission[]> {
     try {
+      const userId = req.user.id;
       return this.deliverablesService.updatePermissions(
         deliverableId,
         permission,
+        userId
       );
     } catch (error) {
       throw new BadRequestException(error);
