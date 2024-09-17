@@ -11,7 +11,7 @@ export class Invoice {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({nullable:true, unique:true})
+    @Column({type: 'varchar', length: 255, nullable:true, unique:true})
     number: string;
 
     @Column({nullable:true})
