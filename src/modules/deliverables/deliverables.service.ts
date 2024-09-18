@@ -363,13 +363,6 @@ export class DeliverablesService {
         deliverable: { name: deliverable.name, path: deliverable.path },
       });
 
-      await this.notificationsService.createNotification({
-        deliverableId: deliverableId,
-        impactedUserId: Number(perm.userId),
-        notificationTypeId: perm.permissionTypeId==2 ? 3 : perm.permissionTypeId==3?4:undefined ,
-        triggerUserId: triggerUser.id,
-      });
-
       // Emitir notificación al usuario impactado
       this.notificationsGateway.emitNotificationToUser(perm.userId, {
         notificationType: {

@@ -27,8 +27,14 @@ export class NotificationsService {
         private notificationsTypeRepository: Repository<NotificationType>
     ) {}
 
-    async getNotifications() {
-        return this.notificationsRepository.find({
+    async getNotifications(impactedUserId?: number, limit?: number) {
+        const whereConditions: any = {};
+        
+        if (impactedUserId) {
+            whereConditions.impactedUser = { id: impactedUserId };
+        }
+
+        const results = await this.notificationsRepository.find({
             relations: ['notificationType', 
                 'impactedUser', 
                 'triggerUser', 
@@ -42,8 +48,14 @@ export class NotificationsService {
                 invoice: {number: true},
                 note: true,
                 createdAt: true
-            }
+            },
+            where: whereConditions,
+            order: {
+                createdAt: "DESC"
+            },
         });
+
+        return limit !== undefined && limit !== null ? results.slice(0, limit) : results;
     }
 
     async createNotification(createNotificationDto: CreateNotificationDto) {
@@ -57,7 +69,9 @@ export class NotificationsService {
         } = createNotificationDto
 
         const notification = new Notification();
-        notification.impactedUser = await this.userRepository.findOne({where: {id: impactedUserId}});
+        if(impactedUserId){
+            notification.impactedUser = await this.userRepository.findOne({where: {id: impactedUserId}});
+        }
 
         notification.triggerUser = await this.userRepository.findOne({where: {id: triggerUserId}});
 
