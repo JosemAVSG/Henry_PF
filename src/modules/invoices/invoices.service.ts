@@ -141,7 +141,7 @@ export class InvoicesService {
               ? 'se ha cargado un voucher de pago'
               : 'la factura ya fue revisada y aprobada',
           impactedUser: { Names: user.Names, LastName: user.LastName },
-          triggerUser: userTrigger.Names,
+          triggerUser: { Names: userTrigger.Names, LastName: userTrigger.LastName },
           invoice: { number: invoice.number },
         });
         await this.notificationsService.createNotification({
@@ -208,7 +208,7 @@ export class InvoicesService {
     this.notificationsGateway.emitNotificationToUser(salaAdmin, {
       notificationType: { name: 'cargar la factura' },
       impactedUser: null,
-      triggerUser: userTrigger.Names,
+      triggerUser: { Names: userTrigger.Names, LastName: userTrigger.LastName },
       invoice: { number: result.number },
     });
 
@@ -285,7 +285,7 @@ export class InvoicesService {
     this.notificationsGateway.emitNotificationToUser(salaAdmin, {
       notificationType: { name: 'cargar la factura' },
       impactedUser: null,
-      triggerUser: user.Names,
+      triggerUser: { Names: user.Names, LastName: user.LastName },
       invoice: { number: invoice.number },
     });
 
@@ -303,7 +303,7 @@ export class InvoicesService {
       this.notificationsGateway.emitNotificationToUser(userRoom, {
         notificationType: { name: 'editar la factura' },
         impactedUser: { Names: user.Names, LastName: user.LastName },
-        triggerUser: user.Names,
+        triggerUser:{ Names: user.Names, LastName: user.LastName },
         invoice: { number: invoice.number },
       });
       await this.notificationsService.createNotification({
@@ -503,9 +503,10 @@ export class InvoicesService {
       const impactedUser = await this.userRepository.findOneBy({id: Number(perm.userId)});
       // Emitir notificación al administrador
       this.notificationsGateway.emitNotificationToUser(salaAdmin, {
+        note:null,
         notificationType: {name: "otorgar permisos de lectura a la factura"},
-        impactedUser: {name:impactedUser.Names , lastName: impactedUser.LastName},
-        triggerUser: user.Names,
+        impactedUser: {Names:impactedUser.Names , LastName: impactedUser.LastName},
+        triggerUser: {Names:user.Names , LastName: user.LastName},
         invoice: { number: invoice.number },
       });
 
@@ -518,9 +519,10 @@ export class InvoicesService {
 
       // Emitir notificación al usuario que otorgó permisos
       this.notificationsGateway.emitNotificationToUser(perm?.userId, {
+        note:null,
         notificationType: {name: "otorgar permisos de lectura a la factura"},
-        impactedUser: {name:impactedUser.Names , lastName: impactedUser.LastName},
-        triggerUser: user.Names,
+        impactedUser: {Names:impactedUser.Names , LastName: impactedUser.LastName},
+        triggerUser: {Names:user.Names , LastName: user.LastName},
         invoice: { number: invoice.number },
       });
 
