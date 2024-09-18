@@ -19,9 +19,9 @@ PATCH http://localhost:3000/companies/1
 Content-Type: application/json
 
 {
-  "name": "Tech Solutions Updated",
-  "address": "456 Secondary St",
-  "cuit": 98765432109
+  "name": "Tech Solutions",
+  "address": "123 Main St",
+  "cuit": 12345678901
 }
 
 ### Eliminar una empresa por ID
