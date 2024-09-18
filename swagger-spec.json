@@ -847,7 +847,16 @@
     "/notifications": {
       "get": {
         "operationId": "NotificationsController_getNotifications",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
