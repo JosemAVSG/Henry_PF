@@ -52,6 +52,7 @@ export class InvoicesService {
         company: true,
         invoiceStatus: true,
         permissions: { permissionType: true },
+        voucher: true,
       },
       order: {
         id: 'ASC', // Ordena por id de manera ascendente, puedes cambiar a 'DESC' si deseas orden descendente
@@ -382,6 +383,7 @@ export class InvoicesService {
         permissions: { permissionType: true },
         company: true,
         user: true,
+        voucher: true,
       },
       order: {
         dueDate: 'DESC',
