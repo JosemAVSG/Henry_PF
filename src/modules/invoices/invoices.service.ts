@@ -509,14 +509,6 @@ export class InvoicesService {
         triggerUser: {Names:user.Names , LastName: user.LastName},
         invoice: { number: invoice.number },
       });
-
-      await this.notificationsService.createNotification({
-        invoiceId: invoiceId,
-        impactedUserId: Number(perm.userId),
-        notificationTypeId: 1,
-        triggerUserId: user.id,
-      });
-
       // Emitir notificación al usuario que otorgó permisos
       this.notificationsGateway.emitNotificationToUser(perm?.userId, {
         note:null,
@@ -535,10 +527,6 @@ export class InvoicesService {
 
     })
 
-
-
-    console.log(addedPermissions, removedPermissions,currentPermissionsSet);
-    
     await this.permissionsRepository.remove(permissions);
 
     const result = newPermission.map(async (item) => {
