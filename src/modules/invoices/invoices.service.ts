@@ -20,6 +20,7 @@ import { NotificationsGateway } from 'src/websockets/notifications/notifications
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { Socket } from 'socket.io';
 import { MailService } from '../mail/mail.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class InvoicesService {
   constructor(
@@ -575,6 +576,8 @@ export class InvoicesService {
     return await Promise.all(result);
   }
 
+  // @Cron('0 12 * * *') // Cron para las 12:00 PM cada día
+  // @Cron('*/5 * * * *') // Ejecutar cada 5 minutos
   async sendDueSoonEmails(): Promise<void> {
     const now = new Date();
     const tomorrow = new Date(now);
@@ -626,6 +629,20 @@ export class InvoicesService {
         }
       }
     }
+  }
+
+
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron('0 12 * * *') // Cron para las 12:00 PM cada día
+  // @Cron('* * * * *') // Ejecutar cada minuto
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron('*/5 * * * *') // Ejecutar cada 5 minutos
+  // @Cron(CronExpression.EVERY_5_MINUTES)
+  async handleCron() {
+    const currentTime = new Date().toLocaleTimeString(); // Obtiene la hora actual
+    console.log(`[${currentTime}] Ejecutando tarea programada: Envío de notificaciones de facturas próximas a vencer`);
+    const currentDateTime = new Date().toLocaleString(); // Obtiene la fecha y hora actual
+    console.log(`[${currentDateTime}] Ejecutando tarea programada: Envío de notificaciones de facturas próximas a vencer`);
   }
 
   
