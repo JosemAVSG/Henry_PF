@@ -25,7 +25,7 @@ export class UserSeeder {
 
     for (let i = 1; i <= 18; i++) {
       const user = new UserEntity();
-      user.email = `user${i}@example.com`;
+      user.email = `user${i}@gmail.com`;
       user.password = await bcrypt.hash(user.email, 10); // Contraseña = email
       user.Names = `User${i}`;
       user.LastName = `LastName${i}`;
@@ -46,7 +46,7 @@ export class UserSeeder {
 
     // Agregar usuarios adicionales con la información proporcionada
     const additionalUser = new UserEntity();
-    additionalUser.email = 'user@example.com';
+    additionalUser.email = 'user@gmail.com';
     additionalUser.password = await bcrypt.hash(additionalUser.email, 10); // Contraseña = email
     additionalUser.Names = 'User';
     additionalUser.LastName = 'Example';
@@ -66,7 +66,7 @@ export class UserSeeder {
     users.push(additionalUser);
 
     const UserAdmin = new UserEntity();
-    UserAdmin.email = 'admin@example.com';
+    UserAdmin.email = 'admin@gmail.com';
     UserAdmin.password = await bcrypt.hash(UserAdmin.email, 10); // Contraseña = email
     UserAdmin.Names = 'Admin';
     UserAdmin.LastName = 'Example';

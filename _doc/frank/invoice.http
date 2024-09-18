@@ -52,12 +52,8 @@ Content-Type: application/json
 ### Comprobar si existe el numero de la factura
 GET http://localhost:3000/invoices/check-invoice-number?invoiceNumber=INV-001
 
-
-# ========== JOSE ==========
-### Obtener facturas por id
-GET http://localhost:3000/invoices/user/11
+### Notificar facturas próximas a vencerse
+POST http://localhost:3000/invoices/notify-due-soon
 Content-Type: application/json
 
-### Obtener facturas por id
-GET http://localhost:3000/invoices/permision/1
-Content-Type: application/json
+###

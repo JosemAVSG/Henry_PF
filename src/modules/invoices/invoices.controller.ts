@@ -248,4 +248,10 @@ export class InvoicesController {
       throw new BadRequestException(error);
     }
   }
+
+    // Endpoint para enviar correos de facturas próximas a vencerse
+    @Post('notify-due-soon')
+    async notifyDueSoonInvoices(): Promise<void> {
+      await this.invoicesService.sendDueSoonEmails();
+    }
 }
