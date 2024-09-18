@@ -87,7 +87,11 @@ export class DeliverablesController {
       
       createDeliverableDto.path = newRelativePath;
 
-      fs.rename(temporalPath, newPath)
+      // Asegúrate de que el directorio de destino exista antes de mover el archivo
+      await fs.ensureDir(join(cwd(), 'uploads/deliverables', parentFolders));
+    
+
+      await fs.rename(temporalPath, newPath)
       .then(() => {
         console.log('File moved successfully!');
       })

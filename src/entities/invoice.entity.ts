@@ -11,7 +11,7 @@ export class Invoice {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({type: 'varchar', length: 255, nullable:true, unique:true})
+    @Column({ nullable:true, unique:true})
     number: string;
 
     @Column({nullable:true})
@@ -23,7 +23,7 @@ export class Invoice {
     @Column({type:'date', nullable:true})
     dueDate: Date; 
 
-    @Column('decimal', { precision: 10, scale: 2 })
+    @Column('decimal', { precision: 15, scale: 2 })
     amount: number;
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP',   })
