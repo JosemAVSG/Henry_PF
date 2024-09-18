@@ -1310,6 +1310,20 @@
           "invoices"
         ]
       }
+    },
+    "/invoices/notify-due-soon": {
+      "post": {
+        "operationId": "InvoicesController_notifyDueSoonInvoices",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "invoices"
+        ]
+      }
     }
   },
   "info": {

@@ -10,6 +10,7 @@ import { PermissionType } from 'src/entities/permissionType.entity';
 import { Company } from 'src/entities/company.entity';
 import { NotificationsGateway } from 'src/websockets/notifications/notifications.gateway';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { MailService } from '../mail/mail.service';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     ]),
     NotificationsModule,
   ],
-  providers: [InvoicesService,NotificationsGateway],
+  providers: [InvoicesService,NotificationsGateway, MailService],
   controllers: [InvoicesController],
 })
 export class InvoicesModule {}

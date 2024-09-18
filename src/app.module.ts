@@ -14,6 +14,7 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
 import { VouchersModule } from './modules/vouchers/vouchers.module';
 import { CompaniesModule } from './modules/company/companies.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [CompaniesModule, AuthModule, UserModule, SeedModule,MailModule,
@@ -29,6 +30,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
       signOptions: { expiresIn: '1d' },
       global: true
     }),
+    ScheduleModule.forRoot(),
     DeliverablesModule,
     VouchersModule,
     InvoicesModule,

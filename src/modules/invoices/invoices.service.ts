@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from '../../entities/invoice.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { InvoiceStatus } from '../../entities/invoiceStatus.entity';
 import { UserEntity } from '../../entities/user.entity';
 import { join } from 'path';
@@ -19,6 +19,7 @@ import { UpdateInvoiceStatusDto } from './dto/update-invoice-status.dto';
 import { NotificationsGateway } from 'src/websockets/notifications/notifications.gateway';
 import { NotificationsService } from 'src/modules/notifications/notifications.service';
 import { Socket } from 'socket.io';
+import { MailService } from '../mail/mail.service';
 @Injectable()
 export class InvoicesService {
   constructor(
@@ -43,6 +44,9 @@ export class InvoicesService {
     private readonly notificationsService: NotificationsService,
 
     private readonly notificationsGateway: NotificationsGateway,
+
+    private readonly mailService: MailService, // Inyectamos MailService
+
   ) {}
   // =====================================
   async getAllInvoices() {
@@ -468,55 +472,54 @@ export class InvoicesService {
     userId: number,
   ): Promise<Permission[]> {
     const permissions = await this.permissionsRepository.find({
-      relations: { user: true, permissionType: true , invoice: true},
+      relations: { user: true, permissionType: true, invoice: true },
       where: { invoice: { id: invoiceId } },
     });
     if (!permissions) {
       return await this.permissionsRepository.save(newPermission);
     }
     console.log(permissions);
-    
-    // Convertir a sets para comparación
+
     const currentPermissionsSet = new Set(
-        permissions.map((p) => `${p.userId}-${p.permissionTypeId}`),
+      permissions.map((p) => `${p.userId}-${p.permissionTypeId}`),
     );
     const newPermissionsSet = new Set(
       newPermission.map((p) => `${p.userId}-${p.permissionTypeId}`),
     );
 
-    // Determinar permisos agregados
     const addedPermissions = newPermission.filter(
       (p) => !currentPermissionsSet.has(`${p.userId}-${p.permissionTypeId}`),
     );
-
-    // Determinar permisos eliminados
     const removedPermissions = permissions.filter(
       (p) => !newPermissionsSet.has(`${p.userId}-${p.permissionTypeId}`),
     );
 
-    const user= await this.userRepository.findOneBy({id: userId});
-    // Sala para el administrador
+    const user = await this.userRepository.findOneBy({ id: userId });
     const salaAdmin = 'Admin';
     const invoice = await this.invoiceRepository.findOne({
-      where: { id: invoiceId },})
+      where: { id: invoiceId },
+    });
 
-    addedPermissions.map(async (perm)=>{
+    addedPermissions.map(async (perm) => {
       console.log(perm.userId);
-      const impactedUser = await this.userRepository.findOneBy({id: Number(perm.userId)});
-      // Emitir notificación al administrador
+      const impactedUser = await this.userRepository.findOneBy({
+        id: Number(perm.userId),
+      });
+
+      // Emitir notificación al administrador y al usuario que otorgó permisos
       this.notificationsGateway.emitNotificationToUser(salaAdmin, {
-        note:null,
-        notificationType: {name: "otorgar permisos de lectura a la factura"},
-        impactedUser: {Names:impactedUser.Names , LastName: impactedUser.LastName},
-        triggerUser: {Names:user.Names , LastName: user.LastName},
+        note: null,
+        notificationType: { name: 'otorgar permisos de lectura a la factura' },
+        impactedUser: { Names: impactedUser.Names, LastName: impactedUser.LastName },
+        triggerUser: { Names: user.Names, LastName: user.LastName },
         invoice: { number: invoice.number },
       });
-      // Emitir notificación al usuario que otorgó permisos
+
       this.notificationsGateway.emitNotificationToUser(perm?.userId, {
-        note:null,
-        notificationType: {name: "otorgar permisos de lectura a la factura"},
-        impactedUser: {Names:impactedUser.Names , LastName: impactedUser.LastName},
-        triggerUser: {Names:user.Names , LastName: user.LastName},
+        note: null,
+        notificationType: { name: 'otorgar permisos de lectura a la factura' },
+        impactedUser: { Names: impactedUser.Names, LastName: impactedUser.LastName },
+        triggerUser: { Names: user.Names, LastName: user.LastName },
         invoice: { number: invoice.number },
       });
 
@@ -527,7 +530,31 @@ export class InvoicesService {
         triggerUserId: user.id,
       });
 
-    })
+      // Enviar correo electrónico al usuario que recibió los permisos
+      const htmlContent = `
+        <p>Hola ${impactedUser.Names},</p>
+        <p>Se te ha otorgado acceso a la factura con el número <strong>${invoice.number}</strong>.</p>
+        <p>Puedes acceder a la factura en la plataforma.</p>
+        <p>Saludos,<br>Equipo de BP Ventures</p>
+      `;
+
+      const textContent = `
+        Hola ${impactedUser.Names},
+        
+        Se te ha otorgado acceso a la factura con el número ${invoice.number}.
+        Puedes acceder a la factura en la plataforma.
+        
+        Saludos,
+        Equipo de BP Ventures
+      `;
+
+      await this.mailService.sendMail(
+        impactedUser.email,
+        'Se te ha otorgado acceso a una factura',
+        textContent,
+        htmlContent,
+      );
+    });
 
     await this.permissionsRepository.remove(permissions);
 
@@ -539,9 +566,7 @@ export class InvoicesService {
         permissionType: await this.permissionTypeRepository.findOneBy({
           id: Number(item.permissionTypeId),
         }),
-        invoice: await this.invoiceRepository.findOneBy({
-          id: invoiceId,
-        }),
+        invoice: await this.invoiceRepository.findOneBy({ id: invoiceId }),
       });
 
       return await this.permissionsRepository.save(permissionObject);
@@ -549,4 +574,60 @@ export class InvoicesService {
 
     return await Promise.all(result);
   }
+
+  async sendDueSoonEmails(): Promise<void> {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+
+    // Obtener las facturas que se vencen en las próximas 24 horas
+    const dueSoonInvoices = await this.invoiceRepository.find({
+      where: {
+        dueDate: Between(now, tomorrow),
+      },
+      relations: ['permissions', 'permissions.user', 'user'], // Obtener las relaciones necesarias
+    });
+
+    for (const invoice of dueSoonInvoices) {
+      // Obtener todos los usuarios con permisos para la factura
+      const usersWithPermissions = await this.permissionsRepository.find({
+        where: { invoice: { id: invoice.id } },
+        relations: ['user'],
+      });
+
+      // Enviar correo a cada usuario
+      for (const permission of usersWithPermissions) {
+        const user = permission.user;
+        if (user?.email) {
+          const htmlContent = `
+            <p>Hola ${user.Names},</p>
+            <p>La factura con el número <strong>${invoice.number}</strong> se vence en las próximas 24 horas.</p>
+            <p>Por favor, asegúrate de tomar las medidas necesarias.</p>
+            <p>Saludos,<br>Equipo de BP Ventures</p>
+          `;
+
+          const textContent = `
+            Hola ${user.Names},
+            
+            La factura con el número ${invoice.number} se vence en las próximas 24 horas.
+            Por favor, asegúrate de tomar las medidas necesarias.
+            
+            Saludos,
+            Equipo de BP Ventures
+          `;
+
+          // Enviar correo
+          await this.mailService.sendMail(
+            user.email,
+            'Factura próxima a vencerse',
+            textContent,
+            htmlContent,
+          );
+        }
+      }
+    }
+  }
+
+  
+
 }
