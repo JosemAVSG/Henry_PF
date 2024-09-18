@@ -10,6 +10,7 @@ GET http://localhost:3000/invoices/getbyid/1
 ### Crear una nueva factura
 POST http://localhost:3000/invoices
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTksInN1YiI6MTksImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlzQWRtaW4iOnRydWUsIm5hbWVzIjoiVXNlciIsImxhc3ROYW1lIjoiRXhhbXBsZSIsImlhdCI6MTcyNjUyNTMyMiwiZXhwIjoxNzI2NjExNzIyfQ.6v5kSZInxFSAc0GUbg-x0B-ScbFKSLpv_XmA9WavQl8
 
 {
   "invoiceNumber": "INV-004",

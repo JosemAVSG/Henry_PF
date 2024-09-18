@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/entities/company.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { CreateCompanyDto } from './dtos/create-company.dto';
 import { UpdateCompanyDto } from './dtos/update-company.dto';
 
@@ -63,10 +63,34 @@ export class CompaniesService {
   
 
   async update(id: number, updateCompanyDto: UpdateCompanyDto): Promise<Company> {
+    const { name, cuit } = updateCompanyDto;
+  
+    // Busca la empresa que se va a actualizar
     const company = await this.findOne(id);
+  
+    // Verifica si ya existe otra empresa con el mismo nombre, excluyendo la empresa actual
+    const existingByName = await this.companyRepository.findOne({ 
+      where: { name, id: Not(id) }
+    });
+  
+    if (existingByName) {
+      throw new ConflictException('Una empresa con este nombre ya existe.');
+    }
+  
+    // Verifica si ya existe otra empresa con el mismo CUIT, excluyendo la empresa actual
+    const existingByCuit = await this.companyRepository.findOne({ 
+      where: { cuit, id: Not(id) }
+    });
+  
+    if (existingByCuit) {
+      throw new ConflictException('Una empresa con este CUIT ya existe.');
+    }
+  
+    // Si no existe ni el nombre ni el CUIT, actualiza la empresa
     Object.assign(company, updateCompanyDto);
     return this.companyRepository.save(company);
   }
+  
 
   async remove(id: number): Promise<void> {
     // Buscamos la empresa con sus relaciones
