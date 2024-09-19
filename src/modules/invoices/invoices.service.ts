@@ -576,7 +576,7 @@ export class InvoicesService {
     return await Promise.all(result);
   }
 
-  // @Cron('0 12 * * *') // Cron para las 12:00 PM cada día
+  @Cron('0 12 * * *') // Cron para las 12:00 PM cada día
   // @Cron('*/5 * * * *') // Ejecutar cada 5 minutos
   async sendDueSoonEmails(): Promise<void> {
     const now = new Date();
