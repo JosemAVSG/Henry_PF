@@ -58,6 +58,7 @@ export class UserController {
   }
 
   // Endpoint para eliminar un usuario
+  @UseGuards(AuthGuard)
   @Delete(':id')
   async deleteUser(@Param('id') id: number) {
     return this.userService.deleteUser(id);
