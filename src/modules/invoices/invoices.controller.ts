@@ -159,6 +159,8 @@ export class InvoicesController {
 
   @Get('getbyid/:id')
   async getInvoiceById(@Param('id') id: number) {
+    console.log("id",id);
+    
     try {
       return await this.invoicesService.getInvoiceById(id);
     } catch (error) {
