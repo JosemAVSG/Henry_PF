@@ -1,0 +1,59 @@
+### Obtener facturas por usuario
+GET http://localhost:3000/invoices/1?page=1&limit=10
+
+### Obtener facturas por usuario
+GET http://localhost:3000/invoices
+
+### Obtener facturas por id
+GET http://localhost:3000/invoices/getbyid/1
+
+### Crear una nueva factura
+POST http://localhost:3000/invoices
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTksInN1YiI6MTksImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImlzQWRtaW4iOnRydWUsIm5hbWVzIjoiVXNlciIsImxhc3ROYW1lIjoiRXhhbXBsZSIsImlhdCI6MTcyNjUyNTMyMiwiZXhwIjoxNzI2NjExNzIyfQ.6v5kSZInxFSAc0GUbg-x0B-ScbFKSLpv_XmA9WavQl8
+
+{
+  "invoiceNumber": "INV-004",
+  "path": "/invoices/inv001.pdf",
+  "issueDate": "2024-08-30",
+  "dueDate": "2024-09-15",
+  "amount": 1500.00,
+  "invoiceStatusId": 2,
+  "companyId": 1
+}
+
+### Actualizar una nueva factura
+PUT http://localhost:3000/invoices/1
+Content-Type: application/json
+
+{
+  "invoiceNumber": "INV-001",
+  "path": "/invoices/inv001.pdf",
+  "issueDate": "2024-08-30",
+  "dueDate": "2024-09-15",
+  "amount": 1500.00,
+  "userId": 1,
+  "invoiceStatusId": 2,
+  "companyId": 1
+}
+
+### Obtener facturas por id
+GET http://localhost:3000/invoices/getbyid/1
+Content-Type: application/json
+
+### Actualiza el estado de la factura
+PATCH http://localhost:3000/invoices/status/1
+Content-Type: application/json
+
+{
+  "invoiceStatusId": 1
+}
+
+### Comprobar si existe el numero de la factura
+GET http://localhost:3000/invoices/check-invoice-number?invoiceNumber=INV-001
+
+### Notificar facturas próximas a vencerse
+POST http://localhost:3000/invoices/notify-due-soon
+Content-Type: application/json
+
+###

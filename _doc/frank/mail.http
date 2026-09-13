@@ -1,0 +1,60 @@
+### Send an email
+POST http://localhost:3000/email/send
+Content-Type: application/json
+
+{
+  "to": "fgp555@gmail.com",
+  "subject": "Test Email",
+  "text": "This is a test email sent from NestJS!"
+}
+
+### signup
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+  "email": "fgp555@gmail.com",
+  "password": "password123",
+  "Names": "John",
+  "LastName": "Doe",
+  "Position": "Manager",
+  "isAdmin": true,
+  "domain": "https://example.com"
+}
+
+### signin
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+  "email": "fgp555@gmail.com",
+  "password": "password123"
+}
+
+
+### Password Reset
+POST http://localhost:3000/auth/reset-password?token=1502134750415a544833020e130c184506161e
+Content-Type: application/json
+
+{
+  "newPassword": "angeldavid2"
+}
+
+### signin
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+  "email": "fgp555@gmail.com",
+  "password": "angeldavid2"
+}
+
+
+### Forgot Password Request
+POST http://localhost:3000/auth/forgotPassword
+Content-Type: application/json
+
+{
+  "email": "fgp555@gmail.com",
+  "domain": "https://example.com"
+}

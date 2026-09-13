@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Invoices</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2>Invoices</h2>
+    <button id="loadInvoicesBtn">Load Invoices</button>
+    
+    <table id="invoicesTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>Invoice Number</th>
+                <th>Path</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Overdue</th>
+            </tr>
+        </thead>
+        <tbody id="invoicesBody">
+            <!-- Invoice rows will be appended here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.getElementById('loadInvoicesBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('http://localhost:3000/invoices/1?page=1&limit=10');
+                
+                if (response.ok) {
+                    const invoices = await response.json();
+                    const invoicesTable = document.getElementById('invoicesTable');
+                    const invoicesBody = document.getElementById('invoicesBody');
+                    
+                    // Clear the table body
+                    invoicesBody.innerHTML = '';
+
+                    // Populate the table with the invoices
+                    invoices.forEach(invoice => {
+                        const row = document.createElement('tr');
+                        
+                        row.innerHTML = `
+                            <td>${invoice.invoiceNumber}</td>
+                            <td>${invoice.invoicePath}</td>
+                            <td>${invoice.invoiceIssueDate}</td>
+                            <td>${invoice.invoiceDueDate}</td>
+                            <td>${invoice.invoiceAmount}</td>
+                            <td>${invoice.invoiceStatus}</td>
+                            <td>${invoice.overdueIndicator ? 'Yes' : 'No'}</td>
+                        `;
+                        
+                        invoicesBody.appendChild(row);
+                    });
+
+                    invoicesTable.style.display = 'table'; // Show the table after loading data
+                } else {
+                    alert('Failed to load invoices');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while loading the invoices.');
+            }
+        });
+    </script>
+</body>
+</html>

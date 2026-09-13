@@ -1,0 +1,24 @@
+name: Sync Swagger with SwaggerHub
+
+on:
+  push:
+    branches:
+      - main 
+      - dev
+
+jobs:
+  sync-swaggerhub:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Verify SwaggerHub CLI Version
+      run: npx swaggerhub-cli --version
+
+    - name: Sync Swagger spec to SwaggerHub
+      env:
+        SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
+      run: |
+        npx swaggerhub-cli@latest api:update JMGG95N/bp-ventures_api/1.0 --file swagger-spec.json

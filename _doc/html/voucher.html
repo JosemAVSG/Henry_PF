@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        .voucher-list {
+            margin-top: 30px;
+        }
+        .voucher-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voucher Management</h1>
+        
+        <h2>Create Voucher</h2>
+        <form id="createVoucherForm">
+            <input type="text" id="number" placeholder="Voucher Number (Optional)" value="VCH-12345">
+            <input type="file" id="file" accept=".jpg,.jpeg,.png,.pdf">
+            <input type="date" id="paymentDate" value="2024-09-01" required>
+            <input type="number" id="amount" placeholder="Amount" value="100.00" required>
+            <input type="number" id="invoiceId" placeholder="Invoice ID" value="1" required>
+            <button type="submit">Create Voucher</button>
+        </form>
+
+        <button id="loadVouchersButton">All Vouchers</button>
+
+        <h2>All Vouchers</h2>
+        <div id="voucherList" class="voucher-list"></div>
+    </div>
+
+    <script>
+        document.getElementById('createVoucherForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('number', document.getElementById('number').value);
+            formData.append('file', document.getElementById('file').files[0]);
+            formData.append('paymentDate', document.getElementById('paymentDate').value);
+            formData.append('amount', document.getElementById('amount').value);
+            formData.append('invoiceId', document.getElementById('invoiceId').value);
+            
+            const response = await fetch('http://localhost:3000/vouchers', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert('Voucher created successfully');
+                loadVouchers();
+            } else {
+                alert('Failed to create voucher');
+            }
+        });
+
+        document.getElementById('loadVouchersButton').addEventListener('click', loadVouchers);
+
+
+        async function loadVouchers() {
+    const response = await fetch('http://localhost:3000/vouchers');
+    const vouchers = await response.json();
+    const voucherList = document.getElementById('voucherList');
+    voucherList.innerHTML = '';
+    vouchers.forEach(voucher => {
+        const voucherItem = document.createElement('div');
+        voucherItem.className = 'voucher-item';
+        voucherItem.innerHTML = `
+            <p><strong>ID:</strong> ${voucher.id}</p>
+            <p><strong>Number:</strong> ${voucher.number || 'N/A'}</p>
+            <p><strong>Payment Date:</strong> ${voucher.paymentDate ? new Date(voucher.paymentDate).toLocaleDateString() : 'N/A'}</p>
+            <p><strong>Amount:</strong> $${parseFloat(voucher.amount).toFixed(2)}</p>
+            <p><strong>Invoice ID:</strong> ${voucher.invoiceId.id}</p>
+            <p><strong>Path:</strong> ${voucher.path ? `<a href="${voucher.path}" target="_blank">View File</a>` : 'No file uploaded'}</p>
+        `;
+        voucherList.appendChild(voucherItem);
+    });
+}
+
+        
+        loadVouchers();
+    </script>
+</body>
+</html>
